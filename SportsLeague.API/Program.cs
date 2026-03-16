@@ -10,7 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 // ── Entity Framework Core ──
 builder.Services.AddDbContext<LeagueDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        x => x.MigrationsAssembly("SportsLeague.DataAccess")));
 
 // ── Repositories ──
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
