@@ -18,17 +18,16 @@ public class GenericRepository<T> : IGenericRepository<T> where T : AuditBase
 
     public async Task<IEnumerable<T>> GetAllAsync()
     {
-        return await _dbSet.ToListAsync();
+        return await _dbSet.AsNoTracking().ToListAsync();
     }
-    public async Task<T?> GetByIdAsync(int id)
+
+    public virtual async Task<T?> GetByIdAsync(int id)
     {
         return await _dbSet.FindAsync(id);
     }
 
     public async Task<T> CreateAsync(T entity)
     {
-        entity.CreatedAt = DateTime.UtcNow;
-        entity.UpdatedAt = null;
         await _dbSet.AddAsync(entity);
         await _context.SaveChangesAsync();
         return entity;
@@ -36,7 +35,6 @@ public class GenericRepository<T> : IGenericRepository<T> where T : AuditBase
 
     public async Task UpdateAsync(T entity)
     {
-        entity.UpdatedAt = DateTime.UtcNow;
         _dbSet.Update(entity);
         await _context.SaveChangesAsync();
     }

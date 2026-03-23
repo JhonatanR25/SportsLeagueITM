@@ -7,20 +7,20 @@ namespace SportsLeague.DataAccess.Repositories;
 
 public class TeamRepository : GenericRepository<Team>, ITeamRepository
 {
-    public TeamRepository(LeagueDbContext context) : base(context)
-    {
-    }
+    public TeamRepository(LeagueDbContext context) : base(context) { }
 
     public async Task<Team?> GetByNameAsync(string name)
     {
-        return await _dbSet
-            .FirstOrDefaultAsync(t => t.Name.ToLower() == name.ToLower());
+        return await _dbSet.FirstOrDefaultAsync(t => t.Name == name);
     }
 
     public async Task<IEnumerable<Team>> GetByCityAsync(string city)
     {
-        return await _dbSet
-            .Where(t => t.City.ToLower() == city.ToLower())
-            .ToListAsync();
+        return await _dbSet.Where(t => t.City == city).ToListAsync();
+    }
+
+    public override async Task<Team?> GetByIdAsync(int id)
+    {
+        return await _dbSet.Include(t => t.Players).FirstOrDefaultAsync(t => t.Id == id);
     }
 }
