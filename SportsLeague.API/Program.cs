@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SportsLeague.DataAccess.Context;
 using SportsLeague.DataAccess.Repositories;
@@ -23,32 +21,10 @@ builder.Services.AddScoped<IRefereeRepository, RefereeRepository>();
 builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();   
 builder.Services.AddScoped<ITournamentTeamRepository, TournamentTeamRepository>();
 
-
-
-// ── Services ──
 builder.Services.AddScoped<ITeamService, TeamService>();
-builder.Services.AddScoped<IPlayerService, PlayerService>();
-builder.Services.AddScoped<IRefereeService, RefereeService>();        
-builder.Services.AddScoped<ITournamentService, TournamentService>();  
-
-
-
-// ── AutoMapper ──
-builder.Services.AddAutoMapper(typeof(Program).Assembly);
-
-// ── Controllers ──
-builder.Services.AddControllers();
-
-// ── ProblemDetails / manejo global básico de errores ──
-builder.Services.AddProblemDetails();
-
-// ── Swagger ──
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// ── Middleware Pipeline ──
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
