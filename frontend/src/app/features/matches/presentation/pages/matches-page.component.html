@@ -1,0 +1,198 @@
+<section class="page-header">
+  <div>
+    <p class="page-header__eyebrow">Modulo de partidos</p>
+    <h1>Gestion de partidos</h1>
+    <p class="page-header__description">
+      Programa encuentros, controla el estado del juego y actualiza marcadores desde la misma vista.
+    </p>
+  </div>
+
+  <div class="page-header__actions">
+    <label class="search-field">
+      <span>Buscar</span>
+      <input type="search" [value]="searchTerm()" (input)="updateSearchTerm(searchInput.value)" #searchInput placeholder="Equipos, arbitro o torneo" />
+    </label>
+
+    <div class="filter-row">
+      <select [value]="filterTournamentId()" (change)="updateFilterTournament(+$any($event.target).value)">
+        <option [value]="0">Todos los torneos</option>
+        @for (tournament of tournaments(); track tournament.id) {
+          <option [value]="tournament.id">{{ tournament.name }}</option>
+        }
+      </select>
+
+      <select [value]="filterStatus()" (change)="updateFilterStatus($any($event.target).value)">
+        <option value="">Todos los estados</option>
+        @for (status of statusOptions; track status) {
+          <option [value]="status">{{ getStatusLabel(status) }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="page-header__buttons">
+      <button type="button" class="ghost-button" (click)="retry()">Actualizar</button>
+      <button type="button" class="primary-button" (click)="openCreateModal()">Crear partido</button>
+    </div>
+  </div>
+</section>
+
+@if (isLoading()) {
+  <section class="state-card">
+    <p class="state-card__label">Cargando partidos</p>
+    <h2>Consultando la API del backend...</h2>
+  </section>
+} @else if (errorMessage()) {
+  <section class="state-card state-card--error">
+    <p class="state-card__label">Conexion pendiente</p>
+    <h2>{{ errorMessage() }}</h2>
+    <button type="button" class="ghost-button ghost-button--light" (click)="retry()">Reintentar</button>
+  </section>
+} @else {
+  <section class="summary-grid">
+    <article class="summary-card"><span>Partidos visibles</span><strong>{{ filteredMatches().length }}</strong></article>
+    <article class="summary-card"><span>Programados</span><strong>{{ scheduledCount() }}</strong></article>
+    <article class="summary-card"><span>En juego</span><strong>{{ inProgressCount() }}</strong></article>
+  </section>
+
+  <section class="table-card">
+    <div class="table-card__header">
+      <div>
+        <p class="table-card__eyebrow">Listado</p>
+        <h2>Partidos registrados</h2>
+      </div>
+    </div>
+
+    @if (filteredMatches().length === 0) {
+      <section class="state-card">
+        <p class="state-card__label">Sin resultados</p>
+        <h2>No encontramos partidos con los filtros actuales.</h2>
+      </section>
+    } @else {
+      <div class="match-grid">
+        @for (match of filteredMatches(); track trackByMatchId($index, match)) {
+          <article class="match-card">
+            <div class="match-card__header">
+              <div>
+                <h3>{{ match.homeTeamName }} vs {{ match.awayTeamName }}</h3>
+                <p>{{ match.tournamentName }}</p>
+              </div>
+              <span class="status-badge" [class]="'status-badge--' + match.status.toLowerCase()">{{ getStatusLabel(match.status) }}</span>
+            </div>
+
+            <dl class="match-card__details">
+              <div><dt>Fecha</dt><dd>{{ match.matchDate | date: 'dd/MM/yyyy HH:mm' }}</dd></div>
+              <div><dt>Arbitro</dt><dd>{{ match.refereeName }}</dd></div>
+              <div><dt>Marcador</dt><dd>{{ match.homeScore }} - {{ match.awayScore }}</dd></div>
+            </dl>
+
+            <div class="match-card__actions">
+              @for (status of getNextStatusOptions(match); track status) {
+                <button type="button" class="ghost-button" (click)="updateMatchStatus(match, status)">
+                  {{ getStatusLabel(status) }}
+                </button>
+              }
+              <button type="button" class="ghost-button ghost-button--light" [disabled]="!canEditScore(match)" (click)="openScoreModal(match)">Actualizar marcador</button>
+            </div>
+          </article>
+        }
+      </div>
+
+      <div class="match-table-wrapper">
+        <table class="match-table">
+          <thead>
+            <tr>
+              <th>Partido</th>
+              <th>Torneo</th>
+              <th>Fecha</th>
+              <th>Estado</th>
+              <th>Marcador</th>
+              <th>Arbitro</th>
+              <th class="match-table__actions-column">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (match of filteredMatches(); track trackByMatchId($index, match)) {
+              <tr>
+                <td><strong>{{ match.homeTeamName }} vs {{ match.awayTeamName }}</strong></td>
+                <td>{{ match.tournamentName }}</td>
+                <td>{{ match.matchDate | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td><span class="status-badge" [class]="'status-badge--' + match.status.toLowerCase()">{{ getStatusLabel(match.status) }}</span></td>
+                <td>{{ match.homeScore }} - {{ match.awayScore }}</td>
+                <td>{{ match.refereeName }}</td>
+                <td class="match-table__actions-cell">
+                  <div class="match-table__actions">
+                    @for (status of getNextStatusOptions(match); track status) {
+                      <button type="button" class="table-action" (click)="updateMatchStatus(match, status)">{{ getStatusLabel(status) }}</button>
+                    }
+                    <button type="button" class="table-action table-action--light" [disabled]="!canEditScore(match)" (click)="openScoreModal(match)">Marcador</button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+}
+
+@if (isCreateModalOpen()) {
+  <div class="overlay" (click)="closeCreateModal()">
+    <section class="modal modal--wide" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
+      <div class="modal__header">
+        <div>
+          <p class="modal__eyebrow">Programacion</p>
+          <h2>Crear partido</h2>
+        </div>
+        <button type="button" class="icon-button" (click)="closeCreateModal()">Cerrar</button>
+      </div>
+
+      <form class="match-form" [formGroup]="createForm" (ngSubmit)="submitCreateForm()">
+        <label class="field"><span>Fecha y hora</span><input type="datetime-local" formControlName="matchDate" /></label>
+        <label class="field"><span>Torneo</span><select formControlName="tournamentId"><option [value]="0">Selecciona un torneo</option>@for (tournament of tournaments(); track tournament.id) {<option [value]="tournament.id">{{ tournament.name }}</option>}</select></label>
+        <label class="field"><span>Equipo local</span><select formControlName="homeTeamId"><option [value]="0">Selecciona un equipo</option>@for (team of teams(); track team.id) {<option [value]="team.id">{{ team.name }}</option>}</select></label>
+        <label class="field"><span>Equipo visitante</span><select formControlName="awayTeamId"><option [value]="0">Selecciona un equipo</option>@for (team of teams(); track team.id) {<option [value]="team.id">{{ team.name }}</option>}</select></label>
+        <label class="field field--full"><span>Arbitro</span><select formControlName="refereeId"><option [value]="0">Selecciona un arbitro</option>@for (referee of referees(); track referee.id) {<option [value]="referee.id">{{ referee.firstName }} {{ referee.lastName }}</option>}</select></label>
+        <div class="modal__actions">
+          <button type="button" class="ghost-button ghost-button--light" (click)="closeCreateModal()">Cancelar</button>
+          <button type="submit" class="primary-button" [disabled]="isSaving() || isCatalogLoading()">{{ isSaving() ? 'Guardando...' : 'Crear partido' }}</button>
+        </div>
+      </form>
+    </section>
+  </div>
+}
+
+@if (isScoreModalOpen()) {
+  @if (selectedMatchForScore(); as selectedMatch) {
+    <div class="overlay" (click)="closeScoreModal()">
+      <section class="modal" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
+        <div class="modal__header">
+          <div>
+            <p class="modal__eyebrow">Marcador</p>
+            <h2>{{ selectedMatch.homeTeamName }} vs {{ selectedMatch.awayTeamName }}</h2>
+          </div>
+          <button type="button" class="icon-button" (click)="closeScoreModal()">Cerrar</button>
+        </div>
+
+        <form class="score-form" [formGroup]="scoreForm" (ngSubmit)="submitScoreForm()">
+          <label class="field"><span>{{ selectedMatch.homeTeamName }}</span><input type="number" min="0" formControlName="homeScore" /></label>
+          <label class="field"><span>{{ selectedMatch.awayTeamName }}</span><input type="number" min="0" formControlName="awayScore" /></label>
+          <label class="check-field field--full"><input type="checkbox" formControlName="isFinalScore" /> <span>Guardar como marcador final</span></label>
+          <div class="modal__actions">
+            <button type="button" class="ghost-button ghost-button--light" (click)="closeScoreModal()">Cancelar</button>
+            <button type="submit" class="primary-button" [disabled]="isSaving()">{{ isSaving() ? 'Guardando...' : 'Guardar marcador' }}</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+}
+
+<section class="toast-stack" aria-live="polite" aria-label="Notificaciones">
+  @for (notification of notifications(); track notification.id) {
+    <article class="toast" [class.toast--error]="notification.type === 'error'">
+      <div><strong>{{ notification.title }}</strong><p>{{ notification.message }}</p></div>
+      <button type="button" class="icon-button icon-button--toast" (click)="dismissNotification(notification.id)">Cerrar</button>
+    </article>
+  }
+</section>

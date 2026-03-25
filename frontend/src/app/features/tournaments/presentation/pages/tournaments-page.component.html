@@ -1,0 +1,282 @@
+<section class="page-header">
+  <div>
+    <p class="page-header__eyebrow">Modulo de torneos</p>
+    <h1>Gestion de torneos</h1>
+    <p class="page-header__description">
+      Controla temporadas, fechas, estados y equipos inscritos con las reglas de negocio del backend.
+    </p>
+  </div>
+
+  <div class="page-header__actions">
+    <label class="search-field">
+      <span>Buscar</span>
+      <input
+        type="search"
+        [value]="searchTerm()"
+        (input)="updateSearchTerm(searchInput.value)"
+        #searchInput
+        placeholder="Nombre, temporada o estado"
+      />
+    </label>
+
+    <div class="page-header__buttons">
+      <button type="button" class="ghost-button" (click)="retry()">Actualizar</button>
+      <button type="button" class="primary-button" (click)="openCreateModal()">Crear torneo</button>
+    </div>
+  </div>
+</section>
+
+@if (isLoading()) {
+  <section class="state-card">
+    <p class="state-card__label">Cargando torneos</p>
+    <h2>Consultando la API del backend...</h2>
+  </section>
+} @else if (errorMessage()) {
+  <section class="state-card state-card--error">
+    <p class="state-card__label">Conexion pendiente</p>
+    <h2>{{ errorMessage() }}</h2>
+    <button type="button" class="ghost-button ghost-button--light" (click)="retry()">
+      Reintentar
+    </button>
+  </section>
+} @else {
+  <section class="summary-grid" aria-label="Resumen de torneos">
+    <article class="summary-card">
+      <span>Torneos visibles</span>
+      <strong>{{ filteredTournaments().length }}</strong>
+    </article>
+    <article class="summary-card">
+      <span>Pendientes</span>
+      <strong>{{ pendingCount() }}</strong>
+    </article>
+    <article class="summary-card">
+      <span>En curso</span>
+      <strong>{{ activeCount() }}</strong>
+    </article>
+  </section>
+
+  <section class="table-card">
+    <div class="table-card__header">
+      <div>
+        <p class="table-card__eyebrow">Listado</p>
+        <h2>Torneos registrados</h2>
+      </div>
+    </div>
+
+    @if (filteredTournaments().length === 0) {
+      <section class="state-card">
+        <p class="state-card__label">Sin resultados</p>
+        <h2>No encontramos torneos con los filtros actuales.</h2>
+      </section>
+    } @else {
+      <div class="tournament-grid">
+        @for (tournament of filteredTournaments(); track trackByTournamentId($index, tournament)) {
+          <article class="tournament-card">
+            <div class="tournament-card__header">
+              <div>
+                <h3>{{ tournament.name }}</h3>
+                <p>{{ tournament.season }}</p>
+              </div>
+              <span class="status-badge" [class]="'status-badge--' + tournament.status.toLowerCase()">
+                {{ getStatusLabel(tournament.status) }}
+              </span>
+            </div>
+
+            <dl class="tournament-card__details">
+              <div>
+                <dt>Inicio</dt>
+                <dd>{{ tournament.startDate | date: 'dd/MM/yyyy' }}</dd>
+              </div>
+              <div>
+                <dt>Fin</dt>
+                <dd>{{ tournament.endDate | date: 'dd/MM/yyyy' }}</dd>
+              </div>
+              <div>
+                <dt>Equipos</dt>
+                <dd>{{ tournament.teamsCount }}</dd>
+              </div>
+            </dl>
+
+            <div class="tournament-card__actions">
+              <button type="button" class="ghost-button ghost-button--light" [disabled]="!canEdit(tournament)" (click)="openEditModal(tournament)">Editar</button>
+              <button type="button" class="ghost-button" [disabled]="!canRegisterTeams(tournament)" (click)="openRegisterTeamsModal(tournament)">Inscribir equipo</button>
+              <button type="button" class="ghost-button" [disabled]="!canAdvanceStatus(tournament)" (click)="advanceStatus(tournament)">
+                {{ getStatusActionLabel(tournament.status) }}
+              </button>
+              <button type="button" class="ghost-button ghost-button--danger" [disabled]="!canDelete(tournament)" (click)="openDeleteModal(tournament)">Eliminar</button>
+            </div>
+          </article>
+        }
+      </div>
+
+      <div class="tournament-table-wrapper">
+        <table class="tournament-table">
+          <thead>
+            <tr>
+              <th>Torneo</th>
+              <th>Temporada</th>
+              <th>Estado</th>
+              <th>Inicio</th>
+              <th>Fin</th>
+              <th>Equipos</th>
+              <th class="tournament-table__actions-column">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (tournament of filteredTournaments(); track trackByTournamentId($index, tournament)) {
+              <tr>
+                <td><strong>{{ tournament.name }}</strong></td>
+                <td>{{ tournament.season }}</td>
+                <td>
+                  <span class="status-badge" [class]="'status-badge--' + tournament.status.toLowerCase()">
+                    {{ getStatusLabel(tournament.status) }}
+                  </span>
+                </td>
+                <td>{{ tournament.startDate | date: 'dd/MM/yyyy' }}</td>
+                <td>{{ tournament.endDate | date: 'dd/MM/yyyy' }}</td>
+                <td>{{ tournament.teamsCount }}</td>
+                <td class="tournament-table__actions-cell">
+                  <div class="tournament-table__actions">
+                    <button type="button" class="table-action" [disabled]="!canEdit(tournament)" (click)="openEditModal(tournament)">Editar</button>
+                    <button type="button" class="table-action" [disabled]="!canRegisterTeams(tournament)" (click)="openRegisterTeamsModal(tournament)">Inscribir</button>
+                    <button type="button" class="table-action" [disabled]="!canAdvanceStatus(tournament)" (click)="advanceStatus(tournament)">
+                      {{ getStatusActionLabel(tournament.status) }}
+                    </button>
+                    <button type="button" class="table-action table-action--danger" [disabled]="!canDelete(tournament)" (click)="openDeleteModal(tournament)">Eliminar</button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+}
+
+@if (isFormModalOpen()) {
+  <div class="overlay" (click)="closeFormModal()">
+    <section class="modal" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
+      <div class="modal__header">
+        <div>
+          <p class="modal__eyebrow">Formulario reactivo</p>
+          <h2>{{ modalTitle() }}</h2>
+        </div>
+        <button type="button" class="icon-button" (click)="closeFormModal()">Cerrar</button>
+      </div>
+
+      <form class="tournament-form" [formGroup]="tournamentForm" (ngSubmit)="submitTournamentForm()">
+        <label class="field">
+          <span>Nombre</span>
+          <input type="text" formControlName="name" placeholder="Ej: Copa ITM" />
+          @if (fieldHasError('name')) { <small>{{ getFieldError('name') }}</small> }
+        </label>
+        <label class="field">
+          <span>Temporada</span>
+          <input type="text" formControlName="season" placeholder="Ej: 2026-A" />
+          @if (fieldHasError('season')) { <small>{{ getFieldError('season') }}</small> }
+        </label>
+        <label class="field">
+          <span>Fecha de inicio</span>
+          <input type="date" formControlName="startDate" />
+          @if (fieldHasError('startDate')) { <small>{{ getFieldError('startDate') }}</small> }
+        </label>
+        <label class="field">
+          <span>Fecha de fin</span>
+          <input type="date" formControlName="endDate" />
+          @if (fieldHasError('endDate')) { <small>{{ getFieldError('endDate') }}</small> }
+        </label>
+
+        <div class="modal__actions">
+          <button type="button" class="ghost-button ghost-button--light" (click)="closeFormModal()">Cancelar</button>
+          <button type="submit" class="primary-button" [disabled]="isSaving()">
+            {{ isSaving() ? 'Guardando...' : submitLabel() }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+}
+
+@if (isDeleteModalOpen()) {
+  @if (tournamentPendingDelete(); as selectedTournament) {
+    <div class="overlay overlay--compact" (click)="closeDeleteModal()">
+      <section class="modal modal--compact" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
+        <div class="modal__header">
+          <div>
+            <p class="modal__eyebrow">Confirmacion</p>
+            <h2>Eliminar torneo</h2>
+          </div>
+        </div>
+        <p class="confirm-copy">
+          Vas a eliminar el torneo <strong>{{ selectedTournament.name }}</strong>. Solo puede eliminarse si esta pendiente.
+        </p>
+        <div class="modal__actions">
+          <button type="button" class="ghost-button ghost-button--light" (click)="closeDeleteModal()">Cancelar</button>
+          <button type="button" class="ghost-button ghost-button--danger" [disabled]="isSaving()" (click)="confirmDelete()">
+            {{ isSaving() ? 'Eliminando...' : 'Eliminar torneo' }}
+          </button>
+        </div>
+      </section>
+    </div>
+  }
+}
+
+@if (isRegisterTeamsModalOpen()) {
+  @if (tournamentForRegistration(); as selectedTournament) {
+    <div class="overlay" (click)="closeRegisterTeamsModal()">
+      <section class="modal modal--wide" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
+        <div class="modal__header">
+          <div>
+            <p class="modal__eyebrow">Inscripcion de equipos</p>
+            <h2>{{ selectedTournament.name }}</h2>
+          </div>
+          <button type="button" class="icon-button" (click)="closeRegisterTeamsModal()">Cerrar</button>
+        </div>
+
+        <div class="register-panel">
+          <label class="field field--full">
+            <span>Equipo</span>
+            <select [value]="selectedTeamId()" (change)="updateSelectedTeamId(+$any($event.target).value)" [disabled]="isTeamsLoading() || isSaving()">
+              <option [value]="0">Selecciona un equipo</option>
+              @for (team of availableTeamsForRegistration(); track team.id) {
+                <option [value]="team.id">{{ team.name }}</option>
+              }
+            </select>
+          </label>
+
+          <button type="button" class="primary-button" [disabled]="selectedTeamId() <= 0 || isSaving()" (click)="registerSelectedTeam()">
+            {{ isSaving() ? 'Inscribiendo...' : 'Inscribir equipo' }}
+          </button>
+        </div>
+
+        <div class="registered-teams">
+          <p class="table-card__eyebrow">Equipos inscritos</p>
+          @if (isTournamentTeamsLoading()) {
+            <p class="muted-copy">Cargando equipos inscritos...</p>
+          } @else if (selectedTournamentTeams().length === 0) {
+            <p class="muted-copy">Aun no hay equipos inscritos en este torneo.</p>
+          } @else {
+            <div class="team-chip-list">
+              @for (team of selectedTournamentTeams(); track team.id) {
+                <span class="team-chip">{{ team.name }}</span>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+  }
+}
+
+<section class="toast-stack" aria-live="polite" aria-label="Notificaciones">
+  @for (notification of notifications(); track notification.id) {
+    <article class="toast" [class.toast--error]="notification.type === 'error'">
+      <div>
+        <strong>{{ notification.title }}</strong>
+        <p>{{ notification.message }}</p>
+      </div>
+      <button type="button" class="icon-button icon-button--toast" (click)="dismissNotification(notification.id)">Cerrar</button>
+    </article>
+  }
+</section>

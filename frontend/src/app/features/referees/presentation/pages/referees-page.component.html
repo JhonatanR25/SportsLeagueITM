@@ -1,0 +1,237 @@
+<section class="page-header">
+  <div>
+    <p class="page-header__eyebrow">Modulo de arbitros</p>
+    <h1>Gestion de arbitros</h1>
+    <p class="page-header__description">
+      Administra el cuerpo arbitral de la liga con busqueda, CRUD y feedback visual integrado.
+    </p>
+  </div>
+
+  <div class="page-header__actions">
+    <label class="search-field">
+      <span>Buscar</span>
+      <input
+        type="search"
+        [value]="searchTerm()"
+        (input)="updateSearchTerm(searchInput.value)"
+        #searchInput
+        placeholder="Nombre o nacionalidad"
+      />
+    </label>
+
+    <div class="page-header__buttons">
+      <button type="button" class="ghost-button" (click)="retry()">Actualizar</button>
+      <button type="button" class="primary-button" (click)="openCreateModal()">Crear arbitro</button>
+    </div>
+  </div>
+</section>
+
+@if (isLoading()) {
+  <section class="state-card">
+    <p class="state-card__label">Cargando arbitros</p>
+    <h2>Consultando la API del backend...</h2>
+  </section>
+} @else if (errorMessage()) {
+  <section class="state-card state-card--error">
+    <p class="state-card__label">Conexion pendiente</p>
+    <h2>{{ errorMessage() }}</h2>
+    <button type="button" class="ghost-button ghost-button--light" (click)="retry()">
+      Reintentar
+    </button>
+  </section>
+} @else {
+  <section class="summary-grid" aria-label="Resumen de arbitros">
+    <article class="summary-card">
+      <span>Arbitros totales</span>
+      <strong>{{ filteredReferees().length }}</strong>
+    </article>
+    <article class="summary-card">
+      <span>Nacionalidades</span>
+      <strong>{{ uniqueNationalitiesCount() }}</strong>
+    </article>
+    <article class="summary-card">
+      <span>Estado del modulo</span>
+      <strong>CRUD operativo</strong>
+    </article>
+  </section>
+
+  <section class="table-card">
+    <div class="table-card__header">
+      <div>
+        <p class="table-card__eyebrow">Listado</p>
+        <h2>Arbitros registrados</h2>
+      </div>
+    </div>
+
+    @if (filteredReferees().length === 0) {
+      <section class="state-card">
+        <p class="state-card__label">Sin resultados</p>
+        <h2>No encontramos arbitros con los filtros actuales.</h2>
+      </section>
+    } @else {
+      <div class="referee-grid">
+        @for (referee of filteredReferees(); track trackByRefereeId($index, referee)) {
+          <article class="referee-card">
+            <div class="referee-card__header">
+              <div class="referee-card__avatar">
+                {{ referee.firstName.slice(0, 1) }}{{ referee.lastName.slice(0, 1) }}
+              </div>
+
+              <div>
+                <h3>{{ referee.firstName }} {{ referee.lastName }}</h3>
+                <p>{{ referee.nationality }}</p>
+              </div>
+            </div>
+
+            <div class="referee-card__actions">
+              <button type="button" class="ghost-button ghost-button--light" (click)="openEditModal(referee)">
+                Editar
+              </button>
+              <button
+                type="button"
+                class="ghost-button ghost-button--danger"
+                (click)="openDeleteModal(referee)"
+              >
+                Eliminar
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+
+      <div class="referee-table-wrapper">
+        <table class="referee-table">
+          <thead>
+            <tr>
+              <th>Arbitro</th>
+              <th>Nacionalidad</th>
+              <th class="referee-table__actions-column">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (referee of filteredReferees(); track trackByRefereeId($index, referee)) {
+              <tr>
+                <td>
+                  <div class="referee-table__identity">
+                    <div class="referee-card__avatar referee-card__avatar--small">
+                      {{ referee.firstName.slice(0, 1) }}{{ referee.lastName.slice(0, 1) }}
+                    </div>
+                    <div>
+                      <strong>{{ referee.firstName }} {{ referee.lastName }}</strong>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ referee.nationality }}</td>
+                <td class="referee-table__actions-cell">
+                  <div class="referee-table__actions">
+                    <button type="button" class="table-action" (click)="openEditModal(referee)">
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      class="table-action table-action--danger"
+                      (click)="openDeleteModal(referee)"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+}
+
+@if (isFormModalOpen()) {
+  <div class="overlay" (click)="closeFormModal()">
+    <section class="modal" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
+      <div class="modal__header">
+        <div>
+          <p class="modal__eyebrow">Formulario reactivo</p>
+          <h2>{{ modalTitle() }}</h2>
+        </div>
+        <button type="button" class="icon-button" (click)="closeFormModal()">Cerrar</button>
+      </div>
+
+      <form class="referee-form" [formGroup]="refereeForm" (ngSubmit)="submitRefereeForm()">
+        <label class="field">
+          <span>Nombres</span>
+          <input type="text" formControlName="firstName" placeholder="Ej: Carlos" />
+          @if (fieldHasError('firstName')) {
+            <small>{{ getFieldError('firstName') }}</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Apellidos</span>
+          <input type="text" formControlName="lastName" placeholder="Ej: Herrera" />
+          @if (fieldHasError('lastName')) {
+            <small>{{ getFieldError('lastName') }}</small>
+          }
+        </label>
+
+        <label class="field field--full">
+          <span>Nacionalidad</span>
+          <input type="text" formControlName="nationality" placeholder="Ej: Colombia" />
+          @if (fieldHasError('nationality')) {
+            <small>{{ getFieldError('nationality') }}</small>
+          }
+        </label>
+
+        <div class="modal__actions">
+          <button type="button" class="ghost-button ghost-button--light" (click)="closeFormModal()">
+            Cancelar
+          </button>
+          <button type="submit" class="primary-button" [disabled]="isSaving()">
+            {{ isSaving() ? 'Guardando...' : submitLabel() }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+}
+
+@if (isDeleteModalOpen()) {
+  @if (refereePendingDelete(); as selectedReferee) {
+    <div class="overlay overlay--compact" (click)="closeDeleteModal()">
+      <section class="modal modal--compact" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
+        <div class="modal__header">
+          <div>
+            <p class="modal__eyebrow">Confirmacion</p>
+            <h2>Eliminar arbitro</h2>
+          </div>
+        </div>
+
+        <p class="confirm-copy">
+          Vas a eliminar al arbitro <strong>{{ selectedReferee.firstName }} {{ selectedReferee.lastName }}</strong>. Esta accion no se puede deshacer.
+        </p>
+
+        <div class="modal__actions">
+          <button type="button" class="ghost-button ghost-button--light" (click)="closeDeleteModal()">
+            Cancelar
+          </button>
+          <button type="button" class="ghost-button ghost-button--danger" [disabled]="isSaving()" (click)="confirmDelete()">
+            {{ isSaving() ? 'Eliminando...' : 'Eliminar arbitro' }}
+          </button>
+        </div>
+      </section>
+    </div>
+  }
+}
+
+<section class="toast-stack" aria-live="polite" aria-label="Notificaciones">
+  @for (notification of notifications(); track notification.id) {
+    <article class="toast" [class.toast--error]="notification.type === 'error'">
+      <div>
+        <strong>{{ notification.title }}</strong>
+        <p>{{ notification.message }}</p>
+      </div>
+      <button type="button" class="icon-button icon-button--toast" (click)="dismissNotification(notification.id)">
+        Cerrar
+      </button>
+    </article>
+  }
+</section>

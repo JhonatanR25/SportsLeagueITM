@@ -1,0 +1,278 @@
+<section class="page-header">
+  <div>
+    <p class="page-header__eyebrow">Modulo de equipos</p>
+    <h1>Gestion de equipos</h1>
+    <p class="page-header__description">
+      Primer CRUD conectado al backend. Aqui gestionaremos clubes, ciudad, estadio y fecha de
+      fundacion con una vista comoda para desktop y movil.
+    </p>
+  </div>
+
+  <div class="page-header__actions">
+    <label class="search-field">
+      <span>Buscar</span>
+      <input
+        type="search"
+        [value]="searchTerm()"
+        (input)="updateSearchTerm(searchInput.value)"
+        #searchInput
+        placeholder="Nombre, ciudad o estadio"
+      />
+    </label>
+
+    <div class="page-header__buttons">
+      <button type="button" class="ghost-button" (click)="retry()">Actualizar</button>
+      <button type="button" class="primary-button" (click)="openCreateModal()">Crear equipo</button>
+    </div>
+  </div>
+</section>
+
+@if (isLoading()) {
+  <section class="state-card">
+    <p class="state-card__label">Cargando equipos</p>
+    <h2>Consultando la API del backend...</h2>
+  </section>
+} @else if (errorMessage()) {
+  <section class="state-card state-card--error">
+    <p class="state-card__label">Conexion pendiente</p>
+    <h2>{{ errorMessage() }}</h2>
+    <button type="button" class="ghost-button ghost-button--light" (click)="retry()">
+      Reintentar
+    </button>
+  </section>
+} @else {
+  <section class="summary-grid" aria-label="Resumen de equipos">
+    <article class="summary-card">
+      <span>Equipos totales</span>
+      <strong>{{ filteredTeams().length }}</strong>
+    </article>
+    <article class="summary-card">
+      <span>Ciudades cubiertas</span>
+      <strong>{{ uniqueCitiesCount() }}</strong>
+    </article>
+    <article class="summary-card">
+      <span>Vista activa</span>
+      <strong>CRUD operativo</strong>
+    </article>
+  </section>
+
+  <section class="table-card">
+    <div class="table-card__header">
+      <div>
+        <p class="table-card__eyebrow">Listado</p>
+        <h2>Equipos registrados</h2>
+      </div>
+    </div>
+
+    @if (filteredTeams().length === 0) {
+      <section class="state-card">
+        <p class="state-card__label">Sin resultados</p>
+        <h2>No encontramos equipos con los filtros actuales.</h2>
+      </section>
+    } @else {
+      <div class="team-grid">
+        @for (team of filteredTeams(); track trackByTeamId($index, team)) {
+          <article class="team-card">
+            <div class="team-card__header">
+              <div class="team-card__crest">
+                @if (team.logoUrl) {
+                  <img [src]="team.logoUrl" [alt]="'Logo de ' + team.name" />
+                } @else {
+                  <span>{{ team.name.slice(0, 2).toUpperCase() }}</span>
+                }
+              </div>
+
+              <div>
+                <h3>{{ team.name }}</h3>
+                <p>{{ team.city }}</p>
+              </div>
+            </div>
+
+            <dl class="team-card__details">
+              <div>
+                <dt>Estadio</dt>
+                <dd>{{ team.stadium }}</dd>
+              </div>
+              <div>
+                <dt>Fundado</dt>
+                <dd>{{ team.foundedDate | date: 'dd/MM/yyyy' }}</dd>
+              </div>
+            </dl>
+
+            <div class="team-card__actions">
+              <button type="button" class="ghost-button ghost-button--light" (click)="openEditModal(team)">
+                Editar
+              </button>
+              <button
+                type="button"
+                class="ghost-button ghost-button--danger"
+                (click)="openDeleteModal(team)"
+              >
+                Eliminar
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+
+      <div class="team-table-wrapper">
+        <table class="team-table">
+          <thead>
+            <tr>
+              <th>Equipo</th>
+              <th>Ciudad</th>
+              <th>Estadio</th>
+              <th>Fundacion</th>
+              <th class="team-table__actions-column">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (team of filteredTeams(); track trackByTeamId($index, team)) {
+              <tr>
+                <td>
+                  <div class="team-table__identity">
+                    <div class="team-card__crest team-card__crest--small">
+                      @if (team.logoUrl) {
+                        <img [src]="team.logoUrl" [alt]="'Logo de ' + team.name" />
+                      } @else {
+                        <span>{{ team.name.slice(0, 2).toUpperCase() }}</span>
+                      }
+                    </div>
+                    <div>
+                      <strong>{{ team.name }}</strong>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ team.city }}</td>
+                <td>{{ team.stadium }}</td>
+                <td>{{ team.foundedDate | date: 'dd/MM/yyyy' }}</td>
+                <td class="team-table__actions-cell">
+                  <div class="team-table__actions">
+                    <button type="button" class="table-action" (click)="openEditModal(team)">
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      class="table-action table-action--danger"
+                      (click)="openDeleteModal(team)"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+}
+
+@if (isFormModalOpen()) {
+  <div class="overlay" (click)="closeFormModal()">
+    <section class="modal" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
+      <div class="modal__header">
+        <div>
+          <p class="modal__eyebrow">Formulario reactivo</p>
+          <h2>{{ modalTitle() }}</h2>
+        </div>
+        <button type="button" class="icon-button" (click)="closeFormModal()">Cerrar</button>
+      </div>
+
+      <form class="team-form" [formGroup]="teamForm" (ngSubmit)="submitTeamForm()">
+        <label class="field">
+          <span>Nombre</span>
+          <input type="text" formControlName="name" placeholder="Ej: Atletico ITM" />
+          @if (fieldHasError('name')) {
+            <small>{{ getFieldError('name') }}</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Ciudad</span>
+          <input type="text" formControlName="city" placeholder="Ej: Medellin" />
+          @if (fieldHasError('city')) {
+            <small>{{ getFieldError('city') }}</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Estadio</span>
+          <input type="text" formControlName="stadium" placeholder="Ej: Estadio ITM" />
+          @if (fieldHasError('stadium')) {
+            <small>{{ getFieldError('stadium') }}</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Logo URL</span>
+          <input type="url" formControlName="logoUrl" placeholder="https://..." />
+          @if (fieldHasError('logoUrl')) {
+            <small>{{ getFieldError('logoUrl') }}</small>
+          }
+        </label>
+
+        <label class="field field--full">
+          <span>Fecha de fundacion</span>
+          <input type="date" formControlName="foundedDate" />
+          @if (fieldHasError('foundedDate')) {
+            <small>{{ getFieldError('foundedDate') }}</small>
+          }
+        </label>
+
+        <div class="modal__actions">
+          <button type="button" class="ghost-button ghost-button--light" (click)="closeFormModal()">
+            Cancelar
+          </button>
+          <button type="submit" class="primary-button" [disabled]="isSaving()">
+            {{ isSaving() ? 'Guardando...' : submitLabel() }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+}
+
+@if (isDeleteModalOpen()) {
+  @if (teamPendingDelete(); as selectedTeam) {
+    <div class="overlay overlay--compact" (click)="closeDeleteModal()">
+      <section class="modal modal--compact" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
+        <div class="modal__header">
+          <div>
+            <p class="modal__eyebrow">Confirmacion</p>
+            <h2>Eliminar equipo</h2>
+          </div>
+        </div>
+
+        <p class="confirm-copy">
+          Vas a eliminar el equipo <strong>{{ selectedTeam.name }}</strong>. Esta accion no se puede
+          deshacer.
+        </p>
+
+        <div class="modal__actions">
+          <button type="button" class="ghost-button ghost-button--light" (click)="closeDeleteModal()">
+            Cancelar
+          </button>
+          <button type="button" class="ghost-button ghost-button--danger" [disabled]="isSaving()" (click)="confirmDelete()">
+            {{ isSaving() ? 'Eliminando...' : 'Eliminar equipo' }}
+          </button>
+        </div>
+      </section>
+    </div>
+  }
+}
+
+<section class="toast-stack" aria-live="polite" aria-label="Notificaciones">
+  @for (notification of notifications(); track notification.id) {
+    <article class="toast" [class.toast--error]="notification.type === 'error'">
+      <div>
+        <strong>{{ notification.title }}</strong>
+        <p>{{ notification.message }}</p>
+      </div>
+      <button type="button" class="icon-button icon-button--toast" (click)="dismissNotification(notification.id)">
+        Cerrar
+      </button>
+    </article>
+  }
+</section>

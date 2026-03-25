@@ -28,7 +28,7 @@ public class TournamentService : ITournamentService
     public async Task<IEnumerable<Tournament>> GetAllAsync()
     {
         _logger.LogInformation("Retrieving all tournaments.");
-        return await _tournamentRepository.GetAllAsync();
+        return await _tournamentRepository.GetAllWithTeamsAsync();
     }
 
     public async Task<Tournament?> GetByIdAsync(int id)
@@ -177,3 +177,4 @@ public class TournamentService : ITournamentService
         return tournamentTeams.Select(tt => tt.Team);
     }
 }
+

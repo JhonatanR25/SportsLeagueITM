@@ -38,6 +38,11 @@ export class ShellComponent {
       description: 'Administracion del cuerpo arbitral',
     },
     {
+      label: 'Partidos',
+      route: '/matches',
+      description: 'Programacion, estado y marcador',
+    },
+    {
       label: 'Torneos',
       route: '/tournaments',
       description: 'Planificacion y control competitivo',

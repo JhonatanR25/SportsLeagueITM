@@ -1,0 +1,293 @@
+<section class="page-header">
+  <div>
+    <p class="page-header__eyebrow">Modulo de jugadores</p>
+    <h1>Gestion de jugadores</h1>
+    <p class="page-header__description">
+      Administra la plantilla de la liga con filtros por nombre, equipo, posicion y dorsal.
+    </p>
+  </div>
+
+  <div class="page-header__actions">
+    <label class="search-field">
+      <span>Buscar</span>
+      <input
+        type="search"
+        [value]="searchTerm()"
+        (input)="updateSearchTerm(searchInput.value)"
+        #searchInput
+        placeholder="Nombre, equipo o dorsal"
+      />
+    </label>
+
+    <div class="page-header__buttons">
+      <button type="button" class="ghost-button" (click)="retry()">Actualizar</button>
+      <button type="button" class="primary-button" (click)="openCreateModal()">Crear jugador</button>
+    </div>
+  </div>
+</section>
+
+@if (isLoading()) {
+  <section class="state-card">
+    <p class="state-card__label">Cargando jugadores</p>
+    <h2>Consultando la API del backend...</h2>
+  </section>
+} @else if (errorMessage()) {
+  <section class="state-card state-card--error">
+    <p class="state-card__label">Conexion pendiente</p>
+    <h2>{{ errorMessage() }}</h2>
+    <button type="button" class="ghost-button ghost-button--light" (click)="retry()">
+      Reintentar
+    </button>
+  </section>
+} @else {
+  <section class="summary-grid" aria-label="Resumen de jugadores">
+    <article class="summary-card">
+      <span>Jugadores totales</span>
+      <strong>{{ filteredPlayers().length }}</strong>
+    </article>
+    <article class="summary-card">
+      <span>Equipos representados</span>
+      <strong>{{ uniqueTeamsCount() }}</strong>
+    </article>
+    <article class="summary-card">
+      <span>Estado del modulo</span>
+      <strong>CRUD operativo</strong>
+    </article>
+  </section>
+
+  <section class="table-card">
+    <div class="table-card__header">
+      <div>
+        <p class="table-card__eyebrow">Listado</p>
+        <h2>Jugadores registrados</h2>
+      </div>
+    </div>
+
+    @if (filteredPlayers().length === 0) {
+      <section class="state-card">
+        <p class="state-card__label">Sin resultados</p>
+        <h2>No encontramos jugadores con los filtros actuales.</h2>
+      </section>
+    } @else {
+      <div class="player-grid">
+        @for (player of filteredPlayers(); track trackByPlayerId($index, player)) {
+          <article class="player-card">
+            <div class="player-card__header">
+              <div class="player-card__avatar">{{ player.firstName.slice(0, 1) }}{{ player.lastName.slice(0, 1) }}</div>
+
+              <div>
+                <h3>{{ player.firstName }} {{ player.lastName }}</h3>
+                <p>{{ player.teamName }}</p>
+              </div>
+            </div>
+
+            <dl class="player-card__details">
+              <div>
+                <dt>Dorsal</dt>
+                <dd>#{{ player.number }}</dd>
+              </div>
+              <div>
+                <dt>Posicion</dt>
+                <dd>{{ getPositionLabel(player.position) }}</dd>
+              </div>
+              <div>
+                <dt>Nacimiento</dt>
+                <dd>{{ player.birthDate | date: 'dd/MM/yyyy' }}</dd>
+              </div>
+            </dl>
+
+            <div class="player-card__actions">
+              <button type="button" class="ghost-button ghost-button--light" (click)="openEditModal(player)">
+                Editar
+              </button>
+              <button
+                type="button"
+                class="ghost-button ghost-button--danger"
+                (click)="openDeleteModal(player)"
+              >
+                Eliminar
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+
+      <div class="player-table-wrapper">
+        <table class="player-table">
+          <thead>
+            <tr>
+              <th>Jugador</th>
+              <th>Equipo</th>
+              <th>Dorsal</th>
+              <th>Posicion</th>
+              <th>Nacimiento</th>
+              <th class="player-table__actions-column">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (player of filteredPlayers(); track trackByPlayerId($index, player)) {
+              <tr>
+                <td>
+                  <div class="player-table__identity">
+                    <div class="player-card__avatar player-card__avatar--small">
+                      {{ player.firstName.slice(0, 1) }}{{ player.lastName.slice(0, 1) }}
+                    </div>
+                    <div>
+                      <strong>{{ player.firstName }} {{ player.lastName }}</strong>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ player.teamName }}</td>
+                <td>#{{ player.number }}</td>
+                <td>{{ getPositionLabel(player.position) }}</td>
+                <td>{{ player.birthDate | date: 'dd/MM/yyyy' }}</td>
+                <td class="player-table__actions-cell">
+                  <div class="player-table__actions">
+                    <button type="button" class="table-action" (click)="openEditModal(player)">
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      class="table-action table-action--danger"
+                      (click)="openDeleteModal(player)"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+}
+
+@if (isFormModalOpen()) {
+  <div class="overlay" (click)="closeFormModal()">
+    <section class="modal" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
+      <div class="modal__header">
+        <div>
+          <p class="modal__eyebrow">Formulario reactivo</p>
+          <h2>{{ modalTitle() }}</h2>
+        </div>
+        <button type="button" class="icon-button" (click)="closeFormModal()">Cerrar</button>
+      </div>
+
+      <form class="player-form" [formGroup]="playerForm" (ngSubmit)="submitPlayerForm()">
+        <label class="field">
+          <span>Nombres</span>
+          <input type="text" formControlName="firstName" placeholder="Ej: Lionel" />
+          @if (fieldHasError('firstName')) {
+            <small>{{ getFieldError('firstName') }}</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Apellidos</span>
+          <input type="text" formControlName="lastName" placeholder="Ej: Messi" />
+          @if (fieldHasError('lastName')) {
+            <small>{{ getFieldError('lastName') }}</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Fecha de nacimiento</span>
+          <input type="date" formControlName="birthDate" />
+          @if (fieldHasError('birthDate')) {
+            <small>{{ getFieldError('birthDate') }}</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Dorsal</span>
+          <input type="number" formControlName="number" min="1" max="999" />
+          @if (fieldHasError('number')) {
+            <small>{{ getFieldError('number') }}</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Posicion</span>
+          <select formControlName="position">
+            @for (option of positionOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+          @if (fieldHasError('position')) {
+            <small>{{ getFieldError('position') }}</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Equipo</span>
+          <select formControlName="teamId" [disabled]="isTeamsLoading() || teams().length === 0">
+            <option [value]="0">Selecciona un equipo</option>
+            @for (team of teams(); track team.id) {
+              <option [value]="team.id">{{ team.name }}</option>
+            }
+          </select>
+          @if (fieldHasError('teamId')) {
+            <small>{{ getFieldError('teamId') }}</small>
+          }
+        </label>
+
+        <div class="modal__actions">
+          <button type="button" class="ghost-button ghost-button--light" (click)="closeFormModal()">
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="isSaving() || isTeamsLoading() || teams().length === 0"
+          >
+            {{ isSaving() ? 'Guardando...' : submitLabel() }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+}
+
+@if (isDeleteModalOpen()) {
+  @if (playerPendingDelete(); as selectedPlayer) {
+    <div class="overlay overlay--compact" (click)="closeDeleteModal()">
+      <section class="modal modal--compact" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
+        <div class="modal__header">
+          <div>
+            <p class="modal__eyebrow">Confirmacion</p>
+            <h2>Eliminar jugador</h2>
+          </div>
+        </div>
+
+        <p class="confirm-copy">
+          Vas a eliminar al jugador <strong>{{ selectedPlayer.firstName }} {{ selectedPlayer.lastName }}</strong>. Esta accion no se puede deshacer.
+        </p>
+
+        <div class="modal__actions">
+          <button type="button" class="ghost-button ghost-button--light" (click)="closeDeleteModal()">
+            Cancelar
+          </button>
+          <button type="button" class="ghost-button ghost-button--danger" [disabled]="isSaving()" (click)="confirmDelete()">
+            {{ isSaving() ? 'Eliminando...' : 'Eliminar jugador' }}
+          </button>
+        </div>
+      </section>
+    </div>
+  }
+}
+
+<section class="toast-stack" aria-live="polite" aria-label="Notificaciones">
+  @for (notification of notifications(); track notification.id) {
+    <article class="toast" [class.toast--error]="notification.type === 'error'">
+      <div>
+        <strong>{{ notification.title }}</strong>
+        <p>{{ notification.message }}</p>
+      </div>
+      <button type="button" class="icon-button icon-button--toast" (click)="dismissNotification(notification.id)">
+        Cerrar
+      </button>
+    </article>
+  }
+</section>
