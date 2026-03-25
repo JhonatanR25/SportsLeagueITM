@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SportsLeague.API.DTOs.Request;
 using SportsLeague.API.DTOs.Response;
 using SportsLeague.Domain.Entities;
+using SportsLeague.Domain.Enums;
 using SportsLeague.Domain.Interfaces.Services;
 
 namespace SportsLeague.API.Controllers;
@@ -21,9 +22,16 @@ public class MatchController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<MatchResponseDTO>>> GetAll()
+    public async Task<ActionResult<IEnumerable<MatchResponseDTO>>> GetAll(
+        [FromQuery] int? tournamentId,
+        [FromQuery] MatchStatus? status,
+        [FromQuery] DateTime? fromDate,
+        [FromQuery] DateTime? toDate)
     {
-        var matches = await _matchService.GetAllAsync();
+        var matches = tournamentId.HasValue || status.HasValue || fromDate.HasValue || toDate.HasValue
+            ? await _matchService.GetFilteredAsync(tournamentId, status, fromDate, toDate)
+            : await _matchService.GetAllAsync();
+
         return Ok(_mapper.Map<IEnumerable<MatchResponseDTO>>(matches));
     }
 
@@ -50,7 +58,8 @@ public class MatchController : ControllerBase
     {
         var match = _mapper.Map<Match>(dto);
         var created = await _matchService.CreateAsync(match);
-        var response = _mapper.Map<MatchResponseDTO>(created);
+        var loadedMatch = await _matchService.GetByIdAsync(created.Id);
+        var response = _mapper.Map<MatchResponseDTO>(loadedMatch ?? created);
         return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
     }
 

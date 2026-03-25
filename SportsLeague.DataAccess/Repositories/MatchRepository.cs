@@ -29,7 +29,45 @@ public class MatchRepository : GenericRepository<Match>, IMatchRepository
             .Include(m => m.AwayTeam)
             .Include(m => m.Referee)
             .Include(m => m.Tournament)
+            .OrderBy(m => m.MatchDate)
+            .ThenBy(m => m.Id)
             .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Match>> GetFilteredAsync(int? tournamentId, MatchStatus? status, DateTime? fromDate, DateTime? toDate)
+    {
+        var query = _dbSet
+            .Include(m => m.HomeTeam)
+            .Include(m => m.AwayTeam)
+            .Include(m => m.Referee)
+            .Include(m => m.Tournament)
+            .AsNoTracking()
+            .AsQueryable();
+
+        if (tournamentId.HasValue)
+        {
+            query = query.Where(m => m.TournamentId == tournamentId.Value);
+        }
+
+        if (status.HasValue)
+        {
+            query = query.Where(m => m.Status == status.Value);
+        }
+
+        if (fromDate.HasValue)
+        {
+            query = query.Where(m => m.MatchDate >= fromDate.Value);
+        }
+
+        if (toDate.HasValue)
+        {
+            query = query.Where(m => m.MatchDate <= toDate.Value);
+        }
+
+        return await query
+            .OrderBy(m => m.MatchDate)
+            .ThenBy(m => m.Id)
             .ToListAsync();
     }
 
@@ -40,6 +78,9 @@ public class MatchRepository : GenericRepository<Match>, IMatchRepository
             .Include(m => m.HomeTeam)
             .Include(m => m.AwayTeam)
             .Include(m => m.Referee)
+            .Include(m => m.Tournament)
+            .OrderBy(m => m.MatchDate)
+            .ThenBy(m => m.Id)
             .AsNoTracking()
             .ToListAsync();
     }
@@ -52,6 +93,8 @@ public class MatchRepository : GenericRepository<Match>, IMatchRepository
             .Include(m => m.AwayTeam)
             .Include(m => m.Referee)
             .Include(m => m.Tournament)
+            .OrderBy(m => m.MatchDate)
+            .ThenBy(m => m.Id)
             .AsNoTracking()
             .ToListAsync();
     }
@@ -64,6 +107,8 @@ public class MatchRepository : GenericRepository<Match>, IMatchRepository
             .Include(m => m.AwayTeam)
             .Include(m => m.Referee)
             .Include(m => m.Tournament)
+            .OrderBy(m => m.MatchDate)
+            .ThenBy(m => m.Id)
             .AsNoTracking()
             .ToListAsync();
     }

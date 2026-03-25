@@ -37,6 +37,21 @@ public class MatchService : IMatchService
         return await _matchRepository.GetAllWithDetailsAsync();
     }
 
+    public async Task<IEnumerable<Match>> GetFilteredAsync(int? tournamentId, MatchStatus? status, DateTime? fromDate, DateTime? toDate)
+    {
+        if (fromDate.HasValue && toDate.HasValue && fromDate > toDate)
+            throw new ArgumentException("La fecha inicial no puede ser posterior a la fecha final.");
+
+        _logger.LogInformation(
+            "Retrieving matches with filters: TournamentId={TournamentId}, Status={Status}, FromDate={FromDate}, ToDate={ToDate}.",
+            tournamentId,
+            status,
+            fromDate,
+            toDate);
+
+        return await _matchRepository.GetFilteredAsync(tournamentId, status, fromDate, toDate);
+    }
+
     public async Task<Match?> GetByIdAsync(int id)
     {
         _logger.LogInformation("Retrieving match with ID: {MatchId}", id);
@@ -49,15 +64,16 @@ public class MatchService : IMatchService
             throw new ArgumentNullException(nameof(match));
 
         if (match.HomeTeamId <= 0 || match.AwayTeamId <= 0 || match.RefereeId <= 0 || match.TournamentId <= 0)
-            throw new ArgumentException("Los IDs de equipo, árbitro y torneo deben ser mayores que cero.");
+            throw new ArgumentException("Los IDs de equipo, arbitro y torneo deben ser mayores que cero.");
 
         if (match.HomeTeamId == match.AwayTeamId)
             throw new InvalidOperationException("El equipo local y visitante deben ser diferentes.");
 
-        await ValidateEntitiesExistAsync(match);
+        var tournament = await ValidateEntitiesExistAsync(match);
         await ValidateTeamsRegisteredAsync(match.TournamentId, match.HomeTeamId, match.AwayTeamId);
+        ValidateMatchDateWithinTournament(match.MatchDate, tournament);
 
-        // Regla de creación: siempre inicia en Scheduled y marcador 0-0.
+        // Siempre se crea como partido programado y sin marcador inicial.
         match.Status = MatchStatus.Scheduled;
         match.HomeScore = 0;
         match.AwayScore = 0;
@@ -74,7 +90,7 @@ public class MatchService : IMatchService
     public async Task UpdateStatusAsync(int id, MatchStatus newStatus)
     {
         var match = await _matchRepository.GetByIdAsync(id)
-            ?? throw new KeyNotFoundException($"No se encontró el partido con ID {id}.");
+            ?? throw new KeyNotFoundException($"No se encontro el partido con ID {id}.");
 
         var validTransition = (match.Status, newStatus) switch
         {
@@ -99,7 +115,7 @@ public class MatchService : IMatchService
     public async Task UpdateScoreAsync(int id, int homeScore, int awayScore, bool isFinalScore = false)
     {
         var match = await _matchRepository.GetByIdAsync(id)
-            ?? throw new KeyNotFoundException($"No se encontró el partido con ID {id}.");
+            ?? throw new KeyNotFoundException($"No se encontro el partido con ID {id}.");
 
         if (homeScore < 0 || awayScore < 0)
             throw new ArgumentException("El marcador no puede tener valores negativos.");
@@ -108,7 +124,7 @@ public class MatchService : IMatchService
             throw new InvalidOperationException("No se puede registrar marcador en estado Scheduled.");
 
         if (isFinalScore && match.Status != MatchStatus.Finished)
-            throw new InvalidOperationException("El marcador final solo puede registrarse cuando el partido está Finished.");
+            throw new InvalidOperationException("El marcador final solo puede registrarse cuando el partido esta Finished.");
 
         match.HomeScore = homeScore;
         match.AwayScore = awayScore;
@@ -116,24 +132,26 @@ public class MatchService : IMatchService
         await _matchRepository.UpdateAsync(match);
     }
 
-    private async Task ValidateEntitiesExistAsync(Match match)
+    private async Task<Tournament> ValidateEntitiesExistAsync(Match match)
     {
         var homeExists = await _teamRepository.ExistsAsync(match.HomeTeamId);
         var awayExists = await _teamRepository.ExistsAsync(match.AwayTeamId);
         var refereeExists = await _refereeRepository.ExistsAsync(match.RefereeId);
-        var tournamentExists = await _tournamentRepository.ExistsAsync(match.TournamentId);
+        var tournament = await _tournamentRepository.GetByIdAsync(match.TournamentId);
 
         if (!homeExists)
-            throw new KeyNotFoundException($"No se encontró el equipo local con ID {match.HomeTeamId}.");
+            throw new KeyNotFoundException($"No se encontro el equipo local con ID {match.HomeTeamId}.");
 
         if (!awayExists)
-            throw new KeyNotFoundException($"No se encontró el equipo visitante con ID {match.AwayTeamId}.");
+            throw new KeyNotFoundException($"No se encontro el equipo visitante con ID {match.AwayTeamId}.");
 
         if (!refereeExists)
-            throw new KeyNotFoundException($"No se encontró el árbitro con ID {match.RefereeId}.");
+            throw new KeyNotFoundException($"No se encontro el arbitro con ID {match.RefereeId}.");
 
-        if (!tournamentExists)
-            throw new KeyNotFoundException($"No se encontró el torneo con ID {match.TournamentId}.");
+        if (tournament == null)
+            throw new KeyNotFoundException($"No se encontro el torneo con ID {match.TournamentId}.");
+
+        return tournament;
     }
 
     private async Task ValidateTeamsRegisteredAsync(int tournamentId, int homeTeamId, int awayTeamId)
@@ -144,6 +162,14 @@ public class MatchService : IMatchService
         if (homeRegistration == null || awayRegistration == null)
         {
             throw new InvalidOperationException("Ambos equipos deben estar inscritos en el torneo para crear un partido.");
+        }
+    }
+
+    private static void ValidateMatchDateWithinTournament(DateTime matchDate, Tournament tournament)
+    {
+        if (matchDate < tournament.StartDate || matchDate > tournament.EndDate)
+        {
+            throw new InvalidOperationException("La fecha del partido debe estar dentro del rango del torneo.");
         }
     }
 }
