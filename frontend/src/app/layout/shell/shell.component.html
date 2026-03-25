@@ -1,0 +1,58 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar__intro">
+      <div class="brand">
+        <p class="brand__eyebrow">Sports League ITM</p>
+        <h1>Control deportivo centralizado</h1>
+        <p class="brand__copy">
+          Plataforma web para administrar torneos, equipos, jugadores y arbitros con una
+          experiencia clara en cualquier pantalla.
+        </p>
+      </div>
+
+      <section class="sidebar-card" aria-label="Estado del proyecto">
+        <p class="sidebar-card__title">Base del frontend</p>
+        <div class="sidebar-card__stats">
+          @for (stat of quickStats; track stat.label) {
+            <div>
+              <span>{{ stat.label }}</span>
+              <strong>{{ stat.value }}</strong>
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+
+    <nav class="nav" aria-label="Principal">
+      @for (item of navigation; track item.route) {
+        <a
+          class="nav__item"
+          [routerLink]="item.route"
+          routerLinkActive="nav__item--active"
+          [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+        >
+          <span class="nav__label">{{ item.label }}</span>
+          <span class="nav__description">{{ item.description }}</span>
+        </a>
+      }
+    </nav>
+  </aside>
+
+  <div class="content">
+    <header class="topbar">
+      <div>
+        <p class="topbar__eyebrow">Aplicacion web deportiva</p>
+        <h2>Frontend escalable por capas y dominios</h2>
+      </div>
+
+      <div class="topbar__status">
+        <span class="status-dot"></span>
+        <span>Base Angular lista para crecer</span>
+      </div>
+    </header>
+
+    <main class="page">
+      <router-outlet />
+    </main>
+  </div>
+</div>

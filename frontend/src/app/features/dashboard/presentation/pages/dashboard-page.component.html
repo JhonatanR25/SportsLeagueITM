@@ -1,0 +1,57 @@
+<section class="hero">
+  <div class="hero__copy">
+    <p class="hero__eyebrow">Dashboard inicial</p>
+    <h1>Base lista para una plataforma deportiva moderna y escalable.</h1>
+    <p class="hero__description">
+      Dejamos el frontend preparado para crecer por modulos sin mezclar capas. El siguiente
+      paso sera conectar la API y empezar a construir las vistas operativas del producto.
+    </p>
+  </div>
+
+  <div class="hero__panel">
+    <span class="hero__pill">Angular Standalone</span>
+    <span class="hero__pill">Arquitectura por capas</span>
+    <span class="hero__pill">Responsive first</span>
+  </div>
+</section>
+
+<section class="metrics" aria-label="Metricas clave">
+  @for (metric of metrics; track metric.label) {
+    <article class="metric-card">
+      <span>{{ metric.label }}</span>
+      <strong>{{ metric.value }}</strong>
+      <p>{{ metric.trend }}</p>
+    </article>
+  }
+</section>
+
+<section class="grid">
+  <article class="panel">
+    <div class="panel__header">
+      <p class="panel__eyebrow">Modulos base</p>
+      <h2>Dominio inicial del producto</h2>
+    </div>
+
+    <div class="module-grid">
+      @for (module of modules; track module.title) {
+        <article class="module-card" [class]="'module-card module-card--' + module.accent">
+          <h3>{{ module.title }}</h3>
+          <p>{{ module.copy }}</p>
+        </article>
+      }
+    </div>
+  </article>
+
+  <article class="panel panel--roadmap">
+    <div class="panel__header">
+      <p class="panel__eyebrow">Siguiente fase</p>
+      <h2>Ruta de construccion</h2>
+    </div>
+
+    <ol class="roadmap">
+      @for (item of roadmap; track item) {
+        <li>{{ item }}</li>
+      }
+    </ol>
+  </article>
+</section>

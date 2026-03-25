@@ -1,0 +1,56 @@
+:root {
+  color-scheme: dark;
+  --color-surface: #071124;
+  --color-surface-strong: #091833;
+  --color-surface-soft: #102445;
+  --color-text: #f5f7fa;
+  --color-text-muted: #9fb0c8;
+  --color-primary: #f3b44c;
+  --color-secondary: #2759d6;
+  --color-success: #3cb371;
+  --color-danger: #db4437;
+  --shadow-soft: 0 1.25rem 3rem rgba(2, 8, 20, 0.24);
+  --font-display:
+    'Segoe UI',
+    'Trebuchet MS',
+    'Arial Narrow',
+    Arial,
+    sans-serif;
+  --font-body:
+    'Segoe UI',
+    Tahoma,
+    Geneva,
+    Verdana,
+    sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  line-height: 1.5;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
