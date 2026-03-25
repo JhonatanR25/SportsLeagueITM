@@ -15,6 +15,7 @@ public class TournamentTeamRepository : GenericRepository<TournamentTeam>, ITour
     {
         return await _dbSet
             .Where(tt => tt.TournamentId == tournamentId && tt.TeamId == teamId)
+            .AsNoTracking()
             .FirstOrDefaultAsync();
     }
 
@@ -23,6 +24,9 @@ public class TournamentTeamRepository : GenericRepository<TournamentTeam>, ITour
         return await _dbSet
             .Where(tt => tt.TournamentId == tournamentId)
             .Include(tt => tt.Team)
+            .AsNoTracking()
+            .OrderBy(tt => tt.Team.Name)
+            .ThenBy(tt => tt.TeamId)
             .ToListAsync();
     }
 

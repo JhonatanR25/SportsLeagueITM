@@ -71,6 +71,7 @@ public class MatchService : IMatchService
 
         var tournament = await ValidateEntitiesExistAsync(match);
         await ValidateTeamsRegisteredAsync(match.TournamentId, match.HomeTeamId, match.AwayTeamId);
+        ValidateTournamentAllowsScheduling(tournament);
         ValidateMatchDateWithinTournament(match.MatchDate, tournament);
 
         // Siempre se crea como partido programado y sin marcador inicial.
@@ -123,8 +124,14 @@ public class MatchService : IMatchService
         if (match.Status == MatchStatus.Scheduled)
             throw new InvalidOperationException("No se puede registrar marcador en estado Scheduled.");
 
+        if (match.Status == MatchStatus.Suspended)
+            throw new InvalidOperationException("No se puede registrar marcador mientras el partido esta Suspended.");
+
         if (isFinalScore && match.Status != MatchStatus.Finished)
             throw new InvalidOperationException("El marcador final solo puede registrarse cuando el partido esta Finished.");
+
+        if (!isFinalScore && match.Status == MatchStatus.Finished)
+            throw new InvalidOperationException("Solo se puede registrar marcador final cuando el partido esta Finished.");
 
         match.HomeScore = homeScore;
         match.AwayScore = awayScore;
@@ -170,6 +177,14 @@ public class MatchService : IMatchService
         if (matchDate < tournament.StartDate || matchDate > tournament.EndDate)
         {
             throw new InvalidOperationException("La fecha del partido debe estar dentro del rango del torneo.");
+        }
+    }
+
+    private static void ValidateTournamentAllowsScheduling(Tournament tournament)
+    {
+        if (tournament.Status != TournamentStatus.Pending)
+        {
+            throw new InvalidOperationException("Solo se pueden programar partidos en torneos con estado Pending.");
         }
     }
 }

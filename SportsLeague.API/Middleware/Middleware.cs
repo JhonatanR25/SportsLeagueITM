@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using SportsLeague.API.Responses;
 
 namespace SportsLeague.API.Middleware;
 
@@ -57,15 +58,13 @@ public class ExceptionHandlingMiddleware
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)code;
 
-        var response = new
-        {
-            status = context.Response.StatusCode,
+        var response = ApiErrorFactory.Create(
+            context,
+            context.Response.StatusCode,
             message,
-            detail = context.RequestServices.GetRequiredService<IHostEnvironment>().IsDevelopment()
+            context.RequestServices.GetRequiredService<IHostEnvironment>().IsDevelopment()
                 ? exception.Message
-                : null,
-            traceId = context.TraceIdentifier
-        };
+                : null);
 
         return context.Response.WriteAsync(JsonSerializer.Serialize(response));
     }

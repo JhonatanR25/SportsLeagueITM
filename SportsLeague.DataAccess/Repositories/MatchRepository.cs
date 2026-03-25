@@ -19,6 +19,7 @@ public class MatchRepository : GenericRepository<Match>, IMatchRepository
             .Include(m => m.AwayTeam)
             .Include(m => m.Referee)
             .Include(m => m.Tournament)
+            .AsNoTracking()
             .FirstOrDefaultAsync(m => m.Id == id);
     }
 

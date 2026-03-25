@@ -11,26 +11,34 @@ public class TeamRepository : GenericRepository<Team>, ITeamRepository
     {
     }
 
-    // Mejora de rendimiento: Carga de jugadores relacionada
     public override async Task<IEnumerable<Team>> GetAllAsync()
     {
         return await _dbSet
             .Include(t => t.Players)
             .AsNoTracking()
+            .OrderBy(t => t.Name)
+            .ThenBy(t => t.Id)
             .ToListAsync();
     }
 
     public async Task<Team?> GetByNameAsync(string name)
     {
+        var normalizedName = name.Trim();
+
         return await _dbSet
-            .FirstOrDefaultAsync(t => t.Name.ToLower() == name.ToLower().Trim());
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.Name == normalizedName);
     }
 
-    // Corrección del error CS0535: Implementación requerida por la interfaz
     public async Task<IEnumerable<Team>> GetByCityAsync(string city)
     {
+        var normalizedCity = city.Trim();
+
         return await _dbSet
-            .Where(t => t.City.ToLower() == city.ToLower().Trim())
+            .Where(t => t.City == normalizedCity)
+            .AsNoTracking()
+            .OrderBy(t => t.Name)
+            .ThenBy(t => t.Id)
             .ToListAsync();
     }
 }

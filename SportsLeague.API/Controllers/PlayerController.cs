@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SportsLeague.API.DTOs.Request;
 using SportsLeague.API.DTOs.Response;
+using SportsLeague.API.Responses;
 using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Interfaces.Services;
 
@@ -33,13 +34,7 @@ public class PlayerController : ControllerBase
         var player = await _playerService.GetByIdAsync(id);
         if (player == null)
         {
-            return NotFound(new
-            {
-                status = StatusCodes.Status404NotFound,
-                message = $"No se encontro el jugador con ID {id}.",
-                detail = (string?)null,
-                traceId = HttpContext.TraceIdentifier
-            });
+            return ApiErrorFactory.NotFound(this, $"No se encontro el jugador con ID {id}.");
         }
 
         return Ok(_mapper.Map<PlayerResponseDTO>(player));

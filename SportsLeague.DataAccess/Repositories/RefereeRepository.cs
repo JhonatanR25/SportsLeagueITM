@@ -2,8 +2,6 @@
 using SportsLeague.DataAccess.Context;
 using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Interfaces.Repositories;
-
-
 namespace SportsLeague.DataAccess.Repositories;
 
 public class RefereeRepository : GenericRepository<Referee>, IRefereeRepository
@@ -14,8 +12,13 @@ public class RefereeRepository : GenericRepository<Referee>, IRefereeRepository
 
     public async Task<IEnumerable<Referee>> GetByNationalityAsync(string nationality)
     {
+        var normalizedNationality = nationality.Trim();
+
         return await _context.Referees
-            .Where(r => r.Nationality.ToLower() == nationality.ToLower().Trim())
+            .Where(r => r.Nationality == normalizedNationality)
+            .AsNoTracking()
+            .OrderBy(r => r.LastName)
+            .ThenBy(r => r.FirstName)
             .ToListAsync();
     }
 

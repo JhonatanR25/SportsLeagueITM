@@ -17,12 +17,16 @@ public class PlayerRepository : GenericRepository<Player>, IPlayerRepository
             .Where(p => p.TeamId == teamId)
             .Include(p => p.Team)
             .AsNoTracking()
+            .OrderBy(p => p.Number)
+            .ThenBy(p => p.LastName)
+            .ThenBy(p => p.FirstName)
             .ToListAsync();
     }
 
     public async Task<Player?> GetByTeamAndNumberAsync(int teamId, int number)
     {
         return await _dbSet
+            .AsNoTracking()
             .FirstOrDefaultAsync(p => p.TeamId == teamId && p.Number == number);
     }
 
@@ -31,6 +35,9 @@ public class PlayerRepository : GenericRepository<Player>, IPlayerRepository
         return await _dbSet
             .Include(p => p.Team)
             .AsNoTracking()
+            .OrderBy(p => p.TeamId)
+            .ThenBy(p => p.Number)
+            .ThenBy(p => p.LastName)
             .ToListAsync();
     }
 
@@ -38,6 +45,7 @@ public class PlayerRepository : GenericRepository<Player>, IPlayerRepository
     {
         return await _dbSet
             .Include(p => p.Team)
+            .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 

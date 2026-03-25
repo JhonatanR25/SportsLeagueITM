@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SportsLeague.API.DTOs.Request;
 using SportsLeague.API.DTOs.Response;
+using SportsLeague.API.Responses;
 using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Interfaces.Services;
 
@@ -35,13 +36,7 @@ public class RefereeController : ControllerBase
         var referee = await _refereeService.GetByIdAsync(id);
         if (referee == null)
         {
-            return NotFound(new
-            {
-                status = StatusCodes.Status404NotFound,
-                message = $"No se encontró el árbitro con ID {id}.",
-                detail = (string?)null,
-                traceId = HttpContext.TraceIdentifier
-            });
+            return ApiErrorFactory.NotFound(this, $"No se encontro el arbitro con ID {id}.");
         }
 
         return Ok(_mapper.Map<RefereeResponseDTO>(referee));

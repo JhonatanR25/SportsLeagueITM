@@ -16,6 +16,9 @@ public class TournamentRepository : GenericRepository<Tournament>, ITournamentRe
     {
         return await _dbSet
             .Where(t => t.Status == status)
+            .AsNoTracking()
+            .OrderBy(t => t.StartDate)
+            .ThenBy(t => t.Id)
             .ToListAsync();
     }
 
@@ -25,6 +28,7 @@ public class TournamentRepository : GenericRepository<Tournament>, ITournamentRe
             .Where(t => t.Id == id)
             .Include(t => t.TournamentTeams)
                 .ThenInclude(tt => tt.Team)
+            .AsNoTracking()
             .FirstOrDefaultAsync();
     }
 }
