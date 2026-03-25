@@ -10,6 +10,16 @@
 *.targets text eol=crlf
 *.xml text eol=crlf
 *.json text eol=crlf
+*.js text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.jsx text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
 
 ###############################################################################
 # Set default behavior for command prompt diff.
