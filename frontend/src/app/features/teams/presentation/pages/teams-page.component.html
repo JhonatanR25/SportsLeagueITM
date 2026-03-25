@@ -1,6 +1,6 @@
 <section class="page-header">
   <div>
-    <p class="page-header__eyebrow">Modulo de equipos</p>
+    <p class="page-header__eyebrow">Equipos</p>
     <h1>Gestion de equipos</h1>
     <p class="page-header__description">
       Primer CRUD conectado al backend. Aqui gestionaremos clubes, ciudad, estadio y fecha de
@@ -34,7 +34,7 @@
   </section>
 } @else if (errorMessage()) {
   <section class="state-card state-card--error">
-    <p class="state-card__label">Conexion pendiente</p>
+    <p class="state-card__label">No disponible</p>
     <h2>{{ errorMessage() }}</h2>
     <button type="button" class="ghost-button ghost-button--light" (click)="retry()">
       Reintentar
@@ -43,7 +43,7 @@
 } @else {
   <section class="summary-grid" aria-label="Resumen de equipos">
     <article class="summary-card">
-      <span>Equipos totales</span>
+      <span>Equipos visibles</span>
       <strong>{{ filteredTeams().length }}</strong>
     </article>
     <article class="summary-card">
@@ -51,8 +51,8 @@
       <strong>{{ uniqueCitiesCount() }}</strong>
     </article>
     <article class="summary-card">
-      <span>Vista activa</span>
-      <strong>CRUD operativo</strong>
+      <span>Estado visual</span>
+      <strong>Gestion clara</strong>
     </article>
   </section>
 
@@ -66,7 +66,7 @@
 
     @if (filteredTeams().length === 0) {
       <section class="state-card">
-        <p class="state-card__label">Sin resultados</p>
+        <p class="state-card__label">Busqueda sin coincidencias</p>
         <h2>No encontramos equipos con los filtros actuales.</h2>
       </section>
     } @else {
@@ -174,13 +174,46 @@
     <section class="modal" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
       <div class="modal__header">
         <div>
-          <p class="modal__eyebrow">Formulario reactivo</p>
+          <p class="modal__eyebrow">Ficha de equipo</p>
           <h2>{{ modalTitle() }}</h2>
         </div>
         <button type="button" class="icon-button" (click)="closeFormModal()">Cerrar</button>
       </div>
 
       <form class="team-form" [formGroup]="teamForm" (ngSubmit)="submitTeamForm()">
+        <section class="context-banner field--full">
+          <div>
+            <span class="context-banner__label">Modo</span>
+            <strong>{{ formModeLabel() }}</strong>
+          </div>
+          <div>
+            <span class="context-banner__label">Objetivo</span>
+            <strong>Registrar datos claros y faciles de identificar</strong>
+          </div>
+        </section>
+
+        <section class="logo-preview field--full">
+          <div class="logo-preview__crest">
+            @if (logoPreview().logoUrl) {
+              <img [src]="logoPreview().logoUrl" [alt]="'Vista previa de ' + (teamForm.controls.name.value || 'equipo')" />
+            } @else {
+              <span>{{ logoPreview().initials }}</span>
+            }
+          </div>
+
+          <div class="logo-preview__content">
+            <span class="context-banner__label">Vista previa</span>
+            <strong>{{ teamForm.controls.name.value || 'Nombre del equipo' }}</strong>
+            <p>
+              @if (logoPreview().logoUrl) {
+                Se mostrara el logo cargado en la lista y las tarjetas del modulo.
+              } @else {
+                Si no agregas logo, mostraremos iniciales para mantener una lectura limpia.
+              }
+            </p>
+          </div>
+        </section>
+
         <label class="field">
           <span>Nombre</span>
           <input type="text" formControlName="name" placeholder="Ej: Atletico ITM" />
@@ -221,11 +254,15 @@
           }
         </label>
 
+        <p class="form-hint field--full">
+          Usa nombre, ciudad y estadio faciles de reconocer. Eso mejora la lectura del listado y evita duplicados visuales.
+        </p>
+
         <div class="modal__actions">
           <button type="button" class="ghost-button ghost-button--light" (click)="closeFormModal()">
             Cancelar
           </button>
-          <button type="submit" class="primary-button" [disabled]="isSaving()">
+          <button type="submit" class="primary-button" [disabled]="!canSubmitForm()">
             {{ isSaving() ? 'Guardando...' : submitLabel() }}
           </button>
         </div>

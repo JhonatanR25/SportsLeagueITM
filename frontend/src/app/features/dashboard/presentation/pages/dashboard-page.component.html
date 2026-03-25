@@ -1,57 +1,64 @@
 <section class="hero">
   <div class="hero__copy">
-    <p class="hero__eyebrow">Dashboard inicial</p>
-    <h1>Base lista para una plataforma deportiva moderna y escalable.</h1>
+    <p class="hero__eyebrow">Dashboard</p>
+    <h1>Panorama general de la competencia</h1>
     <p class="hero__description">
-      Dejamos el frontend preparado para crecer por modulos sin mezclar capas. El siguiente
-      paso sera conectar la API y empezar a construir las vistas operativas del producto.
+      Consulta el estado global de la liga y accede a cada modulo con una lectura clara del sistema.
     </p>
   </div>
 
-  <div class="hero__panel">
-    <span class="hero__pill">Angular Standalone</span>
-    <span class="hero__pill">Arquitectura por capas</span>
-    <span class="hero__pill">Responsive first</span>
+  <div class="hero__meta">
+    <div class="hero__meta-block">
+      <span>Estado del panel</span>
+      <strong>Operacion disponible</strong>
+    </div>
+    <div class="hero__meta-block">
+      <span>Lectura actual</span>
+      <strong>{{ heroStatus() }}</strong>
+    </div>
   </div>
 </section>
 
-<section class="metrics" aria-label="Metricas clave">
-  @for (metric of metrics; track metric.label) {
-    <article class="metric-card">
-      <span>{{ metric.label }}</span>
-      <strong>{{ metric.value }}</strong>
-      <p>{{ metric.trend }}</p>
-    </article>
-  }
-</section>
-
-<section class="grid">
-  <article class="panel">
+@if (isLoading()) {
+  <section class="state-card">
+    <p class="panel__eyebrow">Cargando resumen</p>
+    <h2>Consultando los modulos principales del sistema...</h2>
+  </section>
+} @else if (errorMessage()) {
+  <section class="state-card state-card--error">
+    <p class="panel__eyebrow">No disponible</p>
+    <h2>{{ errorMessage() }}</h2>
+    <button type="button" class="ghost-button ghost-button--light" (click)="retry()">Reintentar</button>
+  </section>
+} @else {
+  <section class="panel">
     <div class="panel__header">
-      <p class="panel__eyebrow">Modulos base</p>
-      <h2>Dominio inicial del producto</h2>
+      <p class="panel__eyebrow">Modulos principales</p>
+      <h2>Resumen</h2>
     </div>
 
     <div class="module-grid">
-      @for (module of modules; track module.title) {
+      @for (module of modules(); track module.title) {
         <article class="module-card" [class]="'module-card module-card--' + module.accent">
-          <h3>{{ module.title }}</h3>
-          <p>{{ module.copy }}</p>
+          <div class="module-card__header">
+            <h3>{{ module.title }}</h3>
+            <a class="module-card__cta" [routerLink]="module.route">{{ module.cta }}</a>
+          </div>
+
+          <div class="module-card__metrics">
+            <div>
+              <span>{{ module.countLabel }}</span>
+              <strong>{{ module.countValue }}</strong>
+            </div>
+            <div>
+              <span>{{ module.detailLabel }}</span>
+              <strong>{{ module.detailValue }}</strong>
+            </div>
+          </div>
+
+          <p>{{ module.helper }}</p>
         </article>
       }
     </div>
-  </article>
-
-  <article class="panel panel--roadmap">
-    <div class="panel__header">
-      <p class="panel__eyebrow">Siguiente fase</p>
-      <h2>Ruta de construccion</h2>
-    </div>
-
-    <ol class="roadmap">
-      @for (item of roadmap; track item) {
-        <li>{{ item }}</li>
-      }
-    </ol>
-  </article>
-</section>
+  </section>
+}

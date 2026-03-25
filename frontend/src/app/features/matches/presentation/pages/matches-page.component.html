@@ -1,6 +1,6 @@
 <section class="page-header">
   <div>
-    <p class="page-header__eyebrow">Modulo de partidos</p>
+    <p class="page-header__eyebrow">Partidos</p>
     <h1>Gestion de partidos</h1>
     <p class="page-header__description">
       Programa encuentros, controla el estado del juego y actualiza marcadores desde la misma vista.
@@ -43,7 +43,7 @@
   </section>
 } @else if (errorMessage()) {
   <section class="state-card state-card--error">
-    <p class="state-card__label">Conexion pendiente</p>
+    <p class="state-card__label">No disponible</p>
     <h2>{{ errorMessage() }}</h2>
     <button type="button" class="ghost-button ghost-button--light" (click)="retry()">Reintentar</button>
   </section>
@@ -64,7 +64,7 @@
 
     @if (filteredMatches().length === 0) {
       <section class="state-card">
-        <p class="state-card__label">Sin resultados</p>
+        <p class="state-card__label">Busqueda sin coincidencias</p>
         <h2>No encontramos partidos con los filtros actuales.</h2>
       </section>
     } @else {
@@ -88,7 +88,7 @@
             <div class="match-card__actions">
               @for (status of getNextStatusOptions(match); track status) {
                 <button type="button" class="ghost-button" (click)="updateMatchStatus(match, status)">
-                  {{ getStatusLabel(status) }}
+                  {{ getStatusActionLabel(match.status, status) }}
                 </button>
               }
               <button type="button" class="ghost-button ghost-button--light" [disabled]="!canEditScore(match)" (click)="openScoreModal(match)">Actualizar marcador</button>
@@ -122,7 +122,7 @@
                 <td class="match-table__actions-cell">
                   <div class="match-table__actions">
                     @for (status of getNextStatusOptions(match); track status) {
-                      <button type="button" class="table-action" (click)="updateMatchStatus(match, status)">{{ getStatusLabel(status) }}</button>
+                      <button type="button" class="table-action" (click)="updateMatchStatus(match, status)">{{ getStatusActionLabel(match.status, status) }}</button>
                     }
                     <button type="button" class="table-action table-action--light" [disabled]="!canEditScore(match)" (click)="openScoreModal(match)">Marcador</button>
                   </div>
@@ -148,14 +148,112 @@
       </div>
 
       <form class="match-form" [formGroup]="createForm" (ngSubmit)="submitCreateForm()">
-        <label class="field"><span>Fecha y hora</span><input type="datetime-local" formControlName="matchDate" /></label>
-        <label class="field"><span>Torneo</span><select formControlName="tournamentId"><option [value]="0">Selecciona un torneo</option>@for (tournament of tournaments(); track tournament.id) {<option [value]="tournament.id">{{ tournament.name }}</option>}</select></label>
-        <label class="field"><span>Equipo local</span><select formControlName="homeTeamId"><option [value]="0">Selecciona un equipo</option>@for (team of teams(); track team.id) {<option [value]="team.id">{{ team.name }}</option>}</select></label>
-        <label class="field"><span>Equipo visitante</span><select formControlName="awayTeamId"><option [value]="0">Selecciona un equipo</option>@for (team of teams(); track team.id) {<option [value]="team.id">{{ team.name }}</option>}</select></label>
-        <label class="field field--full"><span>Arbitro</span><select formControlName="refereeId"><option [value]="0">Selecciona un arbitro</option>@for (referee of referees(); track referee.id) {<option [value]="referee.id">{{ referee.firstName }} {{ referee.lastName }}</option>}</select></label>
+        <section class="context-banner field--full">
+          <div>
+            <span class="context-banner__label">Torneo seleccionado</span>
+            <strong>{{ selectedTournament()?.name ?? 'Selecciona un torneo para habilitar los equipos' }}</strong>
+          </div>
+          <div>
+            <span class="context-banner__label">Equipos disponibles</span>
+            <strong>
+              @if (isTournamentTeamsLoading()) {
+                Cargando...
+              } @else {
+                {{ tournamentTeams().length }}
+              }
+            </strong>
+          </div>
+        </section>
+
+        <label class="field">
+          <span>Fecha y hora</span>
+          <input type="datetime-local" formControlName="matchDate" />
+          @if (hasCreateFieldError('matchDate')) {
+            <small>{{ getCreateFieldError('matchDate') }}</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Torneo</span>
+          <select formControlName="tournamentId">
+            <option [value]="0">Selecciona un torneo</option>
+            @for (tournament of tournaments(); track tournament.id) {
+              <option [value]="tournament.id">{{ tournament.name }}</option>
+            }
+          </select>
+          @if (hasCreateFieldError('tournamentId')) {
+            <small>{{ getCreateFieldError('tournamentId') }}</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Equipo local</span>
+          <select formControlName="homeTeamId" [disabled]="!selectedTournament() || isTournamentTeamsLoading() || tournamentTeams().length === 0">
+            <option [value]="0">
+              @if (!selectedTournament()) {
+                Selecciona primero un torneo
+              } @else if (isTournamentTeamsLoading()) {
+                Cargando equipos...
+              } @else {
+                Selecciona un equipo
+              }
+            </option>
+            @for (team of availableHomeTeams(); track team.id) {
+              <option [value]="team.id">{{ team.name }}</option>
+            }
+          </select>
+          @if (hasCreateFieldError('homeTeamId')) {
+            <small>{{ getCreateFieldError('homeTeamId') }}</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Equipo visitante</span>
+          <select formControlName="awayTeamId" [disabled]="!selectedTournament() || isTournamentTeamsLoading() || tournamentTeams().length === 0">
+            <option [value]="0">
+              @if (!selectedTournament()) {
+                Selecciona primero un torneo
+              } @else if (isTournamentTeamsLoading()) {
+                Cargando equipos...
+              } @else {
+                Selecciona un equipo
+              }
+            </option>
+            @for (team of availableAwayTeams(); track team.id) {
+              <option [value]="team.id">{{ team.name }}</option>
+            }
+          </select>
+          @if (hasCreateFieldError('awayTeamId')) {
+            <small>{{ getCreateFieldError('awayTeamId') }}</small>
+          }
+        </label>
+
+        <label class="field field--full">
+          <span>Arbitro</span>
+          <select formControlName="refereeId">
+            <option [value]="0">Selecciona un arbitro</option>
+            @for (referee of referees(); track referee.id) {
+              <option [value]="referee.id">{{ referee.firstName }} {{ referee.lastName }}</option>
+            }
+          </select>
+          @if (hasCreateFieldError('refereeId')) {
+            <small>{{ getCreateFieldError('refereeId') }}</small>
+          }
+        </label>
+
+        @if (selectedTournament() && !isTournamentTeamsLoading() && tournamentTeams().length < 2) {
+          <p class="form-hint form-hint--warning field--full">
+            Este torneo necesita al menos dos equipos inscritos antes de programar un partido.
+          </p>
+        } @else {
+          <p class="form-hint field--full">
+            Solo se muestran equipos inscritos en el torneo seleccionado para evitar errores de registro.
+          </p>
+        }
+
         <div class="modal__actions">
           <button type="button" class="ghost-button ghost-button--light" (click)="closeCreateModal()">Cancelar</button>
-          <button type="submit" class="primary-button" [disabled]="isSaving() || isCatalogLoading()">{{ isSaving() ? 'Guardando...' : 'Crear partido' }}</button>
+          <button type="submit" class="primary-button" [disabled]="isSaving() || isCatalogLoading() || !canCreateMatch()">{{ isSaving() ? 'Guardando...' : 'Crear partido' }}</button>
         </div>
       </form>
     </section>
@@ -175,9 +273,44 @@
         </div>
 
         <form class="score-form" [formGroup]="scoreForm" (ngSubmit)="submitScoreForm()">
-          <label class="field"><span>{{ selectedMatch.homeTeamName }}</span><input type="number" min="0" formControlName="homeScore" /></label>
-          <label class="field"><span>{{ selectedMatch.awayTeamName }}</span><input type="number" min="0" formControlName="awayScore" /></label>
-          <label class="check-field field--full"><input type="checkbox" formControlName="isFinalScore" /> <span>Guardar como marcador final</span></label>
+          <section class="context-banner field--full">
+            <div>
+              <span class="context-banner__label">Estado actual</span>
+              <strong>{{ getStatusLabel(selectedMatch.status) }}</strong>
+            </div>
+            <div>
+              <span class="context-banner__label">Torneo</span>
+              <strong>{{ selectedMatch.tournamentName }}</strong>
+            </div>
+          </section>
+
+          <label class="field">
+            <span>{{ selectedMatch.homeTeamName }}</span>
+            <input type="number" min="0" formControlName="homeScore" />
+            @if (hasScoreFieldError('homeScore')) {
+              <small>{{ getScoreFieldError('homeScore') }}</small>
+            }
+          </label>
+
+          <label class="field">
+            <span>{{ selectedMatch.awayTeamName }}</span>
+            <input type="number" min="0" formControlName="awayScore" />
+            @if (hasScoreFieldError('awayScore')) {
+              <small>{{ getScoreFieldError('awayScore') }}</small>
+            }
+          </label>
+
+          @if (canMarkAsFinal(selectedMatch)) {
+            <label class="check-field field--full">
+              <input type="checkbox" formControlName="isFinalScore" />
+              <span>Guardar como marcador final</span>
+            </label>
+          } @else {
+            <p class="form-hint field--full">
+              Para guardar este resultado como definitivo, primero cambia el partido a estado finalizado.
+            </p>
+          }
+
           <div class="modal__actions">
             <button type="button" class="ghost-button ghost-button--light" (click)="closeScoreModal()">Cancelar</button>
             <button type="submit" class="primary-button" [disabled]="isSaving()">{{ isSaving() ? 'Guardando...' : 'Guardar marcador' }}</button>

@@ -1,7 +1,7 @@
 <section class="page-header">
   <div>
-    <p class="page-header__eyebrow">Modulo de arbitros</p>
-    <h1>Gestion de arbitros</h1>
+    <p class="page-header__eyebrow">Arbitros</p>
+    <h1>Gestion arbitral</h1>
     <p class="page-header__description">
       Administra el cuerpo arbitral de la liga con busqueda, CRUD y feedback visual integrado.
     </p>
@@ -33,7 +33,7 @@
   </section>
 } @else if (errorMessage()) {
   <section class="state-card state-card--error">
-    <p class="state-card__label">Conexion pendiente</p>
+    <p class="state-card__label">No disponible</p>
     <h2>{{ errorMessage() }}</h2>
     <button type="button" class="ghost-button ghost-button--light" (click)="retry()">
       Reintentar
@@ -42,7 +42,7 @@
 } @else {
   <section class="summary-grid" aria-label="Resumen de arbitros">
     <article class="summary-card">
-      <span>Arbitros totales</span>
+      <span>Arbitros visibles</span>
       <strong>{{ filteredReferees().length }}</strong>
     </article>
     <article class="summary-card">
@@ -50,8 +50,8 @@
       <strong>{{ uniqueNationalitiesCount() }}</strong>
     </article>
     <article class="summary-card">
-      <span>Estado del modulo</span>
-      <strong>CRUD operativo</strong>
+      <span>Estado visual</span>
+      <strong>Cuerpo arbitral claro</strong>
     </article>
   </section>
 
@@ -65,7 +65,7 @@
 
     @if (filteredReferees().length === 0) {
       <section class="state-card">
-        <p class="state-card__label">Sin resultados</p>
+        <p class="state-card__label">Busqueda sin coincidencias</p>
         <h2>No encontramos arbitros con los filtros actuales.</h2>
       </section>
     } @else {
@@ -150,13 +150,34 @@
     <section class="modal" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
       <div class="modal__header">
         <div>
-          <p class="modal__eyebrow">Formulario reactivo</p>
+          <p class="modal__eyebrow">Ficha arbitral</p>
           <h2>{{ modalTitle() }}</h2>
         </div>
         <button type="button" class="icon-button" (click)="closeFormModal()">Cerrar</button>
       </div>
 
       <form class="referee-form" [formGroup]="refereeForm" (ngSubmit)="submitRefereeForm()">
+        <section class="context-banner field--full">
+          <div>
+            <span class="context-banner__label">Modo</span>
+            <strong>{{ formModeLabel() }}</strong>
+          </div>
+          <div>
+            <span class="context-banner__label">Objetivo</span>
+            <strong>Registrar una identidad arbitral clara y consistente</strong>
+          </div>
+        </section>
+
+        <section class="referee-preview field--full">
+          <div class="referee-preview__avatar">{{ refereePreview().initials }}</div>
+
+          <div class="referee-preview__content">
+            <span class="context-banner__label">Vista previa</span>
+            <strong>{{ refereePreview().fullName }}</strong>
+            <p>{{ refereePreview().nationality }}</p>
+          </div>
+        </section>
+
         <label class="field">
           <span>Nombres</span>
           <input type="text" formControlName="firstName" placeholder="Ej: Carlos" />
@@ -181,11 +202,15 @@
           }
         </label>
 
+        <p class="form-hint field--full">
+          Usa nombres y nacionalidad tal como quieras verlos luego en listados, asignaciones y reportes.
+        </p>
+
         <div class="modal__actions">
           <button type="button" class="ghost-button ghost-button--light" (click)="closeFormModal()">
             Cancelar
           </button>
-          <button type="submit" class="primary-button" [disabled]="isSaving()">
+          <button type="submit" class="primary-button" [disabled]="!canSubmitForm()">
             {{ isSaving() ? 'Guardando...' : submitLabel() }}
           </button>
         </div>

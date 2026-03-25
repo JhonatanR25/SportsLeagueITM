@@ -1,23 +1,16 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
+import { ToastNotification, ToastType } from '../../../../shared/domain/models/toast-notification.model';
 import { ConfirmDialogComponent } from '../../../../shared/presentation/components/confirm-dialog/confirm-dialog.component';
 import { ToastStackComponent } from '../../../../shared/presentation/components/toast-stack/toast-stack.component';
+import { parseApiErrorMessage } from '../../../../shared/utils/http-error.utils';
+import { pushToastNotification } from '../../../../shared/utils/toast.utils';
 
 import { Team } from '../../domain/models/team.model';
 import { TeamUpsertPayload } from '../../domain/models/team-upsert.model';
 import { TeamApiService } from '../../infrastructure/repositories/team-api.service';
-
-type ToastType = 'success' | 'error';
-
-type ToastNotification = {
-  id: number;
-  type: ToastType;
-  title: string;
-  message: string;
-};
 
 @Component({
   selector: 'app-teams-page',
@@ -60,6 +53,18 @@ export class TeamsPageComponent {
   protected readonly modalTitle = computed(() =>
     this.teamBeingEdited() ? 'Editar equipo' : 'Crear equipo',
   );
+  protected readonly formModeLabel = computed(() =>
+    this.teamBeingEdited() ? 'Edicion de equipo' : 'Creacion de equipo',
+  );
+  protected readonly logoPreview = computed(() => {
+    const logoUrl = this.teamForm.controls.logoUrl.value.trim();
+    const teamName = this.teamForm.controls.name.value.trim();
+
+    return {
+      logoUrl,
+      initials: (teamName || 'EQ').slice(0, 2).toUpperCase(),
+    };
+  });
   protected readonly teamForm = this.formBuilder.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     city: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
@@ -162,7 +167,7 @@ export class TeamsPageComponent {
         this.pushNotification(
           'error',
           editingTeam ? 'No se pudo actualizar' : 'No se pudo crear',
-          this.getErrorMessage(error),
+          parseApiErrorMessage(error),
         );
       },
     });
@@ -193,7 +198,7 @@ export class TeamsPageComponent {
         },
         error: (error: unknown) => {
           this.isSaving.set(false);
-          this.pushNotification('error', 'No se pudo eliminar', this.getErrorMessage(error));
+          this.pushNotification('error', 'No se pudo eliminar', parseApiErrorMessage(error));
         },
       });
   }
@@ -225,6 +230,10 @@ export class TeamsPageComponent {
     return 'Revisa este campo.';
   }
 
+  protected canSubmitForm(): boolean {
+    return !this.isSaving();
+  }
+
   private loadTeams(): void {
     this.isLoading.set(true);
     this.errorMessage.set('');
@@ -238,7 +247,7 @@ export class TeamsPageComponent {
           this.isLoading.set(false);
         },
         error: (error: unknown) => {
-          this.errorMessage.set(this.getErrorMessage(error));
+          this.errorMessage.set(parseApiErrorMessage(error));
           this.isLoading.set(false);
         },
       });
@@ -261,51 +270,6 @@ export class TeamsPageComponent {
   }
 
   private pushNotification(type: ToastType, title: string, message: string): void {
-    const id = Date.now() + Math.floor(Math.random() * 1000);
-    this.notifications.update((items) => [...items, { id, type, title, message }]);
-
-    window.setTimeout(() => {
-      this.dismissNotification(id);
-    }, 4500);
-  }
-
-  private getErrorMessage(error: unknown): string {
-    if (!(error instanceof HttpErrorResponse)) {
-      return 'Ocurrio un error inesperado. Intenta nuevamente.';
-    }
-
-    const payload = error.error as
-      | { message?: string; detail?: string; errors?: Record<string, string[]> }
-      | string
-      | null;
-
-    if (typeof payload === 'string' && payload.trim()) {
-      return payload;
-    }
-
-    if (payload && typeof payload === 'object' && 'message' in payload && payload.message) {
-      return String(payload.message);
-    }
-
-    if (payload && typeof payload === 'object' && 'detail' in payload && payload.detail) {
-      return String(payload.detail);
-    }
-
-    const validationErrors =
-      payload && typeof payload === 'object' && 'errors' in payload && payload.errors
-        ? Object.values(payload.errors as Record<string, unknown[]>)
-            .flat()
-            .filter((item): item is string => typeof item === 'string' && item.length > 0)
-        : [];
-
-    if (validationErrors.length > 0) {
-      return validationErrors[0];
-    }
-
-    if (error.status === 0) {
-      return 'No se pudo conectar con el backend. Verifica que la API este ejecutandose.';
-    }
-
-    return 'La operacion no pudo completarse. Revisa los datos e intenta nuevamente.';
+    pushToastNotification(this.notifications, (notificationId) => this.dismissNotification(notificationId), type, title, message);
   }
 }

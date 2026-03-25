@@ -1,8 +1,11 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { startWith } from 'rxjs';
+import { ToastNotification, ToastType } from '../../../../shared/domain/models/toast-notification.model';
 import { ToastStackComponent } from '../../../../shared/presentation/components/toast-stack/toast-stack.component';
+import { parseApiErrorMessage } from '../../../../shared/utils/http-error.utils';
+import { pushToastNotification } from '../../../../shared/utils/toast.utils';
 
 import { Team } from '../../../teams/domain/models/team.model';
 import { TeamApiService } from '../../../teams/infrastructure/repositories/team-api.service';
@@ -14,9 +17,6 @@ import { MatchCreatePayload } from '../../domain/models/match-create.model';
 import { Match } from '../../domain/models/match.model';
 import { MatchStatus } from '../../domain/models/match-status.type';
 import { MatchApiService } from '../../infrastructure/repositories/match-api.service';
-
-type ToastType = 'success' | 'error';
-type ToastNotification = { id: number; type: ToastType; title: string; message: string };
 
 @Component({
   selector: 'app-matches-page',
@@ -38,6 +38,7 @@ export class MatchesPageComponent {
   protected readonly tournaments = signal<Tournament[]>([]);
   protected readonly isLoading = signal(true);
   protected readonly isCatalogLoading = signal(true);
+  protected readonly isTournamentTeamsLoading = signal(false);
   protected readonly errorMessage = signal('');
   protected readonly isCreateModalOpen = signal(false);
   protected readonly isScoreModalOpen = signal(false);
@@ -47,12 +48,16 @@ export class MatchesPageComponent {
   protected readonly filterStatus = signal<MatchStatus | ''>('');
   protected readonly filterTournamentId = signal(0);
   protected readonly searchTerm = signal('');
+  protected readonly selectedCreateTournamentId = signal(0);
+  protected readonly selectedHomeTeamId = signal(0);
+  protected readonly selectedAwayTeamId = signal(0);
   protected readonly statusOptions: MatchStatus[] = [
     'Scheduled',
     'InProgress',
     'Finished',
     'Suspended',
   ];
+  protected readonly tournamentTeams = signal<Team[]>([]);
   protected readonly filteredMatches = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
     if (!term) return this.matches();
@@ -72,6 +77,22 @@ export class MatchesPageComponent {
   protected readonly scheduledCount = computed(
     () => this.filteredMatches().filter((match) => match.status === 'Scheduled').length,
   );
+  protected readonly selectedTournament = computed(
+    () => this.tournaments().find((tournament) => tournament.id === this.selectedCreateTournamentId()) ?? null,
+  );
+  protected readonly availableHomeTeams = computed(() => {
+    const awayTeamId = this.selectedAwayTeamId();
+
+    return this.tournamentTeams().filter((team) => team.id !== awayTeamId);
+  });
+  protected readonly availableAwayTeams = computed(() => {
+    const homeTeamId = this.selectedHomeTeamId();
+
+    return this.tournamentTeams().filter((team) => team.id !== homeTeamId);
+  });
+  protected readonly canCreateMatch = computed(
+    () => this.tournamentTeams().length >= 2 && !this.isTournamentTeamsLoading(),
+  );
   protected readonly createForm = this.formBuilder.nonNullable.group({
     matchDate: ['', [Validators.required]],
     tournamentId: [0, [Validators.required, Validators.min(1)]],
@@ -88,6 +109,22 @@ export class MatchesPageComponent {
   constructor() {
     this.loadMatches();
     this.loadCatalogs();
+    this.createForm.controls.tournamentId.valueChanges
+      .pipe(startWith(this.createForm.controls.tournamentId.value))
+      .subscribe((tournamentId) => {
+        this.selectedCreateTournamentId.set(tournamentId);
+        this.handleTournamentSelection(tournamentId);
+      });
+    this.createForm.controls.homeTeamId.valueChanges
+      .pipe(startWith(this.createForm.controls.homeTeamId.value))
+      .subscribe((teamId) => {
+        this.selectedHomeTeamId.set(teamId);
+      });
+    this.createForm.controls.awayTeamId.valueChanges
+      .pipe(startWith(this.createForm.controls.awayTeamId.value))
+      .subscribe((teamId) => {
+        this.selectedAwayTeamId.set(teamId);
+      });
   }
 
   protected trackByMatchId(_: number, match: Match): number {
@@ -123,11 +160,23 @@ export class MatchesPageComponent {
     });
     this.createForm.markAsPristine();
     this.createForm.markAsUntouched();
+    this.tournamentTeams.set([]);
+    this.isTournamentTeamsLoading.set(false);
+    this.selectedCreateTournamentId.set(0);
+    this.selectedHomeTeamId.set(0);
+    this.selectedAwayTeamId.set(0);
     this.isCreateModalOpen.set(true);
   }
 
   protected closeCreateModal(): void {
-    if (!this.isSaving()) this.isCreateModalOpen.set(false);
+    if (!this.isSaving()) {
+      this.isCreateModalOpen.set(false);
+      this.tournamentTeams.set([]);
+      this.isTournamentTeamsLoading.set(false);
+      this.selectedCreateTournamentId.set(0);
+      this.selectedHomeTeamId.set(0);
+      this.selectedAwayTeamId.set(0);
+    }
   }
 
   protected openScoreModal(match: Match): void {
@@ -169,7 +218,7 @@ export class MatchesPageComponent {
       },
       error: (error: unknown) => {
         this.isSaving.set(false);
-        this.pushNotification('error', 'No se pudo crear el partido', this.getErrorMessage(error));
+        this.pushNotification('error', 'No se pudo crear el partido', parseApiErrorMessage(error));
       },
     });
   }
@@ -193,7 +242,7 @@ export class MatchesPageComponent {
       },
       error: (error: unknown) => {
         this.isSaving.set(false);
-        this.pushNotification('error', 'No se pudo actualizar el marcador', this.getErrorMessage(error));
+        this.pushNotification('error', 'No se pudo actualizar el marcador', parseApiErrorMessage(error));
       },
     });
   }
@@ -208,7 +257,7 @@ export class MatchesPageComponent {
       },
       error: (error: unknown) => {
         this.isSaving.set(false);
-        this.pushNotification('error', 'No se pudo actualizar el estado', this.getErrorMessage(error));
+        this.pushNotification('error', 'No se pudo actualizar el estado', parseApiErrorMessage(error));
       },
     });
   }
@@ -230,6 +279,19 @@ export class MatchesPageComponent {
     }
   }
 
+  protected getStatusActionLabel(currentStatus: MatchStatus, nextStatus: MatchStatus): string {
+    switch (nextStatus) {
+      case 'InProgress':
+        return currentStatus === 'Suspended' ? 'Reanudar partido' : 'Iniciar partido';
+      case 'Finished':
+        return 'Finalizar partido';
+      case 'Suspended':
+        return 'Suspender partido';
+      case 'Scheduled':
+        return 'Programar';
+    }
+  }
+
   protected getNextStatusOptions(match: Match): MatchStatus[] {
     switch (match.status) {
       case 'Scheduled':
@@ -247,6 +309,48 @@ export class MatchesPageComponent {
     return match.status !== 'Scheduled' && match.status !== 'Suspended';
   }
 
+  protected canMarkAsFinal(match: Match): boolean {
+    return match.status === 'Finished';
+  }
+
+  protected hasCreateFieldError(fieldName: keyof typeof this.createForm.controls): boolean {
+    const control = this.createForm.controls[fieldName];
+    return control.invalid && (control.touched || control.dirty);
+  }
+
+  protected getCreateFieldError(fieldName: keyof typeof this.createForm.controls): string {
+    const control = this.createForm.controls[fieldName];
+
+    if (control.hasError('required')) {
+      return 'Este campo es obligatorio.';
+    }
+
+    if (control.hasError('min')) {
+      return 'Selecciona una opcion valida.';
+    }
+
+    return 'Revisa este campo.';
+  }
+
+  protected hasScoreFieldError(fieldName: keyof typeof this.scoreForm.controls): boolean {
+    const control = this.scoreForm.controls[fieldName];
+    return control.invalid && (control.touched || control.dirty);
+  }
+
+  protected getScoreFieldError(fieldName: keyof typeof this.scoreForm.controls): string {
+    const control = this.scoreForm.controls[fieldName];
+
+    if (control.hasError('required')) {
+      return 'Este campo es obligatorio.';
+    }
+
+    if (control.hasError('min')) {
+      return 'El marcador no puede ser negativo.';
+    }
+
+    return 'Revisa este campo.';
+  }
+
   private loadMatches(): void {
     this.isLoading.set(true);
     this.errorMessage.set('');
@@ -261,7 +365,7 @@ export class MatchesPageComponent {
           this.isLoading.set(false);
         },
         error: (error: unknown) => {
-          this.errorMessage.set(this.getErrorMessage(error));
+          this.errorMessage.set(parseApiErrorMessage(error));
           this.isLoading.set(false);
         },
       });
@@ -280,39 +384,37 @@ export class MatchesPageComponent {
     this.tournamentApi.getAll().subscribe({ next: (tournaments) => { this.tournaments.set(tournaments); done(); }, error: () => done() });
   }
 
-  private pushNotification(type: ToastType, title: string, message: string): void {
-    const id = Date.now() + Math.floor(Math.random() * 1000);
-    this.notifications.update((items) => [...items, { id, type, title, message }]);
-    window.setTimeout(() => this.dismissNotification(id), 4500);
+  private handleTournamentSelection(tournamentId: number): void {
+    this.createForm.patchValue(
+      {
+        homeTeamId: 0,
+        awayTeamId: 0,
+      },
+      { emitEvent: false },
+    );
+    this.selectedHomeTeamId.set(0);
+    this.selectedAwayTeamId.set(0);
+
+    if (tournamentId <= 0) {
+      this.tournamentTeams.set([]);
+      this.isTournamentTeamsLoading.set(false);
+      return;
+    }
+
+    this.isTournamentTeamsLoading.set(true);
+    this.tournamentApi.getTeams(tournamentId).subscribe({
+      next: (teams) => {
+        this.tournamentTeams.set(teams);
+        this.isTournamentTeamsLoading.set(false);
+      },
+      error: () => {
+        this.tournamentTeams.set([]);
+        this.isTournamentTeamsLoading.set(false);
+      },
+    });
   }
 
-  private getErrorMessage(error: unknown): string {
-    if (!(error instanceof HttpErrorResponse)) {
-      return 'Ocurrio un error inesperado. Intenta nuevamente.';
-    }
-
-    const payload = error.error as
-      | { message?: string; detail?: string; errors?: Record<string, string[]> }
-      | string
-      | null;
-
-    if (typeof payload === 'string' && payload.trim()) return payload;
-    if (payload && typeof payload === 'object' && 'message' in payload && payload.message) {
-      return String(payload.message);
-    }
-    if (payload && typeof payload === 'object' && 'detail' in payload && payload.detail) {
-      return String(payload.detail);
-    }
-
-    const validationErrors =
-      payload && typeof payload === 'object' && 'errors' in payload && payload.errors
-        ? Object.values(payload.errors as Record<string, unknown[]>)
-            .flat()
-            .filter((item): item is string => typeof item === 'string' && item.length > 0)
-        : [];
-
-    if (validationErrors.length > 0) return validationErrors[0];
-    if (error.status === 0) return 'No se pudo conectar con el backend. Verifica que la API este ejecutandose.';
-    return 'La operacion no pudo completarse. Revisa los datos e intenta nuevamente.';
+  private pushNotification(type: ToastType, title: string, message: string): void {
+    pushToastNotification(this.notifications, (notificationId) => this.dismissNotification(notificationId), type, title, message);
   }
 }

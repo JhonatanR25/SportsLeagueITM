@@ -10,6 +10,20 @@ public class RefereeRepository : GenericRepository<Referee>, IRefereeRepository
     {
     }
 
+    public async Task<Referee?> GetByIdentityAsync(string firstName, string lastName, string nationality)
+    {
+        var normalizedFirstName = firstName.Trim();
+        var normalizedLastName = lastName.Trim();
+        var normalizedNationality = nationality.Trim();
+
+        return await _context.Referees
+            .AsNoTracking()
+            .FirstOrDefaultAsync(r =>
+                r.FirstName == normalizedFirstName &&
+                r.LastName == normalizedLastName &&
+                r.Nationality == normalizedNationality);
+    }
+
     public async Task<IEnumerable<Referee>> GetByNationalityAsync(string nationality)
     {
         var normalizedNationality = nationality.Trim();
@@ -20,6 +34,13 @@ public class RefereeRepository : GenericRepository<Referee>, IRefereeRepository
             .OrderBy(r => r.LastName)
             .ThenBy(r => r.FirstName)
             .ToListAsync();
+    }
+
+    public async Task<bool> HasMatchesAsync(int refereeId)
+    {
+        return await _context.Matches
+            .AsNoTracking()
+            .AnyAsync(m => m.RefereeId == refereeId);
     }
 
     public override async Task UpdateAsync(Referee entity)

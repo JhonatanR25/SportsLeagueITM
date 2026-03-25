@@ -1,6 +1,6 @@
 <section class="page-header">
   <div>
-    <p class="page-header__eyebrow">Modulo de jugadores</p>
+    <p class="page-header__eyebrow">Jugadores</p>
     <h1>Gestion de jugadores</h1>
     <p class="page-header__description">
       Administra la plantilla de la liga con filtros por nombre, equipo, posicion y dorsal.
@@ -33,7 +33,7 @@
   </section>
 } @else if (errorMessage()) {
   <section class="state-card state-card--error">
-    <p class="state-card__label">Conexion pendiente</p>
+    <p class="state-card__label">No disponible</p>
     <h2>{{ errorMessage() }}</h2>
     <button type="button" class="ghost-button ghost-button--light" (click)="retry()">
       Reintentar
@@ -42,7 +42,7 @@
 } @else {
   <section class="summary-grid" aria-label="Resumen de jugadores">
     <article class="summary-card">
-      <span>Jugadores totales</span>
+      <span>Jugadores visibles</span>
       <strong>{{ filteredPlayers().length }}</strong>
     </article>
     <article class="summary-card">
@@ -50,8 +50,8 @@
       <strong>{{ uniqueTeamsCount() }}</strong>
     </article>
     <article class="summary-card">
-      <span>Estado del modulo</span>
-      <strong>CRUD operativo</strong>
+      <span>Estado visual</span>
+      <strong>Plantilla clara</strong>
     </article>
   </section>
 
@@ -65,7 +65,7 @@
 
     @if (filteredPlayers().length === 0) {
       <section class="state-card">
-        <p class="state-card__label">Sin resultados</p>
+        <p class="state-card__label">Busqueda sin coincidencias</p>
         <h2>No encontramos jugadores con los filtros actuales.</h2>
       </section>
     } @else {
@@ -169,13 +169,34 @@
     <section class="modal" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
       <div class="modal__header">
         <div>
-          <p class="modal__eyebrow">Formulario reactivo</p>
+          <p class="modal__eyebrow">Ficha de jugador</p>
           <h2>{{ modalTitle() }}</h2>
         </div>
         <button type="button" class="icon-button" (click)="closeFormModal()">Cerrar</button>
       </div>
 
       <form class="player-form" [formGroup]="playerForm" (ngSubmit)="submitPlayerForm()">
+        <section class="context-banner field--full">
+          <div>
+            <span class="context-banner__label">Modo</span>
+            <strong>{{ formModeLabel() }}</strong>
+          </div>
+          <div>
+            <span class="context-banner__label">Objetivo</span>
+            <strong>Registrar una ficha clara del jugador</strong>
+          </div>
+        </section>
+
+        <section class="player-preview field--full">
+          <div class="player-preview__avatar">{{ playerPreview().initials }}</div>
+
+          <div class="player-preview__content">
+            <span class="context-banner__label">Vista previa</span>
+            <strong>{{ playerPreview().fullName }}</strong>
+            <p>{{ playerPreview().teamName }} · {{ playerPreview().positionLabel }}</p>
+          </div>
+        </section>
+
         <label class="field">
           <span>Nombres</span>
           <input type="text" formControlName="firstName" placeholder="Ej: Lionel" />
@@ -223,7 +244,13 @@
         <label class="field">
           <span>Equipo</span>
           <select formControlName="teamId" [disabled]="isTeamsLoading() || teams().length === 0">
-            <option [value]="0">Selecciona un equipo</option>
+            <option [value]="0">
+              @if (isTeamsLoading()) {
+                Cargando equipos...
+              } @else {
+                Selecciona un equipo
+              }
+            </option>
             @for (team of teams(); track team.id) {
               <option [value]="team.id">{{ team.name }}</option>
             }
@@ -233,6 +260,10 @@
           }
         </label>
 
+        <p class="form-hint field--full">
+          Completa nombre, posicion, dorsal y equipo con datos faciles de reconocer para que la plantilla sea mas legible.
+        </p>
+
         <div class="modal__actions">
           <button type="button" class="ghost-button ghost-button--light" (click)="closeFormModal()">
             Cancelar
@@ -240,7 +271,7 @@
           <button
             type="submit"
             class="primary-button"
-            [disabled]="isSaving() || isTeamsLoading() || teams().length === 0"
+            [disabled]="!canSubmitForm()"
           >
             {{ isSaving() ? 'Guardando...' : submitLabel() }}
           </button>

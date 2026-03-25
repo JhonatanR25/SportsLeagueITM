@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Enums;
 using SportsLeague.Domain.Interfaces.Repositories;
@@ -73,8 +73,8 @@ public class MatchService : IMatchService
         await ValidateTeamsRegisteredAsync(match.TournamentId, match.HomeTeamId, match.AwayTeamId);
         ValidateTournamentAllowsScheduling(tournament);
         ValidateMatchDateWithinTournament(match.MatchDate, tournament);
+        await ValidateMatchNotDuplicatedAsync(match);
 
-        // Siempre se crea como partido programado y sin marcador inicial.
         match.Status = MatchStatus.Scheduled;
         match.HomeScore = 0;
         match.AwayScore = 0;
@@ -169,6 +169,20 @@ public class MatchService : IMatchService
         if (homeRegistration == null || awayRegistration == null)
         {
             throw new InvalidOperationException("Ambos equipos deben estar inscritos en el torneo para crear un partido.");
+        }
+    }
+
+    private async Task ValidateMatchNotDuplicatedAsync(Match match)
+    {
+        var existingMatch = await _matchRepository.GetByIdentityAsync(
+            match.TournamentId,
+            match.HomeTeamId,
+            match.AwayTeamId,
+            match.MatchDate);
+
+        if (existingMatch != null)
+        {
+            throw new InvalidOperationException("Ya existe un partido con la misma fecha, torneo y equipos.");
         }
     }
 

@@ -18,40 +18,40 @@ type NavigationItem = {
 export class ShellComponent {
   protected readonly navigation: NavigationItem[] = [
     {
-      label: 'Dashboard',
+      label: 'Panel',
       route: '/dashboard',
-      description: 'Resumen general de la liga',
+      description: 'Panorama general de la competencia',
     },
     {
       label: 'Equipos',
       route: '/teams',
-      description: 'Gestion de clubes y plantillas',
+      description: 'Clubes, ciudades y estadios',
     },
     {
       label: 'Jugadores',
       route: '/players',
-      description: 'Registro y seguimiento de atletas',
+      description: 'Plantillas, dorsales y posiciones',
     },
     {
       label: 'Arbitros',
       route: '/referees',
-      description: 'Administracion del cuerpo arbitral',
+      description: 'Cuerpo arbitral y nacionalidades',
     },
     {
       label: 'Partidos',
       route: '/matches',
-      description: 'Programacion, estado y marcador',
+      description: 'Programacion, estados y marcadores',
     },
     {
       label: 'Torneos',
       route: '/tournaments',
-      description: 'Planificacion y control competitivo',
+      description: 'Temporadas, estados e inscripciones',
     },
   ];
 
   protected readonly quickStats = [
-    { label: 'Temporada activa', value: '2026' },
-    { label: 'Modulo inicial', value: 'Dashboard' },
-    { label: 'Modo de trabajo', value: 'Responsive' },
+    { label: 'Temporada destacada', value: '2026' },
+    { label: 'Vista principal', value: 'Panel' },
+    { label: 'Experiencia', value: 'Multidispositivo' },
   ];
 }

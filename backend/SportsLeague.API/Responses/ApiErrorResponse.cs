@@ -6,4 +6,5 @@ public sealed class ApiErrorResponse
     public string Message { get; init; } = string.Empty;
     public string? Detail { get; init; }
     public string TraceId { get; init; } = string.Empty;
+    public Dictionary<string, string[]>? Errors { get; init; }
 }

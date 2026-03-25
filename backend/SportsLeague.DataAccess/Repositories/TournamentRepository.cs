@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SportsLeague.DataAccess.Context;
 using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Enums;
@@ -25,6 +25,30 @@ public class TournamentRepository : GenericRepository<Tournament>, ITournamentRe
             .OrderBy(t => t.StartDate)
             .ThenBy(t => t.Id)
             .ToListAsync();
+    }
+
+    public async Task<Tournament?> GetByNameAndSeasonAsync(string name, string season)
+    {
+        var normalizedName = name.Trim();
+        var normalizedSeason = season.Trim();
+
+        return await _dbSet
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.Name == normalizedName && t.Season == normalizedSeason);
+    }
+
+    public async Task<bool> HasRegisteredTeamsAsync(int tournamentId)
+    {
+        return await _context.TournamentTeams
+            .AsNoTracking()
+            .AnyAsync(tt => tt.TournamentId == tournamentId);
+    }
+
+    public async Task<bool> HasMatchesAsync(int tournamentId)
+    {
+        return await _context.Matches
+            .AsNoTracking()
+            .AnyAsync(m => m.TournamentId == tournamentId);
     }
 
     public async Task<IEnumerable<Tournament>> GetByStatusAsync(TournamentStatus status)

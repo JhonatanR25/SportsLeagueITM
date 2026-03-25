@@ -111,6 +111,21 @@ public class TeamService : ITeamService
             throw new KeyNotFoundException($"No se encontró el equipo con ID {id}.");
         }
 
+        if (await _teamRepository.HasPlayersAsync(id))
+        {
+            throw new InvalidOperationException("No se puede eliminar el equipo porque tiene jugadores asociados.");
+        }
+
+        if (await _teamRepository.HasTournamentRegistrationsAsync(id))
+        {
+            throw new InvalidOperationException("No se puede eliminar el equipo porque esta inscrito en uno o mas torneos.");
+        }
+
+        if (await _teamRepository.HasMatchesAsync(id))
+        {
+            throw new InvalidOperationException("No se puede eliminar el equipo porque tiene partidos asociados.");
+        }
+
         await _teamRepository.DeleteAsync(id);
 
         _logger.LogInformation("Equipo {TeamId} eliminado correctamente.", id);

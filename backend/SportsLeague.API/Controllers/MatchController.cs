@@ -2,6 +2,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using SportsLeague.API.DTOs.Request;
 using SportsLeague.API.DTOs.Response;
+using SportsLeague.API.Pagination;
 using SportsLeague.API.Responses;
 using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Enums;
@@ -27,13 +28,17 @@ public class MatchController : ControllerBase
         [FromQuery] int? tournamentId,
         [FromQuery] MatchStatus? status,
         [FromQuery] DateTime? fromDate,
-        [FromQuery] DateTime? toDate)
+        [FromQuery] DateTime? toDate,
+        [FromQuery] int? pageNumber,
+        [FromQuery] int? pageSize)
     {
         var matches = tournamentId.HasValue || status.HasValue || fromDate.HasValue || toDate.HasValue
             ? await _matchService.GetFilteredAsync(tournamentId, status, fromDate, toDate)
             : await _matchService.GetAllAsync();
 
-        return Ok(_mapper.Map<IEnumerable<MatchResponseDTO>>(matches));
+        var mappedMatches = _mapper.Map<IEnumerable<MatchResponseDTO>>(matches);
+        var response = PaginationHelper.Apply(Response, mappedMatches, pageNumber, pageSize);
+        return Ok(response);
     }
 
     [HttpGet("{id:int}")]

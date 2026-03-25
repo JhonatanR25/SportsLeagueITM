@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+ï»¿using Microsoft.Extensions.Logging;
 using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Enums;
 using SportsLeague.Domain.Interfaces.Repositories;
@@ -49,9 +49,25 @@ public class TournamentService : ITournamentService
         if (tournament == null)
             throw new ArgumentNullException(nameof(tournament));
 
+        if (string.IsNullOrWhiteSpace(tournament.Name))
+            throw new ArgumentException("El nombre del torneo es obligatorio.", nameof(tournament.Name));
+
+        if (string.IsNullOrWhiteSpace(tournament.Season))
+            throw new ArgumentException("La temporada del torneo es obligatoria.", nameof(tournament.Season));
+
         if (tournament.EndDate <= tournament.StartDate)
         {
-            throw new InvalidOperationException("La fecha de finalización debe ser posterior a la fecha de inicio.");
+            throw new InvalidOperationException("La fecha de finalizaciÃ³n debe ser posterior a la fecha de inicio.");
+        }
+
+        tournament.Name = tournament.Name.Trim();
+        tournament.Season = tournament.Season.Trim();
+
+        var duplicateTournament = await _tournamentRepository.GetByNameAndSeasonAsync(tournament.Name, tournament.Season);
+        if (duplicateTournament != null)
+        {
+            throw new InvalidOperationException(
+                $"Ya existe un torneo con el nombre '{tournament.Name}' y temporada '{tournament.Season}'.");
         }
 
         tournament.Status = TournamentStatus.Pending;
@@ -65,9 +81,15 @@ public class TournamentService : ITournamentService
         if (tournament == null)
             throw new ArgumentNullException(nameof(tournament));
 
+        if (string.IsNullOrWhiteSpace(tournament.Name))
+            throw new ArgumentException("El nombre del torneo es obligatorio.", nameof(tournament.Name));
+
+        if (string.IsNullOrWhiteSpace(tournament.Season))
+            throw new ArgumentException("La temporada del torneo es obligatoria.", nameof(tournament.Season));
+
         var existing = await _tournamentRepository.GetByIdAsync(id);
         if (existing == null)
-            throw new KeyNotFoundException($"No se encontró el torneo con ID {id}.");
+            throw new KeyNotFoundException($"No se encontrÃ³ el torneo con ID {id}.");
 
         if (existing.Status != TournamentStatus.Pending)
         {
@@ -76,11 +98,21 @@ public class TournamentService : ITournamentService
 
         if (tournament.EndDate <= tournament.StartDate)
         {
-            throw new InvalidOperationException("La fecha de finalización debe ser posterior a la fecha de inicio.");
+            throw new InvalidOperationException("La fecha de finalizaciÃ³n debe ser posterior a la fecha de inicio.");
         }
 
-        existing.Name = tournament.Name;
-        existing.Season = tournament.Season;
+        var normalizedName = tournament.Name.Trim();
+        var normalizedSeason = tournament.Season.Trim();
+
+        var duplicateTournament = await _tournamentRepository.GetByNameAndSeasonAsync(normalizedName, normalizedSeason);
+        if (duplicateTournament != null && duplicateTournament.Id != id)
+        {
+            throw new InvalidOperationException(
+                $"Ya existe un torneo con el nombre '{normalizedName}' y temporada '{normalizedSeason}'.");
+        }
+
+        existing.Name = normalizedName;
+        existing.Season = normalizedSeason;
         existing.StartDate = tournament.StartDate;
         existing.EndDate = tournament.EndDate;
 
@@ -92,11 +124,21 @@ public class TournamentService : ITournamentService
     {
         var existing = await _tournamentRepository.GetByIdAsync(id);
         if (existing == null)
-            throw new KeyNotFoundException($"No se encontró el torneo con ID {id}.");
+            throw new KeyNotFoundException($"No se encontrÃ³ el torneo con ID {id}.");
 
         if (existing.Status != TournamentStatus.Pending)
         {
             throw new InvalidOperationException("Solo se pueden eliminar torneos en estado Pending.");
+        }
+
+        if (await _tournamentRepository.HasRegisteredTeamsAsync(id))
+        {
+            throw new InvalidOperationException("No se puede eliminar el torneo porque tiene equipos inscritos.");
+        }
+
+        if (await _tournamentRepository.HasMatchesAsync(id))
+        {
+            throw new InvalidOperationException("No se puede eliminar el torneo porque tiene partidos asociados.");
         }
 
         _logger.LogInformation("Deleting tournament with ID: {TournamentId}", id);
@@ -107,7 +149,7 @@ public class TournamentService : ITournamentService
     {
         var tournament = await _tournamentRepository.GetByIdAsync(id);
         if (tournament == null)
-            throw new KeyNotFoundException($"No se encontró el torneo con ID {id}.");
+            throw new KeyNotFoundException($"No se encontrÃ³ el torneo con ID {id}.");
 
         var validTransition = (tournament.Status, newStatus) switch
         {
@@ -135,7 +177,7 @@ public class TournamentService : ITournamentService
     {
         var tournament = await _tournamentRepository.GetByIdAsync(tournamentId);
         if (tournament == null)
-            throw new KeyNotFoundException($"No se encontró el torneo con ID {tournamentId}.");
+            throw new KeyNotFoundException($"No se encontrÃ³ el torneo con ID {tournamentId}.");
 
         if (tournament.Status != TournamentStatus.Pending)
         {
@@ -144,12 +186,12 @@ public class TournamentService : ITournamentService
 
         var teamExists = await _teamRepository.ExistsAsync(teamId);
         if (!teamExists)
-            throw new KeyNotFoundException($"No se encontró el equipo con ID {teamId}.");
+            throw new KeyNotFoundException($"No se encontrÃ³ el equipo con ID {teamId}.");
 
         var existing = await _tournamentTeamRepository.GetByTournamentAndTeamAsync(tournamentId, teamId);
         if (existing != null)
         {
-            throw new InvalidOperationException("Este equipo ya está inscrito en el torneo.");
+            throw new InvalidOperationException("Este equipo ya estÃ¡ inscrito en el torneo.");
         }
 
         var tournamentTeam = new TournamentTeam
@@ -171,10 +213,9 @@ public class TournamentService : ITournamentService
     {
         var tournament = await _tournamentRepository.GetByIdAsync(tournamentId);
         if (tournament == null)
-            throw new KeyNotFoundException($"No se encontró el torneo con ID {tournamentId}.");
+            throw new KeyNotFoundException($"No se encontrÃ³ el torneo con ID {tournamentId}.");
 
         var tournamentTeams = await _tournamentTeamRepository.GetByTournamentAsync(tournamentId);
         return tournamentTeams.Select(tt => tt.Team);
     }
 }
-

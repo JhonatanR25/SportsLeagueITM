@@ -30,6 +30,27 @@ public class TeamRepository : GenericRepository<Team>, ITeamRepository
             .FirstOrDefaultAsync(t => t.Name == normalizedName);
     }
 
+    public async Task<bool> HasPlayersAsync(int teamId)
+    {
+        return await _context.Players
+            .AsNoTracking()
+            .AnyAsync(p => p.TeamId == teamId);
+    }
+
+    public async Task<bool> HasTournamentRegistrationsAsync(int teamId)
+    {
+        return await _context.TournamentTeams
+            .AsNoTracking()
+            .AnyAsync(tt => tt.TeamId == teamId);
+    }
+
+    public async Task<bool> HasMatchesAsync(int teamId)
+    {
+        return await _context.Matches
+            .AsNoTracking()
+            .AnyAsync(m => m.HomeTeamId == teamId || m.AwayTeamId == teamId);
+    }
+
     public async Task<IEnumerable<Team>> GetByCityAsync(string city)
     {
         var normalizedCity = city.Trim();

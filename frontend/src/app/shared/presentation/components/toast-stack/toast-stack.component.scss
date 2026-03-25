@@ -13,10 +13,10 @@
   justify-content: space-between;
   gap: 0.85rem;
   padding: 1rem;
-  border-radius: 1rem;
+  border-radius: var(--radius-card);
   background: linear-gradient(180deg, rgba(60, 179, 113, 0.18), rgba(9, 24, 51, 0.96));
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: var(--shadow-soft);
+  border: var(--border-soft);
+  box-shadow: var(--shadow-strong);
 }
 
 .toast--error {
@@ -35,12 +35,13 @@
 
 .icon-button {
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   min-height: 2.4rem;
   padding: 0.65rem 0.95rem;
   background: rgba(255, 255, 255, 0.08);
   color: var(--color-text);
   cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .icon-button--toast {

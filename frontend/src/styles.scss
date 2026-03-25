@@ -1,26 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap');
+
 :root {
   color-scheme: dark;
   --color-surface: #071124;
   --color-surface-strong: #091833;
   --color-surface-soft: #102445;
+  --color-surface-elevated: #13284b;
   --color-text: #f5f7fa;
   --color-text-muted: #9fb0c8;
+  --color-text-soft: rgba(245, 247, 250, 0.78);
   --color-primary: #f3b44c;
   --color-secondary: #2759d6;
   --color-success: #3cb371;
   --color-danger: #db4437;
   --shadow-soft: 0 1.25rem 3rem rgba(2, 8, 20, 0.24);
+  --shadow-strong: 0 1.6rem 3.8rem rgba(2, 8, 20, 0.32);
+  --radius-panel: 1.5rem;
+  --radius-card: 1.15rem;
+  --radius-pill: 999px;
+  --border-soft: 1px solid rgba(255, 255, 255, 0.08);
+  --surface-card: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03));
+  --surface-card-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.028));
   --font-display:
-    'Segoe UI',
+    'Sora',
+    'Bahnschrift',
+    'Segoe UI Variable Display',
     'Trebuchet MS',
-    'Arial Narrow',
-    Arial,
     sans-serif;
   --font-body:
+    'Inter',
     'Segoe UI',
-    Tahoma,
-    Geneva,
-    Verdana,
+    'Segoe UI Variable Text',
+    'Tahoma',
     sans-serif;
 }
 
@@ -33,15 +44,19 @@
 html {
   font-size: 16px;
   scroll-behavior: smooth;
+  scrollbar-gutter: stable;
 }
 
 body {
   margin: 0;
   min-width: 320px;
+  overflow-y: scroll;
   background: var(--color-surface);
   color: var(--color-text);
   font-family: var(--font-body);
   line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 button,
@@ -53,4 +68,190 @@ textarea {
 
 a {
   color: inherit;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+p {
+  color: var(--color-text-soft);
+}
+
+.primary-button,
+.ghost-button,
+.table-action,
+.icon-button,
+.hero__pill,
+.status-badge,
+.team-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    color 180ms ease;
+}
+
+.primary-button,
+.ghost-button {
+  min-height: 2.75rem !important;
+  padding: 0.8rem 1.1rem !important;
+  font-weight: 800 !important;
+}
+
+.table-action {
+  min-height: 2.25rem !important;
+  padding: 0.5rem 0.9rem !important;
+  font-weight: 700 !important;
+}
+
+.icon-button {
+  min-height: 2.4rem !important;
+  padding: 0.65rem 0.95rem !important;
+}
+
+.page-header__buttons {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 11rem)) !important;
+  justify-content: flex-end !important;
+  gap: 0.75rem !important;
+}
+
+.page-header__buttons > .primary-button,
+.page-header__buttons > .ghost-button {
+  width: 11rem !important;
+  min-inline-size: 11rem !important;
+}
+
+.table-action {
+  min-inline-size: 6.75rem;
+}
+
+:where(
+  .team-card__actions,
+  .player-card__actions,
+  .referee-card__actions,
+  .tournament-card__actions,
+  .match-card__actions,
+  .team-table__actions,
+  .player-table__actions,
+  .referee-table__actions,
+  .tournament-table__actions,
+  .match-table__actions
+) {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 11rem)) !important;
+  gap: 0.65rem !important;
+  align-items: start;
+}
+
+:where(
+  .team-card__actions,
+  .player-card__actions,
+  .referee-card__actions,
+  .tournament-card__actions,
+  .match-card__actions,
+  .team-table__actions,
+  .player-table__actions,
+  .referee-table__actions,
+  .tournament-table__actions,
+  .match-table__actions
+) > .ghost-button,
+:where(
+  .team-table__actions,
+  .player-table__actions,
+  .referee-table__actions,
+  .tournament-table__actions,
+  .match-table__actions
+) > .table-action {
+  width: 11rem !important;
+  min-inline-size: 11rem !important;
+}
+
+.tournament-table__actions-cell,
+.match-table__actions-cell {
+  width: 24rem !important;
+}
+
+@media (max-width: 720px) {
+  .page-header__buttons {
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+  }
+
+  .page-header__buttons > .primary-button,
+  .page-header__buttons > .ghost-button {
+    width: 100% !important;
+    min-inline-size: 0 !important;
+  }
+
+  :where(
+    .team-card__actions,
+    .player-card__actions,
+    .referee-card__actions,
+    .tournament-card__actions,
+    .match-card__actions,
+    .team-table__actions,
+    .player-table__actions,
+    .referee-table__actions,
+    .tournament-table__actions,
+    .match-table__actions
+  ) {
+    grid-template-columns: 1fr !important;
+  }
+
+  :where(
+    .team-card__actions,
+    .player-card__actions,
+    .referee-card__actions,
+    .tournament-card__actions,
+    .match-card__actions,
+    .team-table__actions,
+    .player-table__actions,
+    .referee-table__actions,
+    .tournament-table__actions,
+    .match-table__actions
+  ) > .ghost-button,
+  :where(
+    .team-table__actions,
+    .player-table__actions,
+    .referee-table__actions,
+    .tournament-table__actions,
+    .match-table__actions
+  ) > .table-action {
+    width: 100% !important;
+    min-inline-size: 0 !important;
+  }
+}
+
+.primary-button:hover:not(:disabled),
+.ghost-button:hover:not(:disabled),
+.table-action:hover:not(:disabled),
+.icon-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.primary-button:focus-visible,
+.ghost-button:focus-visible,
+.table-action:focus-visible,
+.icon-button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid rgba(243, 180, 76, 0.45);
+  outline-offset: 0.12rem;
 }

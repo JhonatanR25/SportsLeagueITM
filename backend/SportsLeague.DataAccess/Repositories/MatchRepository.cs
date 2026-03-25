@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SportsLeague.DataAccess.Context;
 using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Enums;
@@ -10,6 +10,17 @@ public class MatchRepository : GenericRepository<Match>, IMatchRepository
 {
     public MatchRepository(LeagueDbContext context) : base(context)
     {
+    }
+
+    public async Task<Match?> GetByIdentityAsync(int tournamentId, int homeTeamId, int awayTeamId, DateTime matchDate)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m =>
+                m.TournamentId == tournamentId &&
+                m.HomeTeamId == homeTeamId &&
+                m.AwayTeamId == awayTeamId &&
+                m.MatchDate == matchDate);
     }
 
     public async Task<Match?> GetByIdWithDetailsAsync(int id)

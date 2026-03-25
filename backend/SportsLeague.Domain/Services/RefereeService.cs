@@ -35,6 +35,37 @@ public class RefereeService : IRefereeService
 
     public async Task<Referee> CreateAsync(Referee referee)
     {
+        if (referee == null)
+            throw new ArgumentNullException(nameof(referee));
+
+        if (string.IsNullOrWhiteSpace(referee.FirstName))
+            throw new ArgumentException("El nombre del arbitro es obligatorio.", nameof(referee.FirstName));
+
+        if (string.IsNullOrWhiteSpace(referee.LastName))
+            throw new ArgumentException("El apellido del arbitro es obligatorio.", nameof(referee.LastName));
+
+        if (string.IsNullOrWhiteSpace(referee.Nationality))
+            throw new ArgumentException("La nacionalidad es obligatoria.", nameof(referee.Nationality));
+
+        var normalizedFirstName = referee.FirstName.Trim();
+        var normalizedLastName = referee.LastName.Trim();
+        var normalizedNationality = referee.Nationality.Trim();
+
+        var existingReferee = await _refereeRepository.GetByIdentityAsync(
+            normalizedFirstName,
+            normalizedLastName,
+            normalizedNationality);
+
+        if (existingReferee != null)
+        {
+            throw new InvalidOperationException(
+                $"Ya existe un arbitro con el nombre '{normalizedFirstName} {normalizedLastName}' y nacionalidad '{normalizedNationality}'.");
+        }
+
+        referee.FirstName = normalizedFirstName;
+        referee.LastName = normalizedLastName;
+        referee.Nationality = normalizedNationality;
+
         _logger.LogInformation(
             "Creating referee: {FirstName} {LastName}",
             referee.FirstName, referee.LastName);
@@ -43,13 +74,40 @@ public class RefereeService : IRefereeService
 
     public async Task UpdateAsync(int id, Referee referee)
     {
+        if (referee == null)
+            throw new ArgumentNullException(nameof(referee));
+
+        if (string.IsNullOrWhiteSpace(referee.FirstName))
+            throw new ArgumentException("El nombre del arbitro es obligatorio.", nameof(referee.FirstName));
+
+        if (string.IsNullOrWhiteSpace(referee.LastName))
+            throw new ArgumentException("El apellido del arbitro es obligatorio.", nameof(referee.LastName));
+
+        if (string.IsNullOrWhiteSpace(referee.Nationality))
+            throw new ArgumentException("La nacionalidad es obligatoria.", nameof(referee.Nationality));
+
         var existing = await _refereeRepository.GetByIdAsync(id);
         if (existing == null)
             throw new KeyNotFoundException($"No se encontró el árbitro con ID {id}");
 
-        existing.FirstName = referee.FirstName;
-        existing.LastName = referee.LastName;
-        existing.Nationality = referee.Nationality;
+        var normalizedFirstName = referee.FirstName.Trim();
+        var normalizedLastName = referee.LastName.Trim();
+        var normalizedNationality = referee.Nationality.Trim();
+
+        var duplicateReferee = await _refereeRepository.GetByIdentityAsync(
+            normalizedFirstName,
+            normalizedLastName,
+            normalizedNationality);
+
+        if (duplicateReferee != null && duplicateReferee.Id != id)
+        {
+            throw new InvalidOperationException(
+                $"Ya existe un arbitro con el nombre '{normalizedFirstName} {normalizedLastName}' y nacionalidad '{normalizedNationality}'.");
+        }
+
+        existing.FirstName = normalizedFirstName;
+        existing.LastName = normalizedLastName;
+        existing.Nationality = normalizedNationality;
 
         _logger.LogInformation("Updating referee with ID: {RefereeId}", id);
         await _refereeRepository.UpdateAsync(existing);
@@ -59,6 +117,12 @@ public class RefereeService : IRefereeService
         var exists = await _refereeRepository.ExistsAsync(id);
         if (!exists)
             throw new KeyNotFoundException($"No se encontró el árbitro con ID {id}");
+
+        var hasMatches = await _refereeRepository.HasMatchesAsync(id);
+        if (hasMatches)
+        {
+            throw new InvalidOperationException("No se puede eliminar el arbitro porque tiene partidos asociados.");
+        }
 
         _logger.LogInformation("Deleting referee with ID: {RefereeId}", id);
         await _refereeRepository.DeleteAsync(id);

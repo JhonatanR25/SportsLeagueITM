@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SportsLeague.API.DTOs.Request;
 using SportsLeague.API.DTOs.Response;
+using SportsLeague.API.Pagination;
 using SportsLeague.API.Responses;
 using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Interfaces.Services;
@@ -22,10 +23,13 @@ public class TeamController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<TeamResponseDTO>>> GetAll()
+    public async Task<ActionResult<IEnumerable<TeamResponseDTO>>> GetAll(
+        [FromQuery] int? pageNumber,
+        [FromQuery] int? pageSize)
     {
         var teams = await _teamService.GetAllAsync();
-        var response = _mapper.Map<IEnumerable<TeamResponseDTO>>(teams);
+        var mappedTeams = _mapper.Map<IEnumerable<TeamResponseDTO>>(teams);
+        var response = PaginationHelper.Apply(Response, mappedTeams, pageNumber, pageSize);
         return Ok(response);
     }
 

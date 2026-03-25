@@ -16,10 +16,10 @@
 .modal {
   width: min(100%, 42rem);
   padding: 1.5rem;
-  border-radius: 1.5rem;
+  border-radius: var(--radius-panel);
   background: linear-gradient(180deg, rgba(12, 29, 58, 0.98), rgba(8, 20, 40, 0.98));
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 1.5rem 4rem rgba(2, 8, 20, 0.4);
+  border: var(--border-soft);
+  box-shadow: var(--shadow-strong);
 }
 
 .modal--compact {
@@ -60,21 +60,22 @@
 
 .ghost-button {
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   min-height: 2.75rem;
   padding: 0.8rem 1.1rem;
   font-weight: 800;
   cursor: pointer;
   background: rgba(255, 255, 255, 0.08);
   color: var(--color-text);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .ghost-button--light {
-  background: rgba(255, 255, 255, 0.12);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08));
 }
 
 .ghost-button--danger {
-  background: rgba(219, 68, 55, 0.16);
+  background: linear-gradient(180deg, rgba(219, 68, 55, 0.2), rgba(219, 68, 55, 0.12));
   color: #ffd8d4;
 }
 

@@ -44,7 +44,7 @@ public class ExceptionHandlingMiddleware
             code = HttpStatusCode.NotFound;
             message = exception.Message;
         }
-        else if (exception is ArgumentException or FormatException or BadHttpRequestException)
+        else if (exception is ArgumentException or FormatException or BadHttpRequestException or JsonException)
         {
             code = HttpStatusCode.BadRequest;
             message = exception.Message;

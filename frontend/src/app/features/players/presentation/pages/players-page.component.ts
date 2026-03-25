@@ -1,10 +1,12 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
+import { ToastNotification, ToastType } from '../../../../shared/domain/models/toast-notification.model';
 import { ConfirmDialogComponent } from '../../../../shared/presentation/components/confirm-dialog/confirm-dialog.component';
 import { ToastStackComponent } from '../../../../shared/presentation/components/toast-stack/toast-stack.component';
+import { parseApiErrorMessage } from '../../../../shared/utils/http-error.utils';
+import { pushToastNotification } from '../../../../shared/utils/toast.utils';
 
 import { Team } from '../../../teams/domain/models/team.model';
 import { TeamApiService } from '../../../teams/infrastructure/repositories/team-api.service';
@@ -12,15 +14,6 @@ import { Player } from '../../domain/models/player.model';
 import { PlayerPosition } from '../../domain/models/player-position.type';
 import { PlayerUpsertPayload } from '../../domain/models/player-upsert.model';
 import { PlayerApiService } from '../../infrastructure/repositories/player-api.service';
-
-type ToastType = 'success' | 'error';
-
-type ToastNotification = {
-  id: number;
-  type: ToastType;
-  title: string;
-  message: string;
-};
 
 type PositionOption = {
   value: PlayerPosition;
@@ -76,6 +69,21 @@ export class PlayersPageComponent {
   protected readonly modalTitle = computed(() =>
     this.playerBeingEdited() ? 'Editar jugador' : 'Crear jugador',
   );
+  protected readonly formModeLabel = computed(() =>
+    this.playerBeingEdited() ? 'Edicion de jugador' : 'Creacion de jugador',
+  );
+  protected readonly playerPreview = computed(() => {
+    const firstName = this.playerForm.controls.firstName.value.trim();
+    const lastName = this.playerForm.controls.lastName.value.trim();
+    const team = this.teams().find((item) => item.id === this.playerForm.controls.teamId.value);
+
+    return {
+      initials: `${firstName.slice(0, 1)}${lastName.slice(0, 1)}`.trim().toUpperCase() || 'JG',
+      fullName: `${firstName} ${lastName}`.trim() || 'Nombre del jugador',
+      teamName: team?.name ?? 'Sin equipo seleccionado',
+      positionLabel: this.getPositionLabel(this.playerForm.controls.position.value),
+    };
+  });
   protected readonly positionOptions: PositionOption[] = [
     { value: 'Goalkeeper', label: 'Portero' },
     { value: 'Defender', label: 'Defensa' },
@@ -189,7 +197,7 @@ export class PlayersPageComponent {
         this.pushNotification(
           'error',
           editingPlayer ? 'No se pudo actualizar' : 'No se pudo crear',
-          this.getErrorMessage(error),
+          parseApiErrorMessage(error),
         );
       },
     });
@@ -218,7 +226,7 @@ export class PlayersPageComponent {
       },
       error: (error: unknown) => {
         this.isSaving.set(false);
-        this.pushNotification('error', 'No se pudo eliminar', this.getErrorMessage(error));
+        this.pushNotification('error', 'No se pudo eliminar', parseApiErrorMessage(error));
       },
     });
   }
@@ -258,6 +266,10 @@ export class PlayersPageComponent {
     return this.positionOptions.find((option) => option.value === position)?.label ?? position;
   }
 
+  protected canSubmitForm(): boolean {
+    return !this.isSaving() && !this.isTeamsLoading() && this.teams().length > 0;
+  }
+
   private loadPlayers(): void {
     this.isLoading.set(true);
     this.errorMessage.set('');
@@ -269,7 +281,7 @@ export class PlayersPageComponent {
         this.isLoading.set(false);
       },
       error: (error: unknown) => {
-        this.errorMessage.set(this.getErrorMessage(error));
+        this.errorMessage.set(parseApiErrorMessage(error));
         this.isLoading.set(false);
       },
     });
@@ -308,51 +320,6 @@ export class PlayersPageComponent {
   }
 
   private pushNotification(type: ToastType, title: string, message: string): void {
-    const id = Date.now() + Math.floor(Math.random() * 1000);
-    this.notifications.update((items) => [...items, { id, type, title, message }]);
-
-    window.setTimeout(() => {
-      this.dismissNotification(id);
-    }, 4500);
-  }
-
-  private getErrorMessage(error: unknown): string {
-    if (!(error instanceof HttpErrorResponse)) {
-      return 'Ocurrio un error inesperado. Intenta nuevamente.';
-    }
-
-    const payload = error.error as
-      | { message?: string; detail?: string; errors?: Record<string, string[]> }
-      | string
-      | null;
-
-    if (typeof payload === 'string' && payload.trim()) {
-      return payload;
-    }
-
-    if (payload && typeof payload === 'object' && 'message' in payload && payload.message) {
-      return String(payload.message);
-    }
-
-    if (payload && typeof payload === 'object' && 'detail' in payload && payload.detail) {
-      return String(payload.detail);
-    }
-
-    const validationErrors =
-      payload && typeof payload === 'object' && 'errors' in payload && payload.errors
-        ? Object.values(payload.errors as Record<string, unknown[]>)
-            .flat()
-            .filter((item): item is string => typeof item === 'string' && item.length > 0)
-        : [];
-
-    if (validationErrors.length > 0) {
-      return validationErrors[0];
-    }
-
-    if (error.status === 0) {
-      return 'No se pudo conectar con el backend. Verifica que la API este ejecutandose.';
-    }
-
-    return 'La operacion no pudo completarse. Revisa los datos e intenta nuevamente.';
+    pushToastNotification(this.notifications, (notificationId) => this.dismissNotification(notificationId), type, title, message);
   }
 }

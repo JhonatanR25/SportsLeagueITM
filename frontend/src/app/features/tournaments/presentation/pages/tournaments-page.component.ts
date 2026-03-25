@@ -1,10 +1,12 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
+import { ToastNotification, ToastType } from '../../../../shared/domain/models/toast-notification.model';
 import { ConfirmDialogComponent } from '../../../../shared/presentation/components/confirm-dialog/confirm-dialog.component';
 import { ToastStackComponent } from '../../../../shared/presentation/components/toast-stack/toast-stack.component';
+import { parseApiErrorMessage } from '../../../../shared/utils/http-error.utils';
+import { pushToastNotification } from '../../../../shared/utils/toast.utils';
 
 import { Team } from '../../../teams/domain/models/team.model';
 import { TeamApiService } from '../../../teams/infrastructure/repositories/team-api.service';
@@ -12,9 +14,6 @@ import { Tournament } from '../../domain/models/tournament.model';
 import { TournamentStatus } from '../../domain/models/tournament-status.type';
 import { TournamentUpsertPayload } from '../../domain/models/tournament-upsert.model';
 import { TournamentApiService } from '../../infrastructure/repositories/tournament-api.service';
-
-type ToastType = 'success' | 'error';
-type ToastNotification = { id: number; type: ToastType; title: string; message: string };
 
 @Component({
   selector: 'app-tournaments-page',
@@ -64,10 +63,32 @@ export class TournamentsPageComponent {
   protected readonly modalTitle = computed(() =>
     this.tournamentBeingEdited() ? 'Editar torneo' : 'Crear torneo',
   );
+  protected readonly selectedTournamentStatusCopy = computed(() => {
+    const tournament = this.tournamentForRegistration();
+
+    if (!tournament) {
+      return '';
+    }
+
+    return tournament.status === 'Pending'
+      ? 'Puedes inscribir equipos mientras el torneo siga pendiente.'
+      : 'La inscripcion de equipos solo esta disponible cuando el torneo esta pendiente.';
+  });
   protected readonly availableTeamsForRegistration = computed(() => {
     const selectedIds = new Set(this.selectedTournamentTeams().map((team) => team.id));
     return this.teams().filter((team) => !selectedIds.has(team.id));
   });
+  protected readonly remainingTeamsCount = computed(() => this.availableTeamsForRegistration().length);
+  protected readonly canSubmitTournamentForm = computed(
+    () => !this.isSaving() && !this.hasDateRangeError(),
+  );
+  protected readonly canRegisterSelectedTeam = computed(
+    () =>
+      this.selectedTeamId() > 0 &&
+      !this.isSaving() &&
+      !this.isTeamsLoading() &&
+      this.remainingTeamsCount() > 0,
+  );
   protected readonly tournamentForm = this.formBuilder.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(150)]],
     season: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(20)]],
@@ -182,7 +203,7 @@ export class TournamentsPageComponent {
         this.pushNotification(
           'error',
           editingTournament ? 'No se pudo actualizar' : 'No se pudo crear',
-          this.getErrorMessage(error),
+          parseApiErrorMessage(error),
         );
       },
     });
@@ -207,7 +228,7 @@ export class TournamentsPageComponent {
       },
       error: (error: unknown) => {
         this.isSaving.set(false);
-        this.pushNotification('error', 'No se pudo eliminar', this.getErrorMessage(error));
+        this.pushNotification('error', 'No se pudo eliminar', parseApiErrorMessage(error));
       },
     });
   }
@@ -229,7 +250,7 @@ export class TournamentsPageComponent {
       },
       error: (error: unknown) => {
         this.isSaving.set(false);
-        this.pushNotification('error', 'No se pudo actualizar el estado', this.getErrorMessage(error));
+        this.pushNotification('error', 'No se pudo actualizar el estado', parseApiErrorMessage(error));
       },
     });
   }
@@ -250,7 +271,7 @@ export class TournamentsPageComponent {
       },
       error: (error: unknown) => {
         this.isSaving.set(false);
-        this.pushNotification('error', 'No se pudo inscribir el equipo', this.getErrorMessage(error));
+        this.pushNotification('error', 'No se pudo inscribir el equipo', parseApiErrorMessage(error));
       },
     });
   }
@@ -270,6 +291,16 @@ export class TournamentsPageComponent {
     if (control.hasError('minlength')) return 'El valor es demasiado corto.';
     if (control.hasError('maxlength')) return 'El valor supera la longitud permitida.';
     return 'Revisa este campo.';
+  }
+
+  protected hasDateRangeError(): boolean {
+    const { startDate, endDate } = this.tournamentForm.getRawValue();
+
+    if (!startDate || !endDate) {
+      return false;
+    }
+
+    return new Date(endDate).getTime() <= new Date(startDate).getTime();
   }
 
   protected canEdit(tournament: Tournament): boolean {
@@ -302,11 +333,11 @@ export class TournamentsPageComponent {
   protected getStatusActionLabel(status: TournamentStatus): string {
     switch (status) {
       case 'Pending':
-        return 'Iniciar';
+        return 'Iniciar torneo';
       case 'InProgress':
-        return 'Finalizar';
+        return 'Finalizar torneo';
       case 'Finished':
-        return 'Cerrado';
+        return 'Torneo cerrado';
     }
   }
 
@@ -320,7 +351,7 @@ export class TournamentsPageComponent {
         this.isLoading.set(false);
       },
       error: (error: unknown) => {
-        this.errorMessage.set(this.getErrorMessage(error));
+        this.errorMessage.set(parseApiErrorMessage(error));
         this.isLoading.set(false);
       },
     });
@@ -374,40 +405,6 @@ export class TournamentsPageComponent {
   }
 
   private pushNotification(type: ToastType, title: string, message: string): void {
-    const id = Date.now() + Math.floor(Math.random() * 1000);
-    this.notifications.update((items) => [...items, { id, type, title, message }]);
-    window.setTimeout(() => this.dismissNotification(id), 4500);
-  }
-
-  private getErrorMessage(error: unknown): string {
-    if (!(error instanceof HttpErrorResponse)) {
-      return 'Ocurrio un error inesperado. Intenta nuevamente.';
-    }
-
-    const payload = error.error as
-      | { message?: string; detail?: string; errors?: Record<string, string[]> }
-      | string
-      | null;
-
-    if (typeof payload === 'string' && payload.trim()) return payload;
-    if (payload && typeof payload === 'object' && 'message' in payload && payload.message) {
-      return String(payload.message);
-    }
-    if (payload && typeof payload === 'object' && 'detail' in payload && payload.detail) {
-      return String(payload.detail);
-    }
-
-    const validationErrors =
-      payload && typeof payload === 'object' && 'errors' in payload && payload.errors
-        ? Object.values(payload.errors as Record<string, unknown[]>)
-            .flat()
-            .filter((item): item is string => typeof item === 'string' && item.length > 0)
-        : [];
-
-    if (validationErrors.length > 0) return validationErrors[0];
-    if (error.status === 0) {
-      return 'No se pudo conectar con el backend. Verifica que la API este ejecutandose.';
-    }
-    return 'La operacion no pudo completarse. Revisa los datos e intenta nuevamente.';
+    pushToastNotification(this.notifications, (notificationId) => this.dismissNotification(notificationId), type, title, message);
   }
 }
