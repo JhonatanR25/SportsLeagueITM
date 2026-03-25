@@ -1,4 +1,6 @@
-﻿namespace SportsLeague.API.DTOs.Response;
+﻿using SportsLeague.Domain.Enums;
+
+namespace SportsLeague.API.DTOs.Response;
 
 public class TeamResponseDTO
 {

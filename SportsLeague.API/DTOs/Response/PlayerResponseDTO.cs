@@ -9,9 +9,8 @@ public class PlayerResponseDTO
     public string LastName { get; set; } = string.Empty;
     public DateTime BirthDate { get; set; }
     public int Number { get; set; }
-    public PlayerPosition Position { get; set; }
+    public PlayerPosition Position { get; set; } // VOLVEMOS A ENUM
     public int TeamId { get; set; }
     public string TeamName { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
-    public DateTime? UpdatedAt { get; set; }
 }

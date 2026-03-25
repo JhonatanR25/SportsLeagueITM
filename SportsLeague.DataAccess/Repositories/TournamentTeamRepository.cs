@@ -1,8 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SportsLeague.DataAccess.Context;
 using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Interfaces.Repositories;
-using Microsoft.EntityFrameworkCore;
 
 namespace SportsLeague.DataAccess.Repositories;
 
@@ -19,12 +18,21 @@ public class TournamentTeamRepository : GenericRepository<TournamentTeam>, ITour
             .FirstOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<TournamentTeam>> GetByTournamentAsync(
-        int tournamentId)
+    public async Task<IEnumerable<TournamentTeam>> GetByTournamentAsync(int tournamentId)
     {
         return await _dbSet
             .Where(tt => tt.TournamentId == tournamentId)
             .Include(tt => tt.Team)
             .ToListAsync();
+    }
+
+    public override async Task DeleteAsync(int id)
+    {
+        var entity = await _dbSet.FindAsync(id);
+        if (entity is null)
+            return;
+
+        _dbSet.Remove(entity);
+        await _context.SaveChangesAsync();
     }
 }

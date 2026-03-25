@@ -16,6 +16,7 @@ public class PlayerRepository : GenericRepository<Player>, IPlayerRepository
         return await _dbSet
             .Where(p => p.TeamId == teamId)
             .Include(p => p.Team)
+            .AsNoTracking()
             .ToListAsync();
     }
 
@@ -29,6 +30,7 @@ public class PlayerRepository : GenericRepository<Player>, IPlayerRepository
     {
         return await _dbSet
             .Include(p => p.Team)
+            .AsNoTracking()
             .ToListAsync();
     }
 
@@ -37,5 +39,12 @@ public class PlayerRepository : GenericRepository<Player>, IPlayerRepository
         return await _dbSet
             .Include(p => p.Team)
             .FirstOrDefaultAsync(p => p.Id == id);
+    }
+
+    public override async Task<Player> CreateAsync(Player entity)
+    {
+        await _dbSet.AddAsync(entity);
+        await _context.SaveChangesAsync();
+        return entity;
     }
 }

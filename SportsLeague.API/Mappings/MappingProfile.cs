@@ -10,38 +10,32 @@ public class MappingProfile : Profile
     public MappingProfile()
     {
         // Team mappings
-        CreateMap<TeamRequestDTO, Team>();
+        CreateMap<TeamRequestDTO, Team>()
+            .ForMember(dest => dest.Players, opt => opt.Ignore())
+            .ForMember(dest => dest.TournamentTeams, opt => opt.Ignore());
+
         CreateMap<Team, TeamResponseDTO>();
 
         // Player mappings
-        CreateMap<PlayerRequestDTO, Player>();
+        CreateMap<PlayerRequestDTO, Player>()
+            .ForMember(dest => dest.Team, opt => opt.Ignore());
 
         CreateMap<Player, PlayerResponseDTO>()
             .ForMember(
                 dest => dest.TeamName,
                 opt => opt.MapFrom(src => src.Team != null ? src.Team.Name : string.Empty));
-        // Referee mappings
-        CreateMap<RefereeRequestDTO, Referee>();
-        CreateMap<Referee, RefereeResponseDTO>();
-
-        // Tournament mappings
-        CreateMap<TournamentRequestDTO, Tournament>();
-        CreateMap<Tournament, TournamentResponseDTO>()
-            .ForMember(
-                dest => dest.TeamsCount,
-                opt => opt.MapFrom(src =>
-                    src.TournamentTeams != null ? src.TournamentTeams.Count : 0));
 
         // Referee mappings
         CreateMap<RefereeRequestDTO, Referee>();
         CreateMap<Referee, RefereeResponseDTO>();
 
         // Tournament mappings
-        CreateMap<TournamentRequestDTO, Tournament>();
+        CreateMap<TournamentRequestDTO, Tournament>()
+            .ForMember(dest => dest.TournamentTeams, opt => opt.Ignore());
+
         CreateMap<Tournament, TournamentResponseDTO>()
             .ForMember(
                 dest => dest.TeamsCount,
-                opt => opt.MapFrom(src =>
-                    src.TournamentTeams != null ? src.TournamentTeams.Count : 0));
+                opt => opt.MapFrom(src => src.TournamentTeams != null ? src.TournamentTeams.Count : 0));
     }
 }

@@ -25,58 +25,78 @@ public class TeamService : ITeamService
     public async Task<Team?> GetByIdAsync(int id)
     {
         _logger.LogInformation("Consultando equipo con ID: {TeamId}", id);
+
         var team = await _teamRepository.GetByIdAsync(id);
 
         if (team == null)
+        {
             _logger.LogWarning("Equipo con ID {TeamId} no encontrado.", id);
+        }
 
         return team;
     }
 
     public async Task<Team> CreateAsync(Team team)
     {
-        _logger.LogInformation("Intentando crear un nuevo equipo: {TeamName}", team.Name);
+        if (team == null)
+            throw new ArgumentNullException(nameof(team));
 
-        // Validación de negocio: El nombre del equipo debe ser único
-        var existingTeam = await _teamRepository.GetByNameAsync(team.Name);
+        if (string.IsNullOrWhiteSpace(team.Name))
+            throw new ArgumentException("El nombre del equipo es obligatorio.", nameof(team.Name));
+
+        var normalizedName = team.Name.Trim();
+
+        _logger.LogInformation("Intentando crear un nuevo equipo: {TeamName}", normalizedName);
+
+        var existingTeam = await _teamRepository.GetByNameAsync(normalizedName);
         if (existingTeam != null)
         {
-            _logger.LogWarning("Error al crear: El nombre '{TeamName}' ya existe.", team.Name);
-            throw new InvalidOperationException($"Ya existe un equipo con el nombre '{team.Name}'");
+            _logger.LogWarning("Error al crear: El nombre '{TeamName}' ya existe.", normalizedName);
+            throw new InvalidOperationException($"Ya existe un equipo con el nombre '{normalizedName}'.");
         }
+
+        team.Name = normalizedName;
 
         return await _teamRepository.CreateAsync(team);
     }
 
     public async Task UpdateAsync(int id, Team team)
     {
+        if (team == null)
+            throw new ArgumentNullException(nameof(team));
+
+        if (string.IsNullOrWhiteSpace(team.Name))
+            throw new ArgumentException("El nombre del equipo es obligatorio.", nameof(team.Name));
+
         _logger.LogInformation("Intentando actualizar equipo con ID: {TeamId}", id);
 
         var existingTeam = await _teamRepository.GetByIdAsync(id);
         if (existingTeam == null)
         {
             _logger.LogWarning("Update fallido: Equipo {TeamId} no existe.", id);
-            throw new KeyNotFoundException($"No se encontró el equipo con ID {id}");
+            throw new KeyNotFoundException($"No se encontró el equipo con ID {id}.");
         }
 
-        // Validar nombre único solo si el nombre ha cambiado
-        if (existingTeam.Name != team.Name)
+        var normalizedName = team.Name.Trim();
+
+        if (!string.Equals(existingTeam.Name, normalizedName, StringComparison.OrdinalIgnoreCase))
         {
-            var teamWithSameName = await _teamRepository.GetByNameAsync(team.Name);
+            var teamWithSameName = await _teamRepository.GetByNameAsync(normalizedName);
             if (teamWithSameName != null)
             {
-                throw new InvalidOperationException($"El nombre '{team.Name}' ya está siendo usado por otro equipo.");
+                _logger.LogWarning("El nombre '{TeamName}' ya está siendo usado por otro equipo.", normalizedName);
+                throw new InvalidOperationException($"El nombre '{normalizedName}' ya está siendo usado por otro equipo.");
             }
         }
 
-        // Mapeo manual (Clean Code: Mantiene el Dominio independiente de librerías externas)
-        existingTeam.Name = team.Name;
+        existingTeam.Name = normalizedName;
         existingTeam.City = team.City;
         existingTeam.Stadium = team.Stadium;
         existingTeam.LogoUrl = team.LogoUrl;
         existingTeam.FoundedDate = team.FoundedDate;
 
         await _teamRepository.UpdateAsync(existingTeam);
+
         _logger.LogInformation("Equipo {TeamId} actualizado con éxito.", id);
     }
 
@@ -88,10 +108,11 @@ public class TeamService : ITeamService
         if (!exists)
         {
             _logger.LogWarning("Eliminación fallida: Equipo {TeamId} no existe.", id);
-            throw new KeyNotFoundException($"No se encontró el equipo con ID {id}");
+            throw new KeyNotFoundException($"No se encontró el equipo con ID {id}.");
         }
 
         await _teamRepository.DeleteAsync(id);
+
         _logger.LogInformation("Equipo {TeamId} eliminado correctamente.", id);
     }
 }

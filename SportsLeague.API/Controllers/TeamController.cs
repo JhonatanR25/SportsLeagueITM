@@ -24,15 +24,28 @@ public class TeamController : ControllerBase
     public async Task<ActionResult<IEnumerable<TeamResponseDTO>>> GetAll()
     {
         var teams = await _teamService.GetAllAsync();
-        return Ok(_mapper.Map<IEnumerable<TeamResponseDTO>>(teams));
+        var response = _mapper.Map<IEnumerable<TeamResponseDTO>>(teams);
+        return Ok(response);
     }
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<TeamResponseDTO>> GetById(int id)
     {
         var team = await _teamService.GetByIdAsync(id);
-        if (team == null) return NotFound();
-        return Ok(_mapper.Map<TeamResponseDTO>(team));
+
+        if (team is null)
+        {
+            return NotFound(new
+            {
+                status = StatusCodes.Status404NotFound,
+                message = $"No se encontro el equipo con ID {id}.",
+                detail = (string?)null,
+                traceId = HttpContext.TraceIdentifier
+            });
+        }
+
+        var response = _mapper.Map<TeamResponseDTO>(team);
+        return Ok(response);
     }
 
     [HttpPost]
@@ -46,15 +59,16 @@ public class TeamController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    public async Task<ActionResult> Update(int id, [FromBody] TeamRequestDTO dto)
+    public async Task<IActionResult> Update(int id, [FromBody] TeamRequestDTO dto)
     {
         var team = _mapper.Map<Team>(dto);
         await _teamService.UpdateAsync(id, team);
+
         return NoContent();
     }
 
     [HttpDelete("{id:int}")]
-    public async Task<ActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
         await _teamService.DeleteAsync(id);
         return NoContent();

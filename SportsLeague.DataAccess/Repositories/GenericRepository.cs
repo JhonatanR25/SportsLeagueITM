@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SportsLeague.DataAccess.Context;
 using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Interfaces.Repositories;
@@ -16,7 +16,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : AuditBase
         _dbSet = context.Set<T>();
     }
 
-    public async Task<IEnumerable<T>> GetAllAsync()
+    public virtual async Task<IEnumerable<T>> GetAllAsync()
     {
         return await _dbSet.AsNoTracking().ToListAsync();
     }
@@ -26,30 +26,32 @@ public class GenericRepository<T> : IGenericRepository<T> where T : AuditBase
         return await _dbSet.FindAsync(id);
     }
 
-    public async Task<T> CreateAsync(T entity)
+    public virtual async Task<T> CreateAsync(T entity)
     {
         await _dbSet.AddAsync(entity);
         await _context.SaveChangesAsync();
         return entity;
     }
 
-    public async Task UpdateAsync(T entity)
+    public virtual async Task UpdateAsync(T entity)
     {
         _dbSet.Update(entity);
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(int id)
+    public virtual async Task DeleteAsync(int id)
     {
         var entity = await GetByIdAsync(id);
-        if (entity != null)
+        if (entity == null)
         {
-            _dbSet.Remove(entity);
-            await _context.SaveChangesAsync();
+            return;
         }
+
+        _dbSet.Remove(entity);
+        await _context.SaveChangesAsync();
     }
 
-    public async Task<bool> ExistsAsync(int id)
+    public virtual async Task<bool> ExistsAsync(int id)
     {
         return await _dbSet.AnyAsync(e => e.Id == id);
     }

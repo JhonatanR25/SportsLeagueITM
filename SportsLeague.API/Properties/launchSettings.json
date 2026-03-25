@@ -8,5 +8,8 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "launchBrowser": true
+      "launchBrowser": true,
+      "launchUrl": "swagger"
     }
+  }
+}

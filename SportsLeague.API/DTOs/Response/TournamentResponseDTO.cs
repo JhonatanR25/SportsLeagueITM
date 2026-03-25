@@ -9,8 +9,7 @@ public class TournamentResponseDTO
     public string Season { get; set; } = string.Empty;
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
-    public TournamentStatus Status { get; set; }
+    public TournamentStatus Status { get; set; } // VOLVEMOS A ENUM
     public int TeamsCount { get; set; }
     public DateTime CreatedAt { get; set; }
-    public DateTime? UpdatedAt { get; set; }
 }

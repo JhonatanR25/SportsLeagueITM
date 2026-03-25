@@ -10,6 +10,6 @@ public class Tournament : AuditBase
     public DateTime EndDate { get; set; }
     public TournamentStatus Status { get; set; } = TournamentStatus.Pending;
 
-    // Navigation Properties
-    public ICollection<TournamentTeam> TournamentTeams { get; set; } = new List<TournamentTeam>();
+    public virtual ICollection<TournamentTeam> TournamentTeams { get; set; } = new List<TournamentTeam>();
+    public ICollection<Match> Matches { get; set; } = new List<Match>();
 }

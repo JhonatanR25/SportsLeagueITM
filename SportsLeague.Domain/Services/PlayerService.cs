@@ -23,30 +23,31 @@ public class PlayerService : IPlayerService
 
     public async Task<IEnumerable<Player>> GetAllAsync()
     {
-        _logger.LogInformation("Retrieving all players");
+        _logger.LogInformation("Retrieving all players.");
         return await _playerRepository.GetAllWithTeamAsync();
     }
 
     public async Task<Player?> GetByIdAsync(int id)
     {
         _logger.LogInformation("Retrieving player with ID: {PlayerId}", id);
+
         var player = await _playerRepository.GetByIdWithTeamAsync(id);
 
         if (player == null)
-            _logger.LogWarning("Player with ID {PlayerId} not found", id);
+        {
+            _logger.LogWarning("Player with ID {PlayerId} not found.", id);
+        }
 
         return player;
     }
 
     public async Task<IEnumerable<Player>> GetByTeamAsync(int teamId)
     {
-        // Validar que el equipo existe
         var teamExists = await _teamRepository.ExistsAsync(teamId);
         if (!teamExists)
         {
-            _logger.LogWarning("Team with ID {TeamId} not found", teamId);
-            throw new KeyNotFoundException(
-                $"No se encontró el equipo con ID {teamId}");
+            _logger.LogWarning("Team with ID {TeamId} not found.", teamId);
+            throw new KeyNotFoundException($"No se encontró el equipo con ID {teamId}.");
         }
 
         _logger.LogInformation("Retrieving players for team ID: {TeamId}", teamId);
@@ -55,60 +56,93 @@ public class PlayerService : IPlayerService
 
     public async Task<Player> CreateAsync(Player player)
     {
-        // Validar que el equipo existe
+        if (player == null)
+            throw new ArgumentNullException(nameof(player));
+
+        if (string.IsNullOrWhiteSpace(player.FirstName))
+            throw new ArgumentException("El nombre del jugador es obligatorio.", nameof(player.FirstName));
+
+        if (string.IsNullOrWhiteSpace(player.LastName))
+            throw new ArgumentException("El apellido del jugador es obligatorio.", nameof(player.LastName));
+
+        if (player.Number <= 0)
+            throw new ArgumentException("El número del jugador debe ser mayor que cero.", nameof(player.Number));
+
+        player.FirstName = player.FirstName.Trim();
+        player.LastName = player.LastName.Trim();
+
         var teamExists = await _teamRepository.ExistsAsync(player.TeamId);
         if (!teamExists)
         {
-            _logger.LogWarning("Team with ID {TeamId} not found", player.TeamId);
-            throw new KeyNotFoundException(
-                $"No se encontró el equipo con ID {player.TeamId}");
+            _logger.LogWarning("Team with ID {TeamId} not found.", player.TeamId);
+            throw new KeyNotFoundException($"No se encontró el equipo con ID {player.TeamId}.");
         }
 
-        // Validar número de camiseta único en el equipo
-        var existingPlayer = await _playerRepository
-            .GetByTeamAndNumberAsync(player.TeamId, player.Number);
+        var existingPlayer = await _playerRepository.GetByTeamAndNumberAsync(player.TeamId, player.Number);
         if (existingPlayer != null)
         {
             _logger.LogWarning(
-                "Number {Number} already taken in team {TeamId}",
-                player.Number, player.TeamId);
+                "Number {Number} already taken in team {TeamId}.",
+                player.Number,
+                player.TeamId);
+
             throw new InvalidOperationException(
-                $"El número {player.Number} ya está en uso en este equipo");
+                $"El número {player.Number} ya está en uso en este equipo.");
         }
 
         _logger.LogInformation(
-            "Creating player: {FirstName} {LastName}",
-            player.FirstName, player.LastName);
+            "Creating player: {FirstName} {LastName}.",
+            player.FirstName,
+            player.LastName);
+
         return await _playerRepository.CreateAsync(player);
     }
 
     public async Task UpdateAsync(int id, Player player)
     {
+        if (player == null)
+            throw new ArgumentNullException(nameof(player));
+
+        if (string.IsNullOrWhiteSpace(player.FirstName))
+            throw new ArgumentException("El nombre del jugador es obligatorio.", nameof(player.FirstName));
+
+        if (string.IsNullOrWhiteSpace(player.LastName))
+            throw new ArgumentException("El apellido del jugador es obligatorio.", nameof(player.LastName));
+
+        if (player.Number <= 0)
+            throw new ArgumentException("El número del jugador debe ser mayor que cero.", nameof(player.Number));
+
+        _logger.LogInformation("Updating player with ID: {PlayerId}.", id);
+
         var existingPlayer = await _playerRepository.GetByIdAsync(id);
         if (existingPlayer == null)
         {
-            throw new KeyNotFoundException(
-                $"No se encontró el jugador con ID {id}");
+            _logger.LogWarning("Player with ID {PlayerId} not found.", id);
+            throw new KeyNotFoundException($"No se encontró el jugador con ID {id}.");
         }
 
-        // Validar que el nuevo equipo existe
         var teamExists = await _teamRepository.ExistsAsync(player.TeamId);
         if (!teamExists)
         {
-            throw new KeyNotFoundException(
-                $"No se encontró el equipo con ID {player.TeamId}");
+            _logger.LogWarning("Team with ID {TeamId} not found.", player.TeamId);
+            throw new KeyNotFoundException($"No se encontró el equipo con ID {player.TeamId}.");
         }
 
-        // Validar número único (si cambió el número o el equipo)
-        if (existingPlayer.Number != player.Number ||
-            existingPlayer.TeamId != player.TeamId)
+        player.FirstName = player.FirstName.Trim();
+        player.LastName = player.LastName.Trim();
+
+        if (existingPlayer.Number != player.Number || existingPlayer.TeamId != player.TeamId)
         {
-            var conflict = await _playerRepository
-                .GetByTeamAndNumberAsync(player.TeamId, player.Number);
+            var conflict = await _playerRepository.GetByTeamAndNumberAsync(player.TeamId, player.Number);
             if (conflict != null && conflict.Id != id)
             {
+                _logger.LogWarning(
+                    "Number {Number} already taken in team {TeamId}.",
+                    player.Number,
+                    player.TeamId);
+
                 throw new InvalidOperationException(
-                    $"El número {player.Number} ya está en uso en este equipo");
+                    $"El número {player.Number} ya está en uso en este equipo.");
             }
         }
 
@@ -119,8 +153,9 @@ public class PlayerService : IPlayerService
         existingPlayer.Position = player.Position;
         existingPlayer.TeamId = player.TeamId;
 
-        _logger.LogInformation("Updating player with ID: {PlayerId}", id);
         await _playerRepository.UpdateAsync(existingPlayer);
+
+        _logger.LogInformation("Player with ID {PlayerId} updated successfully.", id);
     }
 
     public async Task DeleteAsync(int id)
@@ -128,11 +163,11 @@ public class PlayerService : IPlayerService
         var exists = await _playerRepository.ExistsAsync(id);
         if (!exists)
         {
-            throw new KeyNotFoundException(
-                $"No se encontró el jugador con ID {id}");
+            _logger.LogWarning("Player with ID {PlayerId} not found.", id);
+            throw new KeyNotFoundException($"No se encontró el jugador con ID {id}.");
         }
 
-        _logger.LogInformation("Deleting player with ID: {PlayerId}", id);
+        _logger.LogInformation("Deleting player with ID: {PlayerId}.", id);
         await _playerRepository.DeleteAsync(id);
     }
 }

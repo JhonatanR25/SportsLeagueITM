@@ -29,17 +29,26 @@ public class RefereeController : ControllerBase
         return Ok(_mapper.Map<IEnumerable<RefereeResponseDTO>>(referees));
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<RefereeResponseDTO>> GetById(int id)
     {
         var referee = await _refereeService.GetByIdAsync(id);
         if (referee == null)
-            return NotFound(new { message = $"Árbitro con ID {id} no encontrado" });
+        {
+            return NotFound(new
+            {
+                status = StatusCodes.Status404NotFound,
+                message = $"No se encontró el árbitro con ID {id}.",
+                detail = (string?)null,
+                traceId = HttpContext.TraceIdentifier
+            });
+        }
+
         return Ok(_mapper.Map<RefereeResponseDTO>(referee));
     }
 
     [HttpPost]
-    public async Task<ActionResult<RefereeResponseDTO>> Create(RefereeRequestDTO dto)
+    public async Task<ActionResult<RefereeResponseDTO>> Create([FromBody] RefereeRequestDTO dto)
     {
         var referee = _mapper.Map<Referee>(dto);
         var created = await _refereeService.CreateAsync(referee);
@@ -47,32 +56,18 @@ public class RefereeController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = responseDto.Id }, responseDto);
     }
 
-    [HttpPut("{id}")]
-    public async Task<ActionResult> Update(int id, RefereeRequestDTO dto)
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] RefereeRequestDTO dto)
     {
-        try
-        {
-            var referee = _mapper.Map<Referee>(dto);
-            await _refereeService.UpdateAsync(id, referee);
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
+        var referee = _mapper.Map<Referee>(dto);
+        await _refereeService.UpdateAsync(id, referee);
+        return NoContent();
     }
 
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
     {
-        try
-        {
-            await _refereeService.DeleteAsync(id);
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
+        await _refereeService.DeleteAsync(id);
+        return NoContent();
     }
 }

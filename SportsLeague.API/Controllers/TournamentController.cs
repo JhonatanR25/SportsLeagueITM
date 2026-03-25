@@ -14,9 +14,7 @@ public class TournamentController : ControllerBase
     private readonly ITournamentService _tournamentService;
     private readonly IMapper _mapper;
 
-    public TournamentController(
-        ITournamentService tournamentService,
-        IMapper mapper)
+    public TournamentController(ITournamentService tournamentService, IMapper mapper)
     {
         _tournamentService = tournamentService;
         _mapper = mapper;
@@ -29,88 +27,67 @@ public class TournamentController : ControllerBase
         return Ok(_mapper.Map<IEnumerable<TournamentResponseDTO>>(tournaments));
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<TournamentResponseDTO>> GetById(int id)
     {
         var tournament = await _tournamentService.GetByIdAsync(id);
         if (tournament == null)
-            return NotFound(new { message = $"Torneo con ID {id} no encontrado" });
+        {
+            return NotFound(new
+            {
+                status = StatusCodes.Status404NotFound,
+                message = $"No se encontro el torneo con ID {id}.",
+                detail = (string?)null,
+                traceId = HttpContext.TraceIdentifier
+            });
+        }
+
         return Ok(_mapper.Map<TournamentResponseDTO>(tournament));
     }
 
     [HttpPost]
-    public async Task<ActionResult<TournamentResponseDTO>> Create(TournamentRequestDTO dto)
+    public async Task<ActionResult<TournamentResponseDTO>> Create([FromBody] TournamentRequestDTO dto)
     {
-        try
-        {
-            var tournament = _mapper.Map<Tournament>(dto);
-            var created = await _tournamentService.CreateAsync(tournament);
-            var responseDto = _mapper.Map<TournamentResponseDTO>(created);
-            return CreatedAtAction(nameof(GetById), new { id = responseDto.Id }, responseDto);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var tournament = _mapper.Map<Tournament>(dto);
+        var created = await _tournamentService.CreateAsync(tournament);
+        var responseDto = _mapper.Map<TournamentResponseDTO>(created);
+
+        return CreatedAtAction(nameof(GetById), new { id = responseDto.Id }, responseDto);
     }
 
-    [HttpPut("{id}")]
-    public async Task<ActionResult> Update(int id, TournamentRequestDTO dto)
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] TournamentRequestDTO dto)
     {
-        try
-        {
-            var tournament = _mapper.Map<Tournament>(dto);
-            await _tournamentService.UpdateAsync(id, tournament);
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
-        catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
+        var tournament = _mapper.Map<Tournament>(dto);
+        await _tournamentService.UpdateAsync(id, tournament);
+        return NoContent();
     }
 
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
     {
-        try
-        {
-            await _tournamentService.DeleteAsync(id);
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
-        catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
+        await _tournamentService.DeleteAsync(id);
+        return NoContent();
     }
 
-    [HttpPatch("{id}/status")]
-    public async Task<ActionResult> UpdateStatus(int id, UpdateStatusDTO dto)
+    [HttpPatch("{id:int}/status")]
+    public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateStatusDTO dto)
     {
-        try
-        {
-            await _tournamentService.UpdateStatusAsync(id, dto.Status);
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
-        catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
+        await _tournamentService.UpdateStatusAsync(id, dto.Status);
+        return NoContent();
     }
 
-    [HttpPost("{id}/teams")]
-    public async Task<ActionResult> RegisterTeam(int id, RegisterTeamDTO dto)
+    [HttpPost("{id:int}/teams")]
+    public async Task<IActionResult> RegisterTeam(int id, [FromBody] RegisterTeamDTO dto)
     {
-        try
-        {
-            await _tournamentService.RegisterTeamAsync(id, dto.TeamId);
-            return Ok(new { message = "Equipo inscrito exitosamente" });
-        }
-        catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
-        catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
+        await _tournamentService.RegisterTeamAsync(id, dto.TeamId);
+        return Ok(new { message = "Equipo inscrito exitosamente" });
     }
 
-    [HttpGet("{id}/teams")]
+    [HttpGet("{id:int}/teams")]
     public async Task<ActionResult<IEnumerable<TeamResponseDTO>>> GetTeams(int id)
     {
-        try
-        {
-            var teams = await _tournamentService.GetTeamsByTournamentAsync(id);
-            return Ok(_mapper.Map<IEnumerable<TeamResponseDTO>>(teams));
-        }
-        catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
+        var teams = await _tournamentService.GetTeamsByTournamentAsync(id);
+        return Ok(_mapper.Map<IEnumerable<TeamResponseDTO>>(teams));
     }
 }
