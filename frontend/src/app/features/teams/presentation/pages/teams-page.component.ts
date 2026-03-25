@@ -3,6 +3,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
+import { ConfirmDialogComponent } from '../../../../shared/presentation/components/confirm-dialog/confirm-dialog.component';
+import { ToastStackComponent } from '../../../../shared/presentation/components/toast-stack/toast-stack.component';
 
 import { Team } from '../../domain/models/team.model';
 import { TeamUpsertPayload } from '../../domain/models/team-upsert.model';
@@ -20,7 +22,7 @@ type ToastNotification = {
 @Component({
   selector: 'app-teams-page',
   standalone: true,
-  imports: [CommonModule, DatePipe, ReactiveFormsModule],
+  imports: [CommonModule, DatePipe, ReactiveFormsModule, ConfirmDialogComponent, ToastStackComponent],
   templateUrl: './teams-page.component.html',
   styleUrl: './teams-page.component.scss',
 })

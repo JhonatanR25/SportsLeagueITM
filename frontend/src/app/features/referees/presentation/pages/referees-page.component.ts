@@ -3,6 +3,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
+import { ConfirmDialogComponent } from '../../../../shared/presentation/components/confirm-dialog/confirm-dialog.component';
+import { ToastStackComponent } from '../../../../shared/presentation/components/toast-stack/toast-stack.component';
 
 import { Referee } from '../../domain/models/referee.model';
 import { RefereeUpsertPayload } from '../../domain/models/referee-upsert.model';
@@ -20,7 +22,7 @@ type ToastNotification = {
 @Component({
   selector: 'app-referees-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ConfirmDialogComponent, ToastStackComponent],
   templateUrl: './referees-page.component.html',
   styleUrl: './referees-page.component.scss',
 })

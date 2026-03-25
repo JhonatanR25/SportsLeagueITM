@@ -2,6 +2,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ToastStackComponent } from '../../../../shared/presentation/components/toast-stack/toast-stack.component';
 
 import { Team } from '../../../teams/domain/models/team.model';
 import { TeamApiService } from '../../../teams/infrastructure/repositories/team-api.service';
@@ -20,7 +21,7 @@ type ToastNotification = { id: number; type: ToastType; title: string; message: 
 @Component({
   selector: 'app-matches-page',
   standalone: true,
-  imports: [CommonModule, DatePipe, ReactiveFormsModule],
+  imports: [CommonModule, DatePipe, ReactiveFormsModule, ToastStackComponent],
   templateUrl: './matches-page.component.html',
   styleUrl: './matches-page.component.scss',
 })

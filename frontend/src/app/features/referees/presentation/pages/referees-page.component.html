@@ -194,44 +194,16 @@
   </div>
 }
 
-@if (isDeleteModalOpen()) {
-  @if (refereePendingDelete(); as selectedReferee) {
-    <div class="overlay overlay--compact" (click)="closeDeleteModal()">
-      <section class="modal modal--compact" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
-        <div class="modal__header">
-          <div>
-            <p class="modal__eyebrow">Confirmacion</p>
-            <h2>Eliminar arbitro</h2>
-          </div>
-        </div>
-
-        <p class="confirm-copy">
-          Vas a eliminar al arbitro <strong>{{ selectedReferee.firstName }} {{ selectedReferee.lastName }}</strong>. Esta accion no se puede deshacer.
-        </p>
-
-        <div class="modal__actions">
-          <button type="button" class="ghost-button ghost-button--light" (click)="closeDeleteModal()">
-            Cancelar
-          </button>
-          <button type="button" class="ghost-button ghost-button--danger" [disabled]="isSaving()" (click)="confirmDelete()">
-            {{ isSaving() ? 'Eliminando...' : 'Eliminar arbitro' }}
-          </button>
-        </div>
-      </section>
-    </div>
-  }
+@if (refereePendingDelete(); as selectedReferee) {
+  <app-confirm-dialog
+    [open]="isDeleteModalOpen()"
+    title="Eliminar arbitro"
+    message="Vas a eliminar al arbitro &quot;{{ selectedReferee.firstName }} {{ selectedReferee.lastName }}&quot;. Esta accion no se puede deshacer."
+    confirmLabel="{{ isSaving() ? 'Eliminando...' : 'Eliminar arbitro' }}"
+    [isSaving]="isSaving()"
+    (cancel)="closeDeleteModal()"
+    (confirm)="confirmDelete()"
+  />
 }
 
-<section class="toast-stack" aria-live="polite" aria-label="Notificaciones">
-  @for (notification of notifications(); track notification.id) {
-    <article class="toast" [class.toast--error]="notification.type === 'error'">
-      <div>
-        <strong>{{ notification.title }}</strong>
-        <p>{{ notification.message }}</p>
-      </div>
-      <button type="button" class="icon-button icon-button--toast" (click)="dismissNotification(notification.id)">
-        Cerrar
-      </button>
-    </article>
-  }
-</section>
+<app-toast-stack [notifications]="notifications()" (dismiss)="dismissNotification($event)" />

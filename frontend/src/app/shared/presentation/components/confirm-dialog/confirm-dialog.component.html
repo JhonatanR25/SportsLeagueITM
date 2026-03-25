@@ -1,0 +1,23 @@
+@if (open) {
+  <div class="overlay overlay--compact" (click)="onCancel()">
+    <section class="modal modal--compact" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
+      <div class="modal__header">
+        <div>
+          <p class="modal__eyebrow">{{ eyebrow }}</p>
+          <h2>{{ title }}</h2>
+        </div>
+      </div>
+
+      <p class="confirm-copy">{{ message }}</p>
+
+      <div class="modal__actions">
+        <button type="button" class="ghost-button ghost-button--light" (click)="onCancel()">
+          {{ cancelLabel }}
+        </button>
+        <button type="button" class="ghost-button ghost-button--danger" [disabled]="isSaving" (click)="onConfirm()">
+          {{ isSaving ? 'Procesando...' : confirmLabel }}
+        </button>
+      </div>
+    </section>
+  </div>
+}

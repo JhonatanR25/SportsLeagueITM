@@ -188,11 +188,4 @@
   }
 }
 
-<section class="toast-stack" aria-live="polite" aria-label="Notificaciones">
-  @for (notification of notifications(); track notification.id) {
-    <article class="toast" [class.toast--error]="notification.type === 'error'">
-      <div><strong>{{ notification.title }}</strong><p>{{ notification.message }}</p></div>
-      <button type="button" class="icon-button icon-button--toast" (click)="dismissNotification(notification.id)">Cerrar</button>
-    </article>
-  }
-</section>
+<app-toast-stack [notifications]="notifications()" (dismiss)="dismissNotification($event)" />

@@ -198,28 +198,16 @@
   </div>
 }
 
-@if (isDeleteModalOpen()) {
-  @if (tournamentPendingDelete(); as selectedTournament) {
-    <div class="overlay overlay--compact" (click)="closeDeleteModal()">
-      <section class="modal modal--compact" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
-        <div class="modal__header">
-          <div>
-            <p class="modal__eyebrow">Confirmacion</p>
-            <h2>Eliminar torneo</h2>
-          </div>
-        </div>
-        <p class="confirm-copy">
-          Vas a eliminar el torneo <strong>{{ selectedTournament.name }}</strong>. Solo puede eliminarse si esta pendiente.
-        </p>
-        <div class="modal__actions">
-          <button type="button" class="ghost-button ghost-button--light" (click)="closeDeleteModal()">Cancelar</button>
-          <button type="button" class="ghost-button ghost-button--danger" [disabled]="isSaving()" (click)="confirmDelete()">
-            {{ isSaving() ? 'Eliminando...' : 'Eliminar torneo' }}
-          </button>
-        </div>
-      </section>
-    </div>
-  }
+@if (tournamentPendingDelete(); as selectedTournament) {
+  <app-confirm-dialog
+    [open]="isDeleteModalOpen()"
+    title="Eliminar torneo"
+    message="Vas a eliminar el torneo &quot;{{ selectedTournament.name }}&quot;. Solo puede eliminarse si esta pendiente."
+    confirmLabel="{{ isSaving() ? 'Eliminando...' : 'Eliminar torneo' }}"
+    [isSaving]="isSaving()"
+    (cancel)="closeDeleteModal()"
+    (confirm)="confirmDelete()"
+  />
 }
 
 @if (isRegisterTeamsModalOpen()) {
@@ -269,14 +257,4 @@
   }
 }
 
-<section class="toast-stack" aria-live="polite" aria-label="Notificaciones">
-  @for (notification of notifications(); track notification.id) {
-    <article class="toast" [class.toast--error]="notification.type === 'error'">
-      <div>
-        <strong>{{ notification.title }}</strong>
-        <p>{{ notification.message }}</p>
-      </div>
-      <button type="button" class="icon-button icon-button--toast" (click)="dismissNotification(notification.id)">Cerrar</button>
-    </article>
-  }
-</section>
+<app-toast-stack [notifications]="notifications()" (dismiss)="dismissNotification($event)" />

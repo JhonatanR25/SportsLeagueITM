@@ -234,45 +234,14 @@
   </div>
 }
 
-@if (isDeleteModalOpen()) {
-  @if (teamPendingDelete(); as selectedTeam) {
-    <div class="overlay overlay--compact" (click)="closeDeleteModal()">
-      <section class="modal modal--compact" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
-        <div class="modal__header">
-          <div>
-            <p class="modal__eyebrow">Confirmacion</p>
-            <h2>Eliminar equipo</h2>
-          </div>
-        </div>
+<app-confirm-dialog
+  [open]="isDeleteModalOpen()"
+  title="Eliminar equipo"
+  [message]="'Vas a eliminar el equipo &quot;' + (teamPendingDelete()?.name ?? '') + '&quot;. Esta accion no se puede deshacer.'"
+  confirmLabel="Eliminar equipo"
+  [isSaving]="isSaving()"
+  (cancel)="closeDeleteModal()"
+  (confirm)="confirmDelete()"
+/>
 
-        <p class="confirm-copy">
-          Vas a eliminar el equipo <strong>{{ selectedTeam.name }}</strong>. Esta accion no se puede
-          deshacer.
-        </p>
-
-        <div class="modal__actions">
-          <button type="button" class="ghost-button ghost-button--light" (click)="closeDeleteModal()">
-            Cancelar
-          </button>
-          <button type="button" class="ghost-button ghost-button--danger" [disabled]="isSaving()" (click)="confirmDelete()">
-            {{ isSaving() ? 'Eliminando...' : 'Eliminar equipo' }}
-          </button>
-        </div>
-      </section>
-    </div>
-  }
-}
-
-<section class="toast-stack" aria-live="polite" aria-label="Notificaciones">
-  @for (notification of notifications(); track notification.id) {
-    <article class="toast" [class.toast--error]="notification.type === 'error'">
-      <div>
-        <strong>{{ notification.title }}</strong>
-        <p>{{ notification.message }}</p>
-      </div>
-      <button type="button" class="icon-button icon-button--toast" (click)="dismissNotification(notification.id)">
-        Cerrar
-      </button>
-    </article>
-  }
-</section>
+<app-toast-stack [notifications]="notifications()" (dismiss)="dismissNotification($event)" />

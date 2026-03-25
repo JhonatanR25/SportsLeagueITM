@@ -1,0 +1,99 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(3, 8, 17, 0.72);
+  backdrop-filter: blur(8px);
+  z-index: 30;
+}
+
+.overlay--compact {
+  padding: 1.5rem;
+}
+
+.modal {
+  width: min(100%, 42rem);
+  padding: 1.5rem;
+  border-radius: 1.5rem;
+  background: linear-gradient(180deg, rgba(12, 29, 58, 0.98), rgba(8, 20, 40, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 1.5rem 4rem rgba(2, 8, 20, 0.4);
+}
+
+.modal--compact {
+  width: min(100%, 32rem);
+}
+
+.modal__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+}
+
+.modal__eyebrow {
+  margin: 0;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.modal h2 {
+  margin: 0;
+}
+
+.confirm-copy {
+  margin: 0 0 1.5rem;
+  color: rgba(245, 247, 250, 0.78);
+}
+
+.modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.ghost-button {
+  border: 0;
+  border-radius: 999px;
+  min-height: 2.75rem;
+  padding: 0.8rem 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text);
+}
+
+.ghost-button--light {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.ghost-button--danger {
+  background: rgba(219, 68, 55, 0.16);
+  color: #ffd8d4;
+}
+
+.ghost-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 720px) {
+  .modal {
+    padding: 1.1rem;
+    border-radius: 1.1rem;
+  }
+
+  .modal__actions {
+    flex-direction: column;
+  }
+
+  .ghost-button {
+    width: 100%;
+  }
+}
