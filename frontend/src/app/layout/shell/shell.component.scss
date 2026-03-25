@@ -196,7 +196,8 @@
   }
 
   .nav {
-    grid-template-columns: repeat(5, minmax(11rem, 1fr));
+    grid-auto-columns: minmax(11rem, 1fr);
+    grid-auto-flow: column;
     overflow-x: auto;
     padding-bottom: 0.35rem;
     scrollbar-width: thin;
@@ -243,7 +244,8 @@
   }
 
   .nav {
-    grid-template-columns: repeat(5, minmax(9.5rem, 1fr));
+    grid-auto-columns: minmax(9.5rem, 1fr);
+    grid-auto-flow: column;
     gap: 0.75rem;
   }
 
