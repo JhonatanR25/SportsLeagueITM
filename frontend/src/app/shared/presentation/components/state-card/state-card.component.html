@@ -1,0 +1,13 @@
+<section class="state-card" [class.state-card--error]="tone === 'error'">
+  @if (label) {
+    <p class="state-card__label">{{ label }}</p>
+  }
+
+  <h2>{{ title }}</h2>
+
+  @if (actionLabel) {
+    <button type="button" class="ghost-button ghost-button--light" (click)="onAction()">
+      {{ actionLabel }}
+    </button>
+  }
+</section>

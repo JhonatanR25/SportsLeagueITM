@@ -1,73 +1,43 @@
-<section class="page-header">
-  <div>
-    <p class="page-header__eyebrow">Arbitros</p>
-    <h1>Gestion arbitral</h1>
-    <p class="page-header__description">
-      Administra el cuerpo arbitral de la liga con busqueda, CRUD y feedback visual integrado.
-    </p>
-  </div>
+<app-module-page-header
+  class="page-header--narrow"
+  eyebrow="Arbitros"
+  title="Gestion arbitral"
+  description="Administra el cuerpo arbitral de la liga con busqueda, CRUD y feedback visual integrado."
+>
+  <label class="search-field" moduleHeaderControls>
+    <span>Buscar</span>
+    <input
+      type="search"
+      [value]="searchTerm()"
+      (input)="updateSearchTerm(searchInput.value)"
+      #searchInput
+      placeholder="Nombre o nacionalidad"
+    />
+  </label>
 
-  <div class="page-header__actions">
-    <label class="search-field">
-      <span>Buscar</span>
-      <input
-        type="search"
-        [value]="searchTerm()"
-        (input)="updateSearchTerm(searchInput.value)"
-        #searchInput
-        placeholder="Nombre o nacionalidad"
-      />
-    </label>
-
-    <div class="page-header__buttons">
-      <button type="button" class="ghost-button" (click)="retry()">Actualizar</button>
-      <button type="button" class="primary-button" (click)="openCreateModal()">Crear arbitro</button>
-    </div>
-  </div>
-</section>
+  <button type="button" class="ghost-button" moduleHeaderButtons (click)="retry()">Actualizar</button>
+  <button type="button" class="primary-button" moduleHeaderButtons (click)="openCreateModal()">Crear arbitro</button>
+</app-module-page-header>
 
 @if (isLoading()) {
-  <section class="state-card">
-    <p class="state-card__label">Cargando arbitros</p>
-    <h2>Consultando la API del backend...</h2>
-  </section>
+  <app-state-card label="Cargando arbitros" title="Consultando la API del backend..." />
 } @else if (errorMessage()) {
-  <section class="state-card state-card--error">
-    <p class="state-card__label">No disponible</p>
-    <h2>{{ errorMessage() }}</h2>
-    <button type="button" class="ghost-button ghost-button--light" (click)="retry()">
-      Reintentar
-    </button>
-  </section>
+  <app-state-card
+    label="No disponible"
+    [title]="errorMessage()"
+    tone="error"
+    actionLabel="Reintentar"
+    (action)="retry()"
+  />
 } @else {
-  <section class="summary-grid" aria-label="Resumen de arbitros">
-    <article class="summary-card">
-      <span>Arbitros visibles</span>
-      <strong>{{ filteredReferees().length }}</strong>
-    </article>
-    <article class="summary-card">
-      <span>Nacionalidades</span>
-      <strong>{{ uniqueNationalitiesCount() }}</strong>
-    </article>
-    <article class="summary-card">
-      <span>Estado visual</span>
-      <strong>Cuerpo arbitral claro</strong>
-    </article>
-  </section>
-
-  <section class="table-card">
-    <div class="table-card__header">
-      <div>
-        <p class="table-card__eyebrow">Listado</p>
-        <h2>Arbitros registrados</h2>
-      </div>
-    </div>
+  <section class="table-card table-card--narrow">
+    <app-section-card-header title="Arbitros registrados" />
 
     @if (filteredReferees().length === 0) {
-      <section class="state-card">
-        <p class="state-card__label">Busqueda sin coincidencias</p>
-        <h2>No encontramos arbitros con los filtros actuales.</h2>
-      </section>
+      <app-state-card
+        label="Busqueda sin coincidencias"
+        title="No encontramos arbitros con los filtros actuales."
+      />
     } @else {
       <div class="referee-grid">
         @for (referee of filteredReferees(); track trackByRefereeId($index, referee)) {
@@ -83,7 +53,7 @@
               </div>
             </div>
 
-            <div class="referee-card__actions">
+            <div class="referee-card__actions card-actions--compact">
               <button type="button" class="ghost-button ghost-button--light" (click)="openEditModal(referee)">
                 Editar
               </button>
@@ -100,12 +70,12 @@
       </div>
 
       <div class="referee-table-wrapper">
-        <table class="referee-table">
+        <table class="referee-table table-layout--auto">
           <thead>
             <tr>
               <th>Arbitro</th>
               <th>Nacionalidad</th>
-              <th class="referee-table__actions-column">Acciones</th>
+              <th class="referee-table__actions-column compact-actions-column">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -122,8 +92,8 @@
                   </div>
                 </td>
                 <td>{{ referee.nationality }}</td>
-                <td class="referee-table__actions-cell">
-                  <div class="referee-table__actions">
+                <td class="referee-table__actions-cell compact-actions-cell">
+                  <div class="referee-table__actions table-actions--compact">
                     <button type="button" class="table-action" (click)="openEditModal(referee)">
                       Editar
                     </button>
@@ -153,20 +123,16 @@
           <p class="modal__eyebrow">Ficha arbitral</p>
           <h2>{{ modalTitle() }}</h2>
         </div>
-        <button type="button" class="icon-button" (click)="closeFormModal()">Cerrar</button>
       </div>
 
       <form class="referee-form" [formGroup]="refereeForm" (ngSubmit)="submitRefereeForm()">
-        <section class="context-banner field--full">
-          <div>
-            <span class="context-banner__label">Modo</span>
-            <strong>{{ formModeLabel() }}</strong>
-          </div>
-          <div>
-            <span class="context-banner__label">Objetivo</span>
-            <strong>Registrar una identidad arbitral clara y consistente</strong>
-          </div>
-        </section>
+        <app-context-banner [fullWidth]="true">
+          <app-context-banner-item label="Modo" [value]="formModeLabel()" />
+          <app-context-banner-item
+            label="Objetivo"
+            value="Registrar una identidad arbitral clara y consistente"
+          />
+        </app-context-banner>
 
         <section class="referee-preview field--full">
           <div class="referee-preview__avatar">{{ refereePreview().initials }}</div>

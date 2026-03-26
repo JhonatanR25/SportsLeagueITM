@@ -1,0 +1,27 @@
+:host {
+  display: block;
+}
+
+.context-banner-item {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.context-banner__label {
+  display: block;
+  margin: 0;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: var(--font-size-label-xs);
+  font-weight: 700;
+}
+
+.context-banner-item strong {
+  font-size: var(--font-size-body-lg);
+}
+
+.context-banner-item :where(p, small) {
+  margin: 0;
+  color: rgba(245, 247, 250, 0.74);
+}

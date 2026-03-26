@@ -1,0 +1,22 @@
+:host {
+  display: block;
+}
+
+.context-banner {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem;
+  border: var(--border-soft);
+  border-radius: 1rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+}
+
+.context-banner.field--full {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 720px) {
+  .context-banner {
+    grid-template-columns: 1fr;
+  }
+}

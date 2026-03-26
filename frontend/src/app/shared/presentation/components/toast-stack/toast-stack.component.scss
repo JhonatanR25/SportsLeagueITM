@@ -34,14 +34,7 @@
 }
 
 .icon-button {
-  border: 0;
-  border-radius: var(--radius-pill);
-  min-height: 2.4rem;
-  padding: 0.65rem 0.95rem;
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--color-text);
-  cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-control);
 }
 
 .icon-button--toast {

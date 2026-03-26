@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { Match } from '../../../matches/domain/models/match.model';
 import { MatchApiService } from '../../../matches/infrastructure/repositories/match-api.service';
+import { StateCardComponent } from '../../../../shared/presentation/components/state-card/state-card.component';
 import { Player } from '../../../players/domain/models/player.model';
 import { PlayerApiService } from '../../../players/infrastructure/repositories/player-api.service';
 import { Referee } from '../../../referees/domain/models/referee.model';
@@ -29,7 +30,7 @@ type ModuleCard = {
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, StateCardComponent],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss',
 })

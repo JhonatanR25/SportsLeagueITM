@@ -1,57 +1,44 @@
-<section class="page-header">
-  <div class="page-header__copy">
-    <h1>Clubes y sedes</h1>
-    <p class="page-header__description">
-      Administra la informacion principal de cada equipo, su ciudad, estadio y presencia visual en
-      la competencia.
-    </p>
-  </div>
+<app-module-page-header
+  title="Clubes y sedes"
+  description="Administra la informacion principal de cada equipo, su ciudad, estadio y presencia visual en la competencia."
+>
+  <label class="search-field" moduleHeaderControls>
+    <span>Buscar</span>
+    <input
+      type="search"
+      [value]="searchTerm()"
+      (input)="updateSearchTerm(searchInput.value)"
+      #searchInput
+      placeholder="Buscar por nombre, ciudad o estadio"
+    />
+  </label>
 
-  <div class="page-header__actions">
-    <label class="search-field">
-      <span>Busqueda</span>
-      <input
-        type="search"
-        [value]="searchTerm()"
-        (input)="updateSearchTerm(searchInput.value)"
-        #searchInput
-        placeholder="Buscar por nombre, ciudad o estadio"
-      />
-    </label>
-
-    <div class="page-header__buttons">
-      <button type="button" class="ghost-button" (click)="retry()">Actualizar</button>
-      <button type="button" class="primary-button" (click)="openCreateModal()">Crear equipo</button>
-    </div>
-  </div>
-</section>
+  <button type="button" class="ghost-button" moduleHeaderButtons (click)="retry()">Actualizar</button>
+  <button type="button" class="primary-button" moduleHeaderButtons (click)="openCreateModal()">Crear equipo</button>
+</app-module-page-header>
 
 @if (isLoading()) {
-  <section class="state-card">
-    <p class="state-card__label">Actualizando listado</p>
-    <h2>Consultando la informacion general de los equipos...</h2>
-  </section>
+  <app-state-card
+    label="Actualizando listado"
+    title="Consultando la informacion general de los equipos..."
+  />
 } @else if (errorMessage()) {
-  <section class="state-card state-card--error">
-    <p class="state-card__label">Modulo no disponible</p>
-    <h2>{{ errorMessage() }}</h2>
-    <button type="button" class="ghost-button ghost-button--light" (click)="retry()">
-      Reintentar
-    </button>
-  </section>
+  <app-state-card
+    label="Modulo no disponible"
+    [title]="errorMessage()"
+    tone="error"
+    actionLabel="Reintentar"
+    (action)="retry()"
+  />
 } @else {
   <section class="table-card">
-    <div class="table-card__header">
-      <div>
-        <h2>Listado general</h2>
-      </div>
-    </div>
+    <app-section-card-header title="Listado general" />
 
     @if (filteredTeams().length === 0) {
-      <section class="state-card">
-        <p class="state-card__label">Sin coincidencias</p>
-        <h2>No encontramos equipos con los criterios de busqueda actuales.</h2>
-      </section>
+      <app-state-card
+        label="Sin coincidencias"
+        title="No encontramos equipos con los criterios de busqueda actuales."
+      />
     } @else {
       <div class="team-grid">
         @for (team of filteredTeams(); track trackByTeamId($index, team)) {
@@ -74,7 +61,7 @@
               </div>
             </dl>
 
-            <div class="team-card__actions">
+            <div class="team-card__actions card-actions--compact">
               <button type="button" class="ghost-button ghost-button--light" (click)="openEditModal(team)">
                 Editar
               </button>
@@ -98,7 +85,7 @@
               <th>Ciudad</th>
               <th>Estadio</th>
               <th>Fundacion</th>
-              <th class="team-table__actions-column">Acciones</th>
+              <th class="team-table__actions-column compact-actions-column">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -115,8 +102,8 @@
                 <td>{{ team.city }}</td>
                 <td>{{ team.stadium }}</td>
                 <td>{{ team.foundedDate | date: 'dd/MM/yyyy' }}</td>
-                <td class="team-table__actions-cell">
-                  <div class="team-table__actions">
+                <td class="team-table__actions-cell compact-actions-cell">
+                  <div class="team-table__actions table-actions--compact">
                     <button type="button" class="table-action" (click)="openEditModal(team)">
                       Editar
                     </button>
@@ -149,16 +136,13 @@
       </div>
 
       <form class="team-form" [formGroup]="teamForm" (ngSubmit)="submitTeamForm()">
-        <section class="context-banner field--full">
-          <div>
-            <span class="context-banner__label">Modo</span>
-            <strong>{{ formModeLabel() }}</strong>
-          </div>
-          <div>
-            <span class="context-banner__label">Objetivo</span>
-            <strong>Registrar datos claros y faciles de identificar</strong>
-          </div>
-        </section>
+        <app-context-banner [fullWidth]="true">
+          <app-context-banner-item label="Modo" [value]="formModeLabel()" />
+          <app-context-banner-item
+            label="Objetivo"
+            value="Registrar datos claros y faciles de identificar"
+          />
+        </app-context-banner>
 
         <section class="logo-preview field--full">
           <div class="logo-preview__crest">

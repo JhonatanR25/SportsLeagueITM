@@ -90,6 +90,18 @@ public class PlayerService : IPlayerService
                 $"El número {player.Number} ya está en uso en este equipo.");
         }
 
+        var duplicatePlayer = await _playerRepository.GetByIdentityAsync(
+            player.TeamId,
+            player.FirstName,
+            player.LastName,
+            player.BirthDate);
+
+        if (duplicatePlayer != null)
+        {
+            throw new InvalidOperationException(
+                $"Ya existe un jugador con el nombre '{player.FirstName} {player.LastName}' y la misma fecha de nacimiento en este equipo.");
+        }
+
         _logger.LogInformation(
             "Creating player: {FirstName} {LastName}.",
             player.FirstName,
@@ -144,6 +156,18 @@ public class PlayerService : IPlayerService
                 throw new InvalidOperationException(
                     $"El número {player.Number} ya está en uso en este equipo.");
             }
+        }
+
+        var duplicatePlayer = await _playerRepository.GetByIdentityAsync(
+            player.TeamId,
+            player.FirstName,
+            player.LastName,
+            player.BirthDate);
+
+        if (duplicatePlayer != null && duplicatePlayer.Id != id)
+        {
+            throw new InvalidOperationException(
+                $"Ya existe un jugador con el nombre '{player.FirstName} {player.LastName}' y la misma fecha de nacimiento en este equipo.");
         }
 
         existingPlayer.FirstName = player.FirstName;

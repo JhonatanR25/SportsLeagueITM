@@ -1,0 +1,11 @@
+<div class="table-card__header">
+  <div>
+    @if (eyebrow) {
+      <p class="table-card__eyebrow">{{ eyebrow }}</p>
+    }
+
+    <h2>{{ title }}</h2>
+  </div>
+
+  <ng-content select="[sectionCardHeaderActions]"></ng-content>
+</div>

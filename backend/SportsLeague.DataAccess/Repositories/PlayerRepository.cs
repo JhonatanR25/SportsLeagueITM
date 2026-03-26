@@ -30,6 +30,21 @@ public class PlayerRepository : GenericRepository<Player>, IPlayerRepository
             .FirstOrDefaultAsync(p => p.TeamId == teamId && p.Number == number);
     }
 
+    public async Task<Player?> GetByIdentityAsync(int teamId, string firstName, string lastName, DateTime birthDate)
+    {
+        var normalizedFirstName = firstName.Trim();
+        var normalizedLastName = lastName.Trim();
+        var normalizedBirthDate = birthDate.Date;
+
+        return await _dbSet
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p =>
+                p.TeamId == teamId &&
+                p.FirstName == normalizedFirstName &&
+                p.LastName == normalizedLastName &&
+                p.BirthDate.Date == normalizedBirthDate);
+    }
+
     public async Task<IEnumerable<Player>> GetAllWithTeamAsync()
     {
         return await _dbSet

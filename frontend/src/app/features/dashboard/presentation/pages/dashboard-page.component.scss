@@ -16,7 +16,7 @@
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-size: 0.75rem;
+  font-size: var(--font-size-label-sm);
   font-weight: 700;
 }
 
@@ -34,7 +34,7 @@
 .module-card__total {
   font-weight: 700;
   color: rgba(245, 247, 250, 0.7);
-  font-size: 0.94rem;
+  font-size: var(--font-size-body-md);
 }
 
 .panel,
@@ -55,7 +55,7 @@
 .panel__header h2,
 .state-card h2 {
   margin-top: 0.4rem;
-  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-size: var(--font-size-heading-md);
 }
 
 .panel__season {
@@ -74,12 +74,12 @@
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: 0.72rem;
+  font-size: var(--font-size-label-xs);
   font-weight: 700;
 }
 
 .panel__season strong {
-  font-size: 1.3rem;
+  font-size: var(--font-size-body-xl);
   line-height: 1.05;
 }
 
@@ -111,11 +111,11 @@
   justify-content: center;
   min-height: 2.4rem;
   padding: 0.65rem 0.95rem;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-control);
   text-decoration: none;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
   border: 1px solid rgba(255, 255, 255, 0.07);
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .module-card__metrics {
@@ -134,7 +134,7 @@
 }
 
 .module-card__metrics strong {
-  font-size: 1.2rem;
+  font-size: var(--font-size-body-xl);
   line-height: 1.15;
 }
 

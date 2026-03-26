@@ -1,72 +1,52 @@
-<section class="page-header">
-  <div>
-    <p class="page-header__eyebrow">Partidos</p>
-    <h1>Gestion de partidos</h1>
-    <p class="page-header__description">
-      Programa encuentros, controla el estado del juego y actualiza marcadores desde la misma vista.
-    </p>
+<app-module-page-header
+  eyebrow="Partidos"
+  title="Gestion de partidos"
+  description="Programa encuentros, controla el estado del juego y actualiza marcadores desde la misma vista."
+>
+  <label class="search-field" moduleHeaderControls>
+    <span>Buscar</span>
+    <input type="search" [value]="searchTerm()" (input)="updateSearchTerm(searchInput.value)" #searchInput placeholder="Equipos, arbitro o torneo" />
+  </label>
+
+  <div class="filter-row" moduleHeaderControls>
+    <select [value]="filterTournamentId()" (change)="updateFilterTournament(+$any($event.target).value)">
+      <option [value]="0">Todos los torneos</option>
+      @for (tournament of tournaments(); track tournament.id) {
+        <option [value]="tournament.id">{{ tournament.name }}</option>
+      }
+    </select>
+
+    <select [value]="filterStatus()" (change)="updateFilterStatus($any($event.target).value)">
+      <option value="">Todos los estados</option>
+      @for (status of statusOptions; track status) {
+        <option [value]="status">{{ getStatusLabel(status) }}</option>
+      }
+    </select>
   </div>
 
-  <div class="page-header__actions">
-    <label class="search-field">
-      <span>Buscar</span>
-      <input type="search" [value]="searchTerm()" (input)="updateSearchTerm(searchInput.value)" #searchInput placeholder="Equipos, arbitro o torneo" />
-    </label>
-
-    <div class="filter-row">
-      <select [value]="filterTournamentId()" (change)="updateFilterTournament(+$any($event.target).value)">
-        <option [value]="0">Todos los torneos</option>
-        @for (tournament of tournaments(); track tournament.id) {
-          <option [value]="tournament.id">{{ tournament.name }}</option>
-        }
-      </select>
-
-      <select [value]="filterStatus()" (change)="updateFilterStatus($any($event.target).value)">
-        <option value="">Todos los estados</option>
-        @for (status of statusOptions; track status) {
-          <option [value]="status">{{ getStatusLabel(status) }}</option>
-        }
-      </select>
-    </div>
-
-    <div class="page-header__buttons">
-      <button type="button" class="ghost-button" (click)="retry()">Actualizar</button>
-      <button type="button" class="primary-button" (click)="openCreateModal()">Crear partido</button>
-    </div>
-  </div>
-</section>
+  <button type="button" class="ghost-button" moduleHeaderButtons (click)="retry()">Actualizar</button>
+  <button type="button" class="primary-button" moduleHeaderButtons (click)="openCreateModal()">Crear partido</button>
+</app-module-page-header>
 
 @if (isLoading()) {
-  <section class="state-card">
-    <p class="state-card__label">Cargando partidos</p>
-    <h2>Consultando la API del backend...</h2>
-  </section>
+  <app-state-card label="Cargando partidos" title="Consultando la API del backend..." />
 } @else if (errorMessage()) {
-  <section class="state-card state-card--error">
-    <p class="state-card__label">No disponible</p>
-    <h2>{{ errorMessage() }}</h2>
-    <button type="button" class="ghost-button ghost-button--light" (click)="retry()">Reintentar</button>
-  </section>
+  <app-state-card
+    label="No disponible"
+    [title]="errorMessage()"
+    tone="error"
+    actionLabel="Reintentar"
+    (action)="retry()"
+  />
 } @else {
-  <section class="summary-grid">
-    <article class="summary-card"><span>Partidos visibles</span><strong>{{ filteredMatches().length }}</strong></article>
-    <article class="summary-card"><span>Programados</span><strong>{{ scheduledCount() }}</strong></article>
-    <article class="summary-card"><span>En juego</span><strong>{{ inProgressCount() }}</strong></article>
-  </section>
-
   <section class="table-card">
-    <div class="table-card__header">
-      <div>
-        <p class="table-card__eyebrow">Listado</p>
-        <h2>Partidos registrados</h2>
-      </div>
-    </div>
+    <app-section-card-header title="Partidos registrados" />
 
     @if (filteredMatches().length === 0) {
-      <section class="state-card">
-        <p class="state-card__label">Busqueda sin coincidencias</p>
-        <h2>No encontramos partidos con los filtros actuales.</h2>
-      </section>
+      <app-state-card
+        label="Busqueda sin coincidencias"
+        title="No encontramos partidos con los filtros actuales."
+      />
     } @else {
       <div class="match-grid">
         @for (match of filteredMatches(); track trackByMatchId($index, match)) {
@@ -85,7 +65,7 @@
               <div><dt>Marcador</dt><dd>{{ match.homeScore }} - {{ match.awayScore }}</dd></div>
             </dl>
 
-            <div class="match-card__actions">
+            <div class="match-card__actions card-actions--dense">
               @for (status of getNextStatusOptions(match); track status) {
                 <button type="button" class="ghost-button" (click)="updateMatchStatus(match, status)">
                   {{ getStatusActionLabel(match.status, status) }}
@@ -119,8 +99,8 @@
                 <td><span class="status-badge" [class]="'status-badge--' + match.status.toLowerCase()">{{ getStatusLabel(match.status) }}</span></td>
                 <td>{{ match.homeScore }} - {{ match.awayScore }}</td>
                 <td>{{ match.refereeName }}</td>
-                <td class="match-table__actions-cell">
-                  <div class="match-table__actions">
+                <td class="match-table__actions-cell dense-actions-cell">
+                  <div class="match-table__actions table-actions--dense">
                     @for (status of getNextStatusOptions(match); track status) {
                       <button type="button" class="table-action" (click)="updateMatchStatus(match, status)">{{ getStatusActionLabel(match.status, status) }}</button>
                     }
@@ -144,17 +124,15 @@
           <p class="modal__eyebrow">Programacion</p>
           <h2>Crear partido</h2>
         </div>
-        <button type="button" class="icon-button" (click)="closeCreateModal()">Cerrar</button>
       </div>
 
       <form class="match-form" [formGroup]="createForm" (ngSubmit)="submitCreateForm()">
-        <section class="context-banner field--full">
-          <div>
-            <span class="context-banner__label">Torneo seleccionado</span>
-            <strong>{{ selectedTournament()?.name ?? 'Selecciona un torneo para habilitar los equipos' }}</strong>
-          </div>
-          <div>
-            <span class="context-banner__label">Equipos disponibles</span>
+        <app-context-banner [fullWidth]="true">
+          <app-context-banner-item
+            label="Torneo seleccionado"
+            [value]="selectedTournament()?.name ?? 'Selecciona un torneo para habilitar los equipos'"
+          />
+          <app-context-banner-item label="Equipos disponibles">
             <strong>
               @if (isTournamentTeamsLoading()) {
                 Cargando...
@@ -162,8 +140,8 @@
                 {{ tournamentTeams().length }}
               }
             </strong>
-          </div>
-        </section>
+          </app-context-banner-item>
+        </app-context-banner>
 
         <label class="field">
           <span>Fecha y hora</span>
@@ -269,20 +247,16 @@
             <p class="modal__eyebrow">Marcador</p>
             <h2>{{ selectedMatch.homeTeamName }} vs {{ selectedMatch.awayTeamName }}</h2>
           </div>
-          <button type="button" class="icon-button" (click)="closeScoreModal()">Cerrar</button>
         </div>
 
         <form class="score-form" [formGroup]="scoreForm" (ngSubmit)="submitScoreForm()">
-          <section class="context-banner field--full">
-            <div>
-              <span class="context-banner__label">Estado actual</span>
-              <strong>{{ getStatusLabel(selectedMatch.status) }}</strong>
-            </div>
-            <div>
-              <span class="context-banner__label">Torneo</span>
-              <strong>{{ selectedMatch.tournamentName }}</strong>
-            </div>
-          </section>
+        <app-context-banner [fullWidth]="true">
+          <app-context-banner-item
+            label="Estado actual"
+            [value]="getStatusLabel(selectedMatch.status)"
+          />
+          <app-context-banner-item label="Torneo" [value]="selectedMatch.tournamentName" />
+        </app-context-banner>
 
           <label class="field">
             <span>{{ selectedMatch.homeTeamName }}</span>

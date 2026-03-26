@@ -1,73 +1,42 @@
-<section class="page-header">
-  <div>
-    <p class="page-header__eyebrow">Torneos</p>
-    <h1>Gestion de torneos</h1>
-    <p class="page-header__description">
-      Controla temporadas, fechas, estados y equipos inscritos con las reglas de negocio del backend.
-    </p>
-  </div>
+<app-module-page-header
+  eyebrow="Torneos"
+  title="Gestion de torneos"
+  description="Controla temporadas, fechas, estados y equipos inscritos con las reglas de negocio del backend."
+>
+  <label class="search-field" moduleHeaderControls>
+    <span>Buscar</span>
+    <input
+      type="search"
+      [value]="searchTerm()"
+      (input)="updateSearchTerm(searchInput.value)"
+      #searchInput
+      placeholder="Nombre, temporada o estado"
+    />
+  </label>
 
-  <div class="page-header__actions">
-    <label class="search-field">
-      <span>Buscar</span>
-      <input
-        type="search"
-        [value]="searchTerm()"
-        (input)="updateSearchTerm(searchInput.value)"
-        #searchInput
-        placeholder="Nombre, temporada o estado"
-      />
-    </label>
-
-    <div class="page-header__buttons">
-      <button type="button" class="ghost-button" (click)="retry()">Actualizar</button>
-      <button type="button" class="primary-button" (click)="openCreateModal()">Crear torneo</button>
-    </div>
-  </div>
-</section>
+  <button type="button" class="ghost-button" moduleHeaderButtons (click)="retry()">Actualizar</button>
+  <button type="button" class="primary-button" moduleHeaderButtons (click)="openCreateModal()">Crear torneo</button>
+</app-module-page-header>
 
 @if (isLoading()) {
-  <section class="state-card">
-    <p class="state-card__label">Cargando torneos</p>
-    <h2>Consultando la API del backend...</h2>
-  </section>
+  <app-state-card label="Cargando torneos" title="Consultando la API del backend..." />
 } @else if (errorMessage()) {
-  <section class="state-card state-card--error">
-    <p class="state-card__label">No disponible</p>
-    <h2>{{ errorMessage() }}</h2>
-    <button type="button" class="ghost-button ghost-button--light" (click)="retry()">
-      Reintentar
-    </button>
-  </section>
+  <app-state-card
+    label="No disponible"
+    [title]="errorMessage()"
+    tone="error"
+    actionLabel="Reintentar"
+    (action)="retry()"
+  />
 } @else {
-  <section class="summary-grid" aria-label="Resumen de torneos">
-    <article class="summary-card">
-      <span>Torneos visibles</span>
-      <strong>{{ filteredTournaments().length }}</strong>
-    </article>
-    <article class="summary-card">
-      <span>Pendientes</span>
-      <strong>{{ pendingCount() }}</strong>
-    </article>
-    <article class="summary-card">
-      <span>En curso</span>
-      <strong>{{ activeCount() }}</strong>
-    </article>
-  </section>
-
   <section class="table-card">
-    <div class="table-card__header">
-      <div>
-        <p class="table-card__eyebrow">Listado</p>
-        <h2>Torneos registrados</h2>
-      </div>
-    </div>
+    <app-section-card-header title="Torneos registrados" />
 
     @if (filteredTournaments().length === 0) {
-      <section class="state-card">
-        <p class="state-card__label">Busqueda sin coincidencias</p>
-        <h2>No encontramos torneos con los filtros actuales.</h2>
-      </section>
+      <app-state-card
+        label="Busqueda sin coincidencias"
+        title="No encontramos torneos con los filtros actuales."
+      />
     } @else {
       <div class="tournament-grid">
         @for (tournament of filteredTournaments(); track trackByTournamentId($index, tournament)) {
@@ -97,7 +66,7 @@
               </div>
             </dl>
 
-            <div class="tournament-card__actions">
+            <div class="tournament-card__actions card-actions--dense">
               <button type="button" class="ghost-button ghost-button--light" [disabled]="!canEdit(tournament)" (click)="openEditModal(tournament)">Editar</button>
               <button type="button" class="ghost-button" [disabled]="!canRegisterTeams(tournament)" (click)="openRegisterTeamsModal(tournament)">Gestionar equipos</button>
               <button type="button" class="ghost-button" [disabled]="!canAdvanceStatus(tournament)" (click)="advanceStatus(tournament)">
@@ -135,8 +104,8 @@
                 <td>{{ tournament.startDate | date: 'dd/MM/yyyy' }}</td>
                 <td>{{ tournament.endDate | date: 'dd/MM/yyyy' }}</td>
                 <td>{{ tournament.teamsCount }}</td>
-                <td class="tournament-table__actions-cell">
-                  <div class="tournament-table__actions">
+                <td class="tournament-table__actions-cell dense-actions-cell">
+                  <div class="tournament-table__actions table-actions--dense">
                     <button type="button" class="table-action" [disabled]="!canEdit(tournament)" (click)="openEditModal(tournament)">Editar</button>
                     <button type="button" class="table-action" [disabled]="!canRegisterTeams(tournament)" (click)="openRegisterTeamsModal(tournament)">Equipos</button>
                     <button type="button" class="table-action" [disabled]="!canAdvanceStatus(tournament)" (click)="advanceStatus(tournament)">
@@ -162,20 +131,19 @@
           <p class="modal__eyebrow">Configuracion de torneo</p>
           <h2>{{ modalTitle() }}</h2>
         </div>
-        <button type="button" class="icon-button" (click)="closeFormModal()">Cerrar</button>
       </div>
 
       <form class="tournament-form" [formGroup]="tournamentForm" (ngSubmit)="submitTournamentForm()">
-        <section class="context-banner field--full">
-          <div>
-            <span class="context-banner__label">Modo</span>
-            <strong>{{ tournamentBeingEdited() ? 'Edicion de torneo' : 'Creacion de torneo' }}</strong>
-          </div>
-          <div>
-            <span class="context-banner__label">Regla clave</span>
-            <strong>La fecha final debe ser posterior a la inicial</strong>
-          </div>
-        </section>
+        <app-context-banner [fullWidth]="true">
+          <app-context-banner-item
+            label="Modo"
+            [value]="tournamentBeingEdited() ? 'Edicion de torneo' : 'Creacion de torneo'"
+          />
+          <app-context-banner-item
+            label="Regla clave"
+            value="La fecha final debe ser posterior a la inicial"
+          />
+        </app-context-banner>
 
         <label class="field">
           <span>Nombre</span>
@@ -244,17 +212,16 @@
           <button type="button" class="icon-button" (click)="closeRegisterTeamsModal()">Cerrar</button>
         </div>
 
-        <section class="context-banner">
-          <div>
-            <span class="context-banner__label">Estado actual</span>
-            <strong>{{ getStatusLabel(selectedTournament.status) }}</strong>
-          </div>
-          <div>
-            <span class="context-banner__label">Equipos inscritos</span>
-            <strong>{{ selectedTournamentTeams().length }}</strong>
-          </div>
-          <div>
-            <span class="context-banner__label">Disponibles para inscribir</span>
+        <app-context-banner>
+          <app-context-banner-item
+            label="Estado actual"
+            [value]="getStatusLabel(selectedTournament.status)"
+          />
+          <app-context-banner-item
+            label="Equipos inscritos"
+            [value]="selectedTournamentTeams().length"
+          />
+          <app-context-banner-item label="Disponibles para inscribir">
             <strong>
               @if (isTournamentTeamsLoading()) {
                 Cargando...
@@ -262,8 +229,8 @@
                 {{ remainingTeamsCount() }}
               }
             </strong>
-          </div>
-        </section>
+          </app-context-banner-item>
+        </app-context-banner>
 
         <div class="register-panel">
           <label class="field field--full">

@@ -1,0 +1,8 @@
+<section class="summary-grid" [attr.aria-label]="ariaLabel">
+  @for (item of items; track item.label) {
+    <article class="summary-card" [class.summary-card--copy]="item.variant === 'copy'">
+      <span>{{ item.label }}</span>
+      <strong>{{ item.value }}</strong>
+    </article>
+  }
+</section>

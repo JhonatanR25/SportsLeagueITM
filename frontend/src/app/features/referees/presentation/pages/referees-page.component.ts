@@ -1,82 +1,47 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { ToastNotification, ToastType } from '../../../../shared/domain/models/toast-notification.model';
-import { ConfirmDialogComponent } from '../../../../shared/presentation/components/confirm-dialog/confirm-dialog.component';
-import { ToastStackComponent } from '../../../../shared/presentation/components/toast-stack/toast-stack.component';
-import { parseApiErrorMessage } from '../../../../shared/utils/http-error.utils';
-import { pushToastNotification } from '../../../../shared/utils/toast.utils';
+import { Component, inject } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
 
+import { ConfirmDialogComponent } from '../../../../shared/presentation/components/confirm-dialog/confirm-dialog.component';
+import { ContextBannerComponent } from '../../../../shared/presentation/components/context-banner/context-banner.component';
+import { ContextBannerItemComponent } from '../../../../shared/presentation/components/context-banner-item/context-banner-item.component';
+import { ModulePageHeaderComponent } from '../../../../shared/presentation/components/module-page-header/module-page-header.component';
+import { SectionCardHeaderComponent } from '../../../../shared/presentation/components/section-card-header/section-card-header.component';
+import { StateCardComponent } from '../../../../shared/presentation/components/state-card/state-card.component';
+import { ToastStackComponent } from '../../../../shared/presentation/components/toast-stack/toast-stack.component';
 import { Referee } from '../../domain/models/referee.model';
-import { RefereeUpsertPayload } from '../../domain/models/referee-upsert.model';
-import { RefereeApiService } from '../../infrastructure/repositories/referee-api.service';
+import { RefereesPageFacade } from '../../application/facades/referees-page.facade';
 
 @Component({
   selector: 'app-referees-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ConfirmDialogComponent, ToastStackComponent],
+  imports: [CommonModule, ReactiveFormsModule, ConfirmDialogComponent, ContextBannerComponent, ContextBannerItemComponent, ModulePageHeaderComponent, SectionCardHeaderComponent, StateCardComponent, ToastStackComponent],
   templateUrl: './referees-page.component.html',
   styleUrl: './referees-page.component.scss',
+  providers: [RefereesPageFacade],
 })
 export class RefereesPageComponent {
-  private readonly refereeApi = inject(RefereeApiService);
-  private readonly formBuilder = inject(FormBuilder);
+  private readonly facade = inject(RefereesPageFacade);
 
-  protected readonly referees = signal<Referee[]>([]);
-  protected readonly isLoading = signal(true);
-  protected readonly errorMessage = signal('');
-  protected readonly isFormModalOpen = signal(false);
-  protected readonly isDeleteModalOpen = signal(false);
-  protected readonly isSaving = signal(false);
-  protected readonly refereeBeingEdited = signal<Referee | null>(null);
-  protected readonly refereePendingDelete = signal<Referee | null>(null);
-  protected readonly notifications = signal<ToastNotification[]>([]);
-  protected readonly searchTerm = signal('');
-  protected readonly filteredReferees = computed(() => {
-    const term = this.searchTerm().trim().toLowerCase();
-
-    if (!term) {
-      return this.referees();
-    }
-
-    return this.referees().filter((referee) =>
-      [`${referee.firstName} ${referee.lastName}`, referee.nationality].some((value) =>
-        value.toLowerCase().includes(term),
-      ),
-    );
-  });
-  protected readonly uniqueNationalitiesCount = computed(
-    () => new Set(this.filteredReferees().map((referee) => referee.nationality.trim().toLowerCase())).size,
-  );
-  protected readonly submitLabel = computed(() =>
-    this.refereeBeingEdited() ? 'Guardar cambios' : 'Crear arbitro',
-  );
-  protected readonly modalTitle = computed(() =>
-    this.refereeBeingEdited() ? 'Editar arbitro' : 'Crear arbitro',
-  );
-  protected readonly formModeLabel = computed(() =>
-    this.refereeBeingEdited() ? 'Edicion de arbitro' : 'Creacion de arbitro',
-  );
-  protected readonly refereePreview = computed(() => {
-    const firstName = this.refereeForm.controls.firstName.value.trim();
-    const lastName = this.refereeForm.controls.lastName.value.trim();
-    const nationality = this.refereeForm.controls.nationality.value.trim();
-
-    return {
-      initials: `${firstName.slice(0, 1)}${lastName.slice(0, 1)}`.trim().toUpperCase() || 'AR',
-      fullName: `${firstName} ${lastName}`.trim() || 'Nombre del arbitro',
-      nationality: nationality || 'Nacionalidad pendiente',
-    };
-  });
-  protected readonly refereeForm = this.formBuilder.nonNullable.group({
-    firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
-    lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
-    nationality: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
-  });
+  protected readonly refereeForm = this.facade.refereeForm;
+  protected readonly referees = this.facade.referees;
+  protected readonly isLoading = this.facade.isLoading;
+  protected readonly errorMessage = this.facade.errorMessage;
+  protected readonly isFormModalOpen = this.facade.isFormModalOpen;
+  protected readonly isDeleteModalOpen = this.facade.isDeleteModalOpen;
+  protected readonly isSaving = this.facade.isSaving;
+  protected readonly refereeBeingEdited = this.facade.refereeBeingEdited;
+  protected readonly refereePendingDelete = this.facade.refereePendingDelete;
+  protected readonly notifications = this.facade.notifications;
+  protected readonly searchTerm = this.facade.searchTerm;
+  protected readonly filteredReferees = this.facade.filteredReferees;
+  protected readonly submitLabel = this.facade.submitLabel;
+  protected readonly modalTitle = this.facade.modalTitle;
+  protected readonly formModeLabel = this.facade.formModeLabel;
+  protected readonly refereePreview = this.facade.refereePreview;
 
   constructor() {
-    this.loadReferees();
+    this.facade.loadReferees();
   }
 
   protected trackByRefereeId(_: number, referee: Referee): number {
@@ -84,180 +49,54 @@ export class RefereesPageComponent {
   }
 
   protected retry(): void {
-    this.loadReferees();
+    this.facade.retry();
   }
 
   protected updateSearchTerm(value: string): void {
-    this.searchTerm.set(value);
+    this.facade.updateSearchTerm(value);
   }
 
   protected openCreateModal(): void {
-    this.refereeBeingEdited.set(null);
-    this.refereeForm.reset({
-      firstName: '',
-      lastName: '',
-      nationality: '',
-    });
-    this.refereeForm.markAsPristine();
-    this.refereeForm.markAsUntouched();
-    this.isFormModalOpen.set(true);
+    this.facade.openCreateModal();
   }
 
   protected openEditModal(referee: Referee): void {
-    this.refereeBeingEdited.set(referee);
-    this.refereeForm.reset({
-      firstName: referee.firstName,
-      lastName: referee.lastName,
-      nationality: referee.nationality,
-    });
-    this.refereeForm.markAsPristine();
-    this.refereeForm.markAsUntouched();
-    this.isFormModalOpen.set(true);
+    this.facade.openEditModal(referee);
   }
 
   protected closeFormModal(): void {
-    if (!this.isSaving()) {
-      this.isFormModalOpen.set(false);
-    }
+    this.facade.closeFormModal();
   }
 
   protected openDeleteModal(referee: Referee): void {
-    this.refereePendingDelete.set(referee);
-    this.isDeleteModalOpen.set(true);
+    this.facade.openDeleteModal(referee);
   }
 
   protected closeDeleteModal(): void {
-    if (!this.isSaving()) {
-      this.isDeleteModalOpen.set(false);
-      this.refereePendingDelete.set(null);
-    }
+    this.facade.closeDeleteModal();
   }
 
   protected submitRefereeForm(): void {
-    if (this.refereeForm.invalid) {
-      this.refereeForm.markAllAsTouched();
-      return;
-    }
-
-    const editingReferee = this.refereeBeingEdited();
-    const payload = this.buildPayload();
-    const request$: Observable<unknown> = editingReferee
-      ? this.refereeApi.update(editingReferee.id, payload)
-      : this.refereeApi.create(payload);
-
-    this.isSaving.set(true);
-
-    request$.subscribe({
-      next: () => {
-        this.isSaving.set(false);
-        this.isFormModalOpen.set(false);
-        this.pushNotification(
-          'success',
-          editingReferee ? 'Arbitro actualizado' : 'Arbitro creado',
-          editingReferee
-            ? 'Los cambios del arbitro se guardaron correctamente.'
-            : 'El nuevo arbitro se registro correctamente.',
-        );
-        this.loadReferees();
-      },
-      error: (error: unknown) => {
-        this.isSaving.set(false);
-        this.pushNotification(
-          'error',
-          editingReferee ? 'No se pudo actualizar' : 'No se pudo crear',
-          parseApiErrorMessage(error),
-        );
-      },
-    });
+    this.facade.submitRefereeForm();
   }
 
   protected confirmDelete(): void {
-    const referee = this.refereePendingDelete();
-
-    if (!referee) {
-      return;
-    }
-
-    this.isSaving.set(true);
-
-    this.refereeApi.delete(referee.id).subscribe({
-      next: () => {
-        this.isSaving.set(false);
-        this.isDeleteModalOpen.set(false);
-        this.refereePendingDelete.set(null);
-        this.pushNotification(
-          'success',
-          'Arbitro eliminado',
-          `El arbitro "${referee.firstName} ${referee.lastName}" fue eliminado correctamente.`,
-        );
-        this.loadReferees();
-      },
-      error: (error: unknown) => {
-        this.isSaving.set(false);
-        this.pushNotification('error', 'No se pudo eliminar', parseApiErrorMessage(error));
-      },
-    });
+    this.facade.confirmDelete();
   }
 
   protected dismissNotification(notificationId: number): void {
-    this.notifications.update((items) => items.filter((item) => item.id !== notificationId));
+    this.facade.dismissNotification(notificationId);
   }
 
   protected fieldHasError(fieldName: keyof typeof this.refereeForm.controls): boolean {
-    const control = this.refereeForm.controls[fieldName];
-    return control.invalid && (control.dirty || control.touched);
+    return this.facade.fieldHasError(fieldName);
   }
 
   protected getFieldError(fieldName: keyof typeof this.refereeForm.controls): string {
-    const control = this.refereeForm.controls[fieldName];
-
-    if (control.hasError('required')) {
-      return 'Este campo es obligatorio.';
-    }
-
-    if (control.hasError('minlength')) {
-      return 'El valor es demasiado corto.';
-    }
-
-    if (control.hasError('maxlength')) {
-      return 'El valor supera la longitud permitida.';
-    }
-
-    return 'Revisa este campo.';
+    return this.facade.getFieldError(fieldName);
   }
 
   protected canSubmitForm(): boolean {
-    return !this.isSaving();
-  }
-
-  private loadReferees(): void {
-    this.isLoading.set(true);
-    this.errorMessage.set('');
-
-    this.refereeApi.getAll().subscribe({
-      next: (referees) => {
-        this.referees.set(referees);
-        this.searchTerm.set('');
-        this.isLoading.set(false);
-      },
-      error: (error: unknown) => {
-        this.errorMessage.set(parseApiErrorMessage(error));
-        this.isLoading.set(false);
-      },
-    });
-  }
-
-  private buildPayload(): RefereeUpsertPayload {
-    const { firstName, lastName, nationality } = this.refereeForm.getRawValue();
-
-    return {
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
-      nationality: nationality.trim(),
-    };
-  }
-
-  private pushNotification(type: ToastType, title: string, message: string): void {
-    pushToastNotification(this.notifications, (notificationId) => this.dismissNotification(notificationId), type, title, message);
+    return this.facade.canSubmitForm();
   }
 }

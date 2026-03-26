@@ -1,14 +1,16 @@
 @if (isLoading()) {
-  <section class="state-card">
-    <p class="panel__eyebrow">Actualizando panel</p>
-    <h2>Consultando la informacion general de la competencia...</h2>
-  </section>
+  <app-state-card
+    label="Actualizando panel"
+    title="Consultando la informacion general de la competencia..."
+  />
 } @else if (errorMessage()) {
-  <section class="state-card state-card--error">
-    <p class="panel__eyebrow">Resumen no disponible</p>
-    <h2>{{ errorMessage() }}</h2>
-    <button type="button" class="ghost-button ghost-button--light" (click)="retry()">Reintentar</button>
-  </section>
+  <app-state-card
+    label="Resumen no disponible"
+    [title]="errorMessage()"
+    tone="error"
+    actionLabel="Reintentar"
+    (action)="retry()"
+  />
 } @else {
   <section class="panel">
     <div class="panel__header">

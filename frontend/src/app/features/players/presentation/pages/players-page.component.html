@@ -1,73 +1,42 @@
-<section class="page-header">
-  <div>
-    <p class="page-header__eyebrow">Jugadores</p>
-    <h1>Gestion de jugadores</h1>
-    <p class="page-header__description">
-      Administra la plantilla de la liga con filtros por nombre, equipo, posicion y dorsal.
-    </p>
-  </div>
+<app-module-page-header
+  eyebrow="Jugadores"
+  title="Gestion de jugadores"
+  description="Administra la plantilla de la liga con filtros por nombre, equipo, posicion y dorsal."
+>
+  <label class="search-field" moduleHeaderControls>
+    <span>Buscar</span>
+    <input
+      type="search"
+      [value]="searchTerm()"
+      (input)="updateSearchTerm(searchInput.value)"
+      #searchInput
+      placeholder="Nombre, equipo o dorsal"
+    />
+  </label>
 
-  <div class="page-header__actions">
-    <label class="search-field">
-      <span>Buscar</span>
-      <input
-        type="search"
-        [value]="searchTerm()"
-        (input)="updateSearchTerm(searchInput.value)"
-        #searchInput
-        placeholder="Nombre, equipo o dorsal"
-      />
-    </label>
-
-    <div class="page-header__buttons">
-      <button type="button" class="ghost-button" (click)="retry()">Actualizar</button>
-      <button type="button" class="primary-button" (click)="openCreateModal()">Crear jugador</button>
-    </div>
-  </div>
-</section>
+  <button type="button" class="ghost-button" moduleHeaderButtons (click)="retry()">Actualizar</button>
+  <button type="button" class="primary-button" moduleHeaderButtons (click)="openCreateModal()">Crear jugador</button>
+</app-module-page-header>
 
 @if (isLoading()) {
-  <section class="state-card">
-    <p class="state-card__label">Cargando jugadores</p>
-    <h2>Consultando la API del backend...</h2>
-  </section>
+  <app-state-card label="Cargando jugadores" title="Consultando la API del backend..." />
 } @else if (errorMessage()) {
-  <section class="state-card state-card--error">
-    <p class="state-card__label">No disponible</p>
-    <h2>{{ errorMessage() }}</h2>
-    <button type="button" class="ghost-button ghost-button--light" (click)="retry()">
-      Reintentar
-    </button>
-  </section>
+  <app-state-card
+    label="No disponible"
+    [title]="errorMessage()"
+    tone="error"
+    actionLabel="Reintentar"
+    (action)="retry()"
+  />
 } @else {
-  <section class="summary-grid" aria-label="Resumen de jugadores">
-    <article class="summary-card">
-      <span>Jugadores visibles</span>
-      <strong>{{ filteredPlayers().length }}</strong>
-    </article>
-    <article class="summary-card">
-      <span>Equipos representados</span>
-      <strong>{{ uniqueTeamsCount() }}</strong>
-    </article>
-    <article class="summary-card">
-      <span>Estado visual</span>
-      <strong>Plantilla clara</strong>
-    </article>
-  </section>
-
   <section class="table-card">
-    <div class="table-card__header">
-      <div>
-        <p class="table-card__eyebrow">Listado</p>
-        <h2>Jugadores registrados</h2>
-      </div>
-    </div>
+    <app-section-card-header title="Jugadores registrados" />
 
     @if (filteredPlayers().length === 0) {
-      <section class="state-card">
-        <p class="state-card__label">Busqueda sin coincidencias</p>
-        <h2>No encontramos jugadores con los filtros actuales.</h2>
-      </section>
+      <app-state-card
+        label="Busqueda sin coincidencias"
+        title="No encontramos jugadores con los filtros actuales."
+      />
     } @else {
       <div class="player-grid">
         @for (player of filteredPlayers(); track trackByPlayerId($index, player)) {
@@ -96,7 +65,7 @@
               </div>
             </dl>
 
-            <div class="player-card__actions">
+            <div class="player-card__actions card-actions--compact">
               <button type="button" class="ghost-button ghost-button--light" (click)="openEditModal(player)">
                 Editar
               </button>
@@ -121,7 +90,7 @@
               <th>Dorsal</th>
               <th>Posicion</th>
               <th>Nacimiento</th>
-              <th class="player-table__actions-column">Acciones</th>
+              <th class="player-table__actions-column compact-actions-column">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -141,8 +110,8 @@
                 <td>#{{ player.number }}</td>
                 <td>{{ getPositionLabel(player.position) }}</td>
                 <td>{{ player.birthDate | date: 'dd/MM/yyyy' }}</td>
-                <td class="player-table__actions-cell">
-                  <div class="player-table__actions">
+                <td class="player-table__actions-cell compact-actions-cell">
+                  <div class="player-table__actions table-actions--compact">
                     <button type="button" class="table-action" (click)="openEditModal(player)">
                       Editar
                     </button>
@@ -172,20 +141,16 @@
           <p class="modal__eyebrow">Ficha de jugador</p>
           <h2>{{ modalTitle() }}</h2>
         </div>
-        <button type="button" class="icon-button" (click)="closeFormModal()">Cerrar</button>
       </div>
 
       <form class="player-form" [formGroup]="playerForm" (ngSubmit)="submitPlayerForm()">
-        <section class="context-banner field--full">
-          <div>
-            <span class="context-banner__label">Modo</span>
-            <strong>{{ formModeLabel() }}</strong>
-          </div>
-          <div>
-            <span class="context-banner__label">Objetivo</span>
-            <strong>Registrar una ficha clara del jugador</strong>
-          </div>
-        </section>
+        <app-context-banner [fullWidth]="true">
+          <app-context-banner-item label="Modo" [value]="formModeLabel()" />
+          <app-context-banner-item
+            label="Objetivo"
+            value="Registrar una ficha clara del jugador"
+          />
+        </app-context-banner>
 
         <section class="player-preview field--full">
           <div class="player-preview__avatar">{{ playerPreview().initials }}</div>

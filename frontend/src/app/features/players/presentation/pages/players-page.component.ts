@@ -1,107 +1,51 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { ToastNotification, ToastType } from '../../../../shared/domain/models/toast-notification.model';
-import { ConfirmDialogComponent } from '../../../../shared/presentation/components/confirm-dialog/confirm-dialog.component';
-import { ToastStackComponent } from '../../../../shared/presentation/components/toast-stack/toast-stack.component';
-import { parseApiErrorMessage } from '../../../../shared/utils/http-error.utils';
-import { pushToastNotification } from '../../../../shared/utils/toast.utils';
+import { Component, inject } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
 
-import { Team } from '../../../teams/domain/models/team.model';
-import { TeamApiService } from '../../../teams/infrastructure/repositories/team-api.service';
+import { ConfirmDialogComponent } from '../../../../shared/presentation/components/confirm-dialog/confirm-dialog.component';
+import { ContextBannerComponent } from '../../../../shared/presentation/components/context-banner/context-banner.component';
+import { ContextBannerItemComponent } from '../../../../shared/presentation/components/context-banner-item/context-banner-item.component';
+import { ModulePageHeaderComponent } from '../../../../shared/presentation/components/module-page-header/module-page-header.component';
+import { SectionCardHeaderComponent } from '../../../../shared/presentation/components/section-card-header/section-card-header.component';
+import { StateCardComponent } from '../../../../shared/presentation/components/state-card/state-card.component';
+import { ToastStackComponent } from '../../../../shared/presentation/components/toast-stack/toast-stack.component';
 import { Player } from '../../domain/models/player.model';
 import { PlayerPosition } from '../../domain/models/player-position.type';
-import { PlayerUpsertPayload } from '../../domain/models/player-upsert.model';
-import { PlayerApiService } from '../../infrastructure/repositories/player-api.service';
-
-type PositionOption = {
-  value: PlayerPosition;
-  label: string;
-};
+import { PlayersPageFacade } from '../../application/facades/players-page.facade';
 
 @Component({
   selector: 'app-players-page',
   standalone: true,
-  imports: [CommonModule, DatePipe, ReactiveFormsModule, ConfirmDialogComponent, ToastStackComponent],
+  imports: [CommonModule, DatePipe, ReactiveFormsModule, ConfirmDialogComponent, ContextBannerComponent, ContextBannerItemComponent, ModulePageHeaderComponent, SectionCardHeaderComponent, StateCardComponent, ToastStackComponent],
   templateUrl: './players-page.component.html',
   styleUrl: './players-page.component.scss',
+  providers: [PlayersPageFacade],
 })
 export class PlayersPageComponent {
-  private readonly playerApi = inject(PlayerApiService);
-  private readonly teamApi = inject(TeamApiService);
-  private readonly formBuilder = inject(FormBuilder);
+  private readonly facade = inject(PlayersPageFacade);
 
-  protected readonly players = signal<Player[]>([]);
-  protected readonly teams = signal<Team[]>([]);
-  protected readonly isLoading = signal(true);
-  protected readonly isTeamsLoading = signal(true);
-  protected readonly errorMessage = signal('');
-  protected readonly isFormModalOpen = signal(false);
-  protected readonly isDeleteModalOpen = signal(false);
-  protected readonly isSaving = signal(false);
-  protected readonly playerBeingEdited = signal<Player | null>(null);
-  protected readonly playerPendingDelete = signal<Player | null>(null);
-  protected readonly notifications = signal<ToastNotification[]>([]);
-  protected readonly searchTerm = signal('');
-  protected readonly filteredPlayers = computed(() => {
-    const term = this.searchTerm().trim().toLowerCase();
-
-    if (!term) {
-      return this.players();
-    }
-
-    return this.players().filter((player) =>
-      [
-        `${player.firstName} ${player.lastName}`,
-        player.teamName,
-        player.position,
-        String(player.number),
-      ].some((value) => value.toLowerCase().includes(term)),
-    );
-  });
-  protected readonly uniqueTeamsCount = computed(
-    () => new Set(this.filteredPlayers().map((player) => player.teamName.trim().toLowerCase())).size,
-  );
-  protected readonly submitLabel = computed(() =>
-    this.playerBeingEdited() ? 'Guardar cambios' : 'Crear jugador',
-  );
-  protected readonly modalTitle = computed(() =>
-    this.playerBeingEdited() ? 'Editar jugador' : 'Crear jugador',
-  );
-  protected readonly formModeLabel = computed(() =>
-    this.playerBeingEdited() ? 'Edicion de jugador' : 'Creacion de jugador',
-  );
-  protected readonly playerPreview = computed(() => {
-    const firstName = this.playerForm.controls.firstName.value.trim();
-    const lastName = this.playerForm.controls.lastName.value.trim();
-    const team = this.teams().find((item) => item.id === this.playerForm.controls.teamId.value);
-
-    return {
-      initials: `${firstName.slice(0, 1)}${lastName.slice(0, 1)}`.trim().toUpperCase() || 'JG',
-      fullName: `${firstName} ${lastName}`.trim() || 'Nombre del jugador',
-      teamName: team?.name ?? 'Sin equipo seleccionado',
-      positionLabel: this.getPositionLabel(this.playerForm.controls.position.value),
-    };
-  });
-  protected readonly positionOptions: PositionOption[] = [
-    { value: 'Goalkeeper', label: 'Portero' },
-    { value: 'Defender', label: 'Defensa' },
-    { value: 'Midfielder', label: 'Mediocampista' },
-    { value: 'Forward', label: 'Delantero' },
-  ];
-  protected readonly playerForm = this.formBuilder.nonNullable.group({
-    firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
-    lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
-    birthDate: ['', [Validators.required]],
-    number: [0, [Validators.required, Validators.min(1), Validators.max(999)]],
-    position: ['Goalkeeper' as PlayerPosition, [Validators.required]],
-    teamId: [0, [Validators.required, Validators.min(1)]],
-  });
+  protected readonly playerForm = this.facade.playerForm;
+  protected readonly players = this.facade.players;
+  protected readonly teams = this.facade.teams;
+  protected readonly isLoading = this.facade.isLoading;
+  protected readonly isTeamsLoading = this.facade.isTeamsLoading;
+  protected readonly errorMessage = this.facade.errorMessage;
+  protected readonly isFormModalOpen = this.facade.isFormModalOpen;
+  protected readonly isDeleteModalOpen = this.facade.isDeleteModalOpen;
+  protected readonly isSaving = this.facade.isSaving;
+  protected readonly playerBeingEdited = this.facade.playerBeingEdited;
+  protected readonly playerPendingDelete = this.facade.playerPendingDelete;
+  protected readonly notifications = this.facade.notifications;
+  protected readonly searchTerm = this.facade.searchTerm;
+  protected readonly filteredPlayers = this.facade.filteredPlayers;
+  protected readonly submitLabel = this.facade.submitLabel;
+  protected readonly modalTitle = this.facade.modalTitle;
+  protected readonly formModeLabel = this.facade.formModeLabel;
+  protected readonly playerPreview = this.facade.playerPreview;
+  protected readonly positionOptions = this.facade.positionOptions;
 
   constructor() {
-    this.loadPlayers();
-    this.loadTeams();
+    this.facade.loadInitialData();
   }
 
   protected trackByPlayerId(_: number, player: Player): number {
@@ -109,217 +53,58 @@ export class PlayersPageComponent {
   }
 
   protected retry(): void {
-    this.loadPlayers();
-    this.loadTeams();
+    this.facade.retry();
   }
 
   protected updateSearchTerm(value: string): void {
-    this.searchTerm.set(value);
+    this.facade.updateSearchTerm(value);
   }
 
   protected openCreateModal(): void {
-    this.playerBeingEdited.set(null);
-    this.playerForm.reset({
-      firstName: '',
-      lastName: '',
-      birthDate: '',
-      number: 0,
-      position: 'Goalkeeper',
-      teamId: 0,
-    });
-    this.playerForm.markAsPristine();
-    this.playerForm.markAsUntouched();
-    this.isFormModalOpen.set(true);
+    this.facade.openCreateModal();
   }
 
   protected openEditModal(player: Player): void {
-    this.playerBeingEdited.set(player);
-    this.playerForm.reset({
-      firstName: player.firstName,
-      lastName: player.lastName,
-      birthDate: this.toDateInputValue(player.birthDate),
-      number: player.number,
-      position: player.position,
-      teamId: player.teamId,
-    });
-    this.playerForm.markAsPristine();
-    this.playerForm.markAsUntouched();
-    this.isFormModalOpen.set(true);
+    this.facade.openEditModal(player);
   }
 
   protected closeFormModal(): void {
-    if (!this.isSaving()) {
-      this.isFormModalOpen.set(false);
-    }
+    this.facade.closeFormModal();
   }
 
   protected openDeleteModal(player: Player): void {
-    this.playerPendingDelete.set(player);
-    this.isDeleteModalOpen.set(true);
+    this.facade.openDeleteModal(player);
   }
 
   protected closeDeleteModal(): void {
-    if (!this.isSaving()) {
-      this.isDeleteModalOpen.set(false);
-      this.playerPendingDelete.set(null);
-    }
+    this.facade.closeDeleteModal();
   }
 
   protected submitPlayerForm(): void {
-    if (this.playerForm.invalid) {
-      this.playerForm.markAllAsTouched();
-      return;
-    }
-
-    const editingPlayer = this.playerBeingEdited();
-    const payload = this.buildPayload();
-    const request$: Observable<unknown> = editingPlayer
-      ? this.playerApi.update(editingPlayer.id, payload)
-      : this.playerApi.create(payload);
-
-    this.isSaving.set(true);
-
-    request$.subscribe({
-      next: () => {
-        this.isSaving.set(false);
-        this.isFormModalOpen.set(false);
-        this.pushNotification(
-          'success',
-          editingPlayer ? 'Jugador actualizado' : 'Jugador creado',
-          editingPlayer
-            ? 'Los cambios del jugador se guardaron correctamente.'
-            : 'El nuevo jugador se registro correctamente.',
-        );
-        this.loadPlayers();
-      },
-      error: (error: unknown) => {
-        this.isSaving.set(false);
-        this.pushNotification(
-          'error',
-          editingPlayer ? 'No se pudo actualizar' : 'No se pudo crear',
-          parseApiErrorMessage(error),
-        );
-      },
-    });
+    this.facade.submitPlayerForm();
   }
 
   protected confirmDelete(): void {
-    const player = this.playerPendingDelete();
-
-    if (!player) {
-      return;
-    }
-
-    this.isSaving.set(true);
-
-    this.playerApi.delete(player.id).subscribe({
-      next: () => {
-        this.isSaving.set(false);
-        this.isDeleteModalOpen.set(false);
-        this.playerPendingDelete.set(null);
-        this.pushNotification(
-          'success',
-          'Jugador eliminado',
-          `El jugador "${player.firstName} ${player.lastName}" fue eliminado correctamente.`,
-        );
-        this.loadPlayers();
-      },
-      error: (error: unknown) => {
-        this.isSaving.set(false);
-        this.pushNotification('error', 'No se pudo eliminar', parseApiErrorMessage(error));
-      },
-    });
+    this.facade.confirmDelete();
   }
 
   protected dismissNotification(notificationId: number): void {
-    this.notifications.update((items) => items.filter((item) => item.id !== notificationId));
+    this.facade.dismissNotification(notificationId);
   }
 
   protected fieldHasError(fieldName: keyof typeof this.playerForm.controls): boolean {
-    const control = this.playerForm.controls[fieldName];
-    return control.invalid && (control.dirty || control.touched);
+    return this.facade.fieldHasError(fieldName);
   }
 
   protected getFieldError(fieldName: keyof typeof this.playerForm.controls): string {
-    const control = this.playerForm.controls[fieldName];
-
-    if (control.hasError('required')) {
-      return 'Este campo es obligatorio.';
-    }
-
-    if (control.hasError('minlength')) {
-      return 'El valor es demasiado corto.';
-    }
-
-    if (control.hasError('maxlength')) {
-      return 'El valor supera la longitud permitida.';
-    }
-
-    if (control.hasError('min') || control.hasError('max')) {
-      return 'El valor esta fuera del rango permitido.';
-    }
-
-    return 'Revisa este campo.';
+    return this.facade.getFieldError(fieldName);
   }
 
   protected getPositionLabel(position: PlayerPosition): string {
-    return this.positionOptions.find((option) => option.value === position)?.label ?? position;
+    return this.facade.getPositionLabel(position);
   }
 
   protected canSubmitForm(): boolean {
-    return !this.isSaving() && !this.isTeamsLoading() && this.teams().length > 0;
-  }
-
-  private loadPlayers(): void {
-    this.isLoading.set(true);
-    this.errorMessage.set('');
-
-    this.playerApi.getAll().subscribe({
-      next: (players) => {
-        this.players.set(players);
-        this.searchTerm.set('');
-        this.isLoading.set(false);
-      },
-      error: (error: unknown) => {
-        this.errorMessage.set(parseApiErrorMessage(error));
-        this.isLoading.set(false);
-      },
-    });
-  }
-
-  private loadTeams(): void {
-    this.isTeamsLoading.set(true);
-
-    this.teamApi.getAll().subscribe({
-      next: (teams) => {
-        this.teams.set(teams);
-        this.isTeamsLoading.set(false);
-      },
-      error: () => {
-        this.isTeamsLoading.set(false);
-      },
-    });
-  }
-
-  private buildPayload(): PlayerUpsertPayload {
-    const { firstName, lastName, birthDate, number, position, teamId } =
-      this.playerForm.getRawValue();
-
-    return {
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
-      birthDate,
-      number,
-      position,
-      teamId,
-    };
-  }
-
-  private toDateInputValue(value: string): string {
-    return value ? value.slice(0, 10) : '';
-  }
-
-  private pushNotification(type: ToastType, title: string, message: string): void {
-    pushToastNotification(this.notifications, (notificationId) => this.dismissNotification(notificationId), type, title, message);
+    return this.facade.canSubmitForm();
   }
 }
