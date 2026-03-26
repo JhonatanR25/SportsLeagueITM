@@ -49,9 +49,5 @@ export class ShellComponent {
     },
   ];
 
-  protected readonly quickStats = [
-    { label: 'Temporada destacada', value: '2026' },
-    { label: 'Vista principal', value: 'Panel' },
-    { label: 'Experiencia', value: 'Multidispositivo' },
-  ];
+  protected readonly currentSeason = '2026';
 }

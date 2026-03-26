@@ -1,22 +1,21 @@
 <section class="page-header">
-  <div>
-    <p class="page-header__eyebrow">Equipos</p>
-    <h1>Gestion de equipos</h1>
+  <div class="page-header__copy">
+    <h1>Clubes y sedes</h1>
     <p class="page-header__description">
-      Primer CRUD conectado al backend. Aqui gestionaremos clubes, ciudad, estadio y fecha de
-      fundacion con una vista comoda para desktop y movil.
+      Administra la informacion principal de cada equipo, su ciudad, estadio y presencia visual en
+      la competencia.
     </p>
   </div>
 
   <div class="page-header__actions">
     <label class="search-field">
-      <span>Buscar</span>
+      <span>Busqueda</span>
       <input
         type="search"
         [value]="searchTerm()"
         (input)="updateSearchTerm(searchInput.value)"
         #searchInput
-        placeholder="Nombre, ciudad o estadio"
+        placeholder="Buscar por nombre, ciudad o estadio"
       />
     </label>
 
@@ -29,59 +28,35 @@
 
 @if (isLoading()) {
   <section class="state-card">
-    <p class="state-card__label">Cargando equipos</p>
-    <h2>Consultando la API del backend...</h2>
+    <p class="state-card__label">Actualizando listado</p>
+    <h2>Consultando la informacion general de los equipos...</h2>
   </section>
 } @else if (errorMessage()) {
   <section class="state-card state-card--error">
-    <p class="state-card__label">No disponible</p>
+    <p class="state-card__label">Modulo no disponible</p>
     <h2>{{ errorMessage() }}</h2>
     <button type="button" class="ghost-button ghost-button--light" (click)="retry()">
       Reintentar
     </button>
   </section>
 } @else {
-  <section class="summary-grid" aria-label="Resumen de equipos">
-    <article class="summary-card">
-      <span>Equipos visibles</span>
-      <strong>{{ filteredTeams().length }}</strong>
-    </article>
-    <article class="summary-card">
-      <span>Ciudades cubiertas</span>
-      <strong>{{ uniqueCitiesCount() }}</strong>
-    </article>
-    <article class="summary-card">
-      <span>Estado visual</span>
-      <strong>Gestion clara</strong>
-    </article>
-  </section>
-
   <section class="table-card">
     <div class="table-card__header">
       <div>
-        <p class="table-card__eyebrow">Listado</p>
-        <h2>Equipos registrados</h2>
+        <h2>Listado general</h2>
       </div>
     </div>
 
     @if (filteredTeams().length === 0) {
       <section class="state-card">
-        <p class="state-card__label">Busqueda sin coincidencias</p>
-        <h2>No encontramos equipos con los filtros actuales.</h2>
+        <p class="state-card__label">Sin coincidencias</p>
+        <h2>No encontramos equipos con los criterios de busqueda actuales.</h2>
       </section>
     } @else {
       <div class="team-grid">
         @for (team of filteredTeams(); track trackByTeamId($index, team)) {
           <article class="team-card">
             <div class="team-card__header">
-              <div class="team-card__crest">
-                @if (team.logoUrl) {
-                  <img [src]="team.logoUrl" [alt]="'Logo de ' + team.name" />
-                } @else {
-                  <span>{{ team.name.slice(0, 2).toUpperCase() }}</span>
-                }
-              </div>
-
               <div>
                 <h3>{{ team.name }}</h3>
                 <p>{{ team.city }}</p>
@@ -131,15 +106,9 @@
               <tr>
                 <td>
                   <div class="team-table__identity">
-                    <div class="team-card__crest team-card__crest--small">
-                      @if (team.logoUrl) {
-                        <img [src]="team.logoUrl" [alt]="'Logo de ' + team.name" />
-                      } @else {
-                        <span>{{ team.name.slice(0, 2).toUpperCase() }}</span>
-                      }
-                    </div>
                     <div>
                       <strong>{{ team.name }}</strong>
+                      <small>{{ team.city }}</small>
                     </div>
                   </div>
                 </td>
@@ -177,7 +146,6 @@
           <p class="modal__eyebrow">Ficha de equipo</p>
           <h2>{{ modalTitle() }}</h2>
         </div>
-        <button type="button" class="icon-button" (click)="closeFormModal()">Cerrar</button>
       </div>
 
       <form class="team-form" [formGroup]="teamForm" (ngSubmit)="submitTeamForm()">

@@ -18,11 +18,11 @@ type ModuleCard = {
   title: string;
   route: string;
   accent: 'gold' | 'blue' | 'green' | 'red' | 'cyan';
-  countLabel: string;
-  countValue: string;
-  detailLabel: string;
-  detailValue: string;
-  helper: string;
+  stats: Array<{
+    label: string;
+    value: string;
+  }>;
+  totalLabel: string;
   cta: string;
 };
 
@@ -55,97 +55,90 @@ export class DashboardPageComponent {
     const tournaments = this.tournaments();
     const matches = this.matches();
 
-    const largestSquad =
-      Object.entries(
-        players.reduce<Record<string, number>>((accumulator, player) => {
-          accumulator[player.teamName] = (accumulator[player.teamName] ?? 0) + 1;
-          return accumulator;
-        }, {}),
-      ).sort((left, right) => right[1] - left[1])[0] ?? null;
+    const uniqueCities = new Set(teams.map((team) => team.city.trim().toLowerCase())).size;
+    const nationalityCounts = Object.entries(
+      referees.reduce<Record<string, number>>((accumulator, referee) => {
+        accumulator[referee.nationality] = (accumulator[referee.nationality] ?? 0) + 1;
+        return accumulator;
+      }, {}),
+    )
+      .sort((left, right) => right[1] - left[1])
+      .slice(0, 4);
 
-    const mainNationality =
-      Object.entries(
-        referees.reduce<Record<string, number>>((accumulator, referee) => {
-          accumulator[referee.nationality] = (accumulator[referee.nationality] ?? 0) + 1;
-          return accumulator;
-        }, {}),
-      ).sort((left, right) => right[1] - left[1])[0] ?? null;
+    const playerPositionCounts = {
+      goalkeepers: players.filter((player) => player.position === 'Goalkeeper').length,
+      defenders: players.filter((player) => player.position === 'Defender').length,
+      midfielders: players.filter((player) => player.position === 'Midfielder').length,
+      forwards: players.filter((player) => player.position === 'Forward').length,
+    };
 
     return [
       {
         title: 'Equipos',
         route: '/teams',
         accent: 'blue',
-        countLabel: 'Clubes visibles',
-        countValue: String(teams.length),
-        detailLabel: 'Estadio principal',
-        detailValue: teams[0]?.stadium ?? 'Sin equipos registrados',
-        helper: `${new Set(teams.map((team) => team.city.trim().toLowerCase())).size} ciudades y estructura deportiva disponible`,
+        stats: [
+          { label: 'Equipos registrados', value: String(teams.length) },
+          { label: 'Ciudades cubiertas', value: String(uniqueCities) },
+          { label: 'Ciudades disponibles', value: String(Math.max(0, teams.length - uniqueCities)) },
+        ],
+        totalLabel: `Total: ${teams.length} equipos`,
         cta: 'Ver equipos',
       },
       {
         title: 'Jugadores',
         route: '/players',
         accent: 'green',
-        countLabel: 'Jugadores registrados',
-        countValue: String(players.length),
-        detailLabel: 'Plantilla destacada',
-        detailValue: largestSquad ? `${largestSquad[0]} · ${largestSquad[1]}` : 'Sin jugadores registrados',
-        helper: `${players.filter((player) => player.position === 'Forward').length} delanteros y ${players.filter((player) => player.position === 'Goalkeeper').length} porteros`,
+        stats: [
+          { label: 'Arqueros', value: String(playerPositionCounts.goalkeepers) },
+          { label: 'Defensas', value: String(playerPositionCounts.defenders) },
+          { label: 'Mediocampo', value: String(playerPositionCounts.midfielders) },
+          { label: 'Delanteros', value: String(playerPositionCounts.forwards) },
+        ],
+        totalLabel: `Total: ${players.length} jugadores`,
         cta: 'Ver jugadores',
       },
       {
         title: 'Arbitros',
         route: '/referees',
         accent: 'red',
-        countLabel: 'Arbitros disponibles',
-        countValue: String(referees.length),
-        detailLabel: 'Nacionalidad mas frecuente',
-        detailValue: mainNationality ? `${mainNationality[0]} · ${mainNationality[1]}` : 'Sin arbitros registrados',
-        helper: `${new Set(referees.map((referee) => referee.nationality.trim().toLowerCase())).size} nacionalidades en el panel arbitral`,
+        stats: [
+          { label: 'Arbitros disponibles', value: String(referees.length) },
+          ...nationalityCounts.map(([nationality, count]) => ({
+            label: nationality,
+            value: String(count),
+          })),
+        ],
+        totalLabel: `Total: ${referees.length} arbitros`,
         cta: 'Ver arbitros',
       },
       {
         title: 'Torneos',
         route: '/tournaments',
         accent: 'gold',
-        countLabel: 'Torneos visibles',
-        countValue: String(tournaments.length),
-        detailLabel: 'Pendientes por iniciar',
-        detailValue: String(tournaments.filter((tournament) => tournament.status === 'Pending').length),
-        helper: `${tournaments.filter((tournament) => tournament.status === 'InProgress').length} en curso y ${tournaments.reduce((sum, tournament) => sum + tournament.teamsCount, 0)} cupos inscritos`,
+        stats: [
+          { label: 'Torneos totales', value: String(tournaments.length) },
+          { label: 'En curso', value: String(tournaments.filter((tournament) => tournament.status === 'InProgress').length) },
+          { label: 'Pendientes', value: String(tournaments.filter((tournament) => tournament.status === 'Pending').length) },
+          { label: 'Finalizados', value: String(tournaments.filter((tournament) => tournament.status === 'Finished').length) },
+        ],
+        totalLabel: `Total: ${tournaments.length} torneos`,
         cta: 'Ver torneos',
       },
       {
         title: 'Partidos',
         route: '/matches',
         accent: 'cyan',
-        countLabel: 'Partidos programados',
-        countValue: String(matches.length),
-        detailLabel: 'Estado dominante',
-        detailValue:
-          matches.length > 0
-            ? `${matches.filter((match) => match.status === 'Scheduled').length} programados`
-            : 'Sin partidos registrados',
-        helper: `${matches.filter((match) => match.status === 'Finished').length} finalizados y ${matches.filter((match) => match.status === 'Suspended').length} suspendidos`,
+        stats: [
+          { label: 'Programados', value: String(matches.filter((match) => match.status === 'Scheduled').length) },
+          { label: 'En juego', value: String(matches.filter((match) => match.status === 'InProgress').length) },
+          { label: 'Suspendidos', value: String(matches.filter((match) => match.status === 'Suspended').length) },
+          { label: 'Finalizados', value: String(matches.filter((match) => match.status === 'Finished').length) },
+        ],
+        totalLabel: `Total: ${matches.length} partidos`,
         cta: 'Ver partidos',
       },
     ];
-  });
-
-  protected readonly heroStatus = computed(() => {
-    const activeTournaments = this.tournaments().filter((tournament) => tournament.status === 'InProgress').length;
-    const liveMatches = this.matches().filter((match) => match.status === 'InProgress').length;
-
-    if (activeTournaments > 0 && liveMatches > 0) {
-      return 'La liga tiene competiciones activas y seguimiento disponible desde el panel.';
-    }
-
-    if (activeTournaments > 0) {
-      return 'Hay competiciones en curso y la operacion general se encuentra disponible.';
-    }
-
-    return 'La plataforma esta lista para administrar clubes, plantillas, arbitros y calendarios.';
   });
 
   constructor() {

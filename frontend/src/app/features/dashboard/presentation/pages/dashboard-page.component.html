@@ -1,40 +1,23 @@
-<section class="hero">
-  <div class="hero__copy">
-    <p class="hero__eyebrow">Dashboard</p>
-    <h1>Panorama general de la competencia</h1>
-    <p class="hero__description">
-      Consulta el estado global de la liga y accede a cada modulo con una lectura clara del sistema.
-    </p>
-  </div>
-
-  <div class="hero__meta">
-    <div class="hero__meta-block">
-      <span>Estado del panel</span>
-      <strong>Operacion disponible</strong>
-    </div>
-    <div class="hero__meta-block">
-      <span>Lectura actual</span>
-      <strong>{{ heroStatus() }}</strong>
-    </div>
-  </div>
-</section>
-
 @if (isLoading()) {
   <section class="state-card">
-    <p class="panel__eyebrow">Cargando resumen</p>
-    <h2>Consultando los modulos principales del sistema...</h2>
+    <p class="panel__eyebrow">Actualizando panel</p>
+    <h2>Consultando la informacion general de la competencia...</h2>
   </section>
 } @else if (errorMessage()) {
   <section class="state-card state-card--error">
-    <p class="panel__eyebrow">No disponible</p>
+    <p class="panel__eyebrow">Resumen no disponible</p>
     <h2>{{ errorMessage() }}</h2>
     <button type="button" class="ghost-button ghost-button--light" (click)="retry()">Reintentar</button>
   </section>
 } @else {
   <section class="panel">
     <div class="panel__header">
-      <p class="panel__eyebrow">Modulos principales</p>
-      <h2>Resumen</h2>
+      <h2>Resumen operativo</h2>
+
+      <div class="panel__season">
+        <span>Temporada actual</span>
+        <strong>2026</strong>
+      </div>
     </div>
 
     <div class="module-grid">
@@ -46,17 +29,15 @@
           </div>
 
           <div class="module-card__metrics">
-            <div>
-              <span>{{ module.countLabel }}</span>
-              <strong>{{ module.countValue }}</strong>
-            </div>
-            <div>
-              <span>{{ module.detailLabel }}</span>
-              <strong>{{ module.detailValue }}</strong>
-            </div>
+            @for (stat of module.stats; track stat.label) {
+              <div>
+                <span>{{ stat.label }}</span>
+                <strong>{{ stat.value }}</strong>
+              </div>
+            }
           </div>
 
-          <p>{{ module.helper }}</p>
+          <p class="module-card__total">{{ module.totalLabel }}</p>
         </article>
       }
     </div>

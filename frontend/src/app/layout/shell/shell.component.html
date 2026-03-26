@@ -3,24 +3,12 @@
     <div class="sidebar__intro">
       <div class="brand">
         <p class="brand__eyebrow">Sports League ITM</p>
-        <h1>Control deportivo centralizado</h1>
+        <h1>Gestion integral de competencia</h1>
         <p class="brand__copy">
-          Plataforma web para administrar torneos, equipos, jugadores y arbitros con una
-          experiencia clara en cualquier pantalla.
+          Plataforma web para administrar equipos, jugadores, arbitros, partidos y torneos.
         </p>
       </div>
 
-      <section class="sidebar-card" aria-label="Estado del proyecto">
-        <p class="sidebar-card__title">Vista general</p>
-        <div class="sidebar-card__stats">
-          @for (stat of quickStats; track stat.label) {
-            <div>
-              <span>{{ stat.label }}</span>
-              <strong>{{ stat.value }}</strong>
-            </div>
-          }
-        </div>
-      </section>
     </div>
 
     <nav class="nav" aria-label="Principal">
@@ -39,17 +27,7 @@
   </aside>
 
   <div class="content">
-    <header class="topbar">
-      <div>
-        <p class="topbar__eyebrow">Plataforma deportiva</p>
-        <h2>Gestion integral de liga y competencia</h2>
-      </div>
-
-      <div class="topbar__status">
-        <span class="status-dot"></span>
-        <span>Plataforma activa y disponible</span>
-      </div>
-    </header>
+    <header class="topbar"></header>
 
     <main class="page">
       <router-outlet />
