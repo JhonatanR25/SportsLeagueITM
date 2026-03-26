@@ -23,7 +23,6 @@ type ModuleCard = {
     label: string;
     value: string;
   }>;
-  totalLabel: string;
   cta: string;
 };
 
@@ -64,7 +63,7 @@ export class DashboardPageComponent {
       }, {}),
     )
       .sort((left, right) => right[1] - left[1])
-      .slice(0, 4);
+      .slice(0, 3);
 
     const playerPositionCounts = {
       goalkeepers: players.filter((player) => player.position === 'Goalkeeper').length,
@@ -79,11 +78,9 @@ export class DashboardPageComponent {
         route: '/teams',
         accent: 'blue',
         stats: [
-          { label: 'Equipos registrados', value: String(teams.length) },
-          { label: 'Ciudades cubiertas', value: String(uniqueCities) },
-          { label: 'Ciudades disponibles', value: String(Math.max(0, teams.length - uniqueCities)) },
+          { label: 'Equipos', value: String(teams.length) },
+          { label: 'Ciudades', value: String(uniqueCities) },
         ],
-        totalLabel: `Total: ${teams.length} equipos`,
         cta: 'Ver equipos',
       },
       {
@@ -96,7 +93,6 @@ export class DashboardPageComponent {
           { label: 'Mediocampo', value: String(playerPositionCounts.midfielders) },
           { label: 'Delanteros', value: String(playerPositionCounts.forwards) },
         ],
-        totalLabel: `Total: ${players.length} jugadores`,
         cta: 'Ver jugadores',
       },
       {
@@ -104,13 +100,12 @@ export class DashboardPageComponent {
         route: '/referees',
         accent: 'red',
         stats: [
-          { label: 'Arbitros disponibles', value: String(referees.length) },
+          { label: 'Disponibles', value: String(referees.length) },
           ...nationalityCounts.map(([nationality, count]) => ({
             label: nationality,
             value: String(count),
           })),
         ],
-        totalLabel: `Total: ${referees.length} arbitros`,
         cta: 'Ver arbitros',
       },
       {
@@ -118,12 +113,11 @@ export class DashboardPageComponent {
         route: '/tournaments',
         accent: 'gold',
         stats: [
-          { label: 'Torneos totales', value: String(tournaments.length) },
+          { label: 'Torneos', value: String(tournaments.length) },
           { label: 'En curso', value: String(tournaments.filter((tournament) => tournament.status === 'InProgress').length) },
           { label: 'Pendientes', value: String(tournaments.filter((tournament) => tournament.status === 'Pending').length) },
           { label: 'Finalizados', value: String(tournaments.filter((tournament) => tournament.status === 'Finished').length) },
         ],
-        totalLabel: `Total: ${tournaments.length} torneos`,
         cta: 'Ver torneos',
       },
       {
@@ -136,7 +130,6 @@ export class DashboardPageComponent {
           { label: 'Suspendidos', value: String(matches.filter((match) => match.status === 'Suspended').length) },
           { label: 'Finalizados', value: String(matches.filter((match) => match.status === 'Finished').length) },
         ],
-        totalLabel: `Total: ${matches.length} partidos`,
         cta: 'Ver partidos',
       },
     ];
