@@ -73,13 +73,6 @@
   grid-auto-rows: max-content;
 }
 
-.nav__hint {
-  display: none;
-  margin: 0;
-  color: rgba(245, 247, 250, 0.68);
-  font-size: var(--font-size-body-xs);
-}
-
 .nav__item {
   display: grid;
   grid-template-rows: auto 1fr;
@@ -258,23 +251,28 @@
 
   .sidebar__intro {
     grid-template-columns: 1fr;
-    gap: 0.65rem;
-    margin-bottom: 0.85rem;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
   }
 
   .brand {
     display: grid;
-    gap: 0.4rem;
+    gap: var(--space-xs);
   }
 
   .brand h1 {
-    font-size: var(--font-size-heading-md);
-    max-width: 14ch;
+    font-size: clamp(1.2rem, 6vw, 1.6rem);
+    line-height: 0.98;
+    max-width: 11ch;
     margin-bottom: 0;
   }
 
   .brand__copy {
     display: none;
+  }
+
+  .brand__eyebrow {
+    letter-spacing: 0.1em;
   }
 
   .sidebar-card {
@@ -284,7 +282,7 @@
   .nav {
     grid-auto-columns: minmax(7.75rem, max-content);
     grid-auto-flow: column;
-    gap: 0.6rem;
+    gap: var(--space-sm);
     overflow-x: auto;
     overflow-y: hidden;
     margin-top: 0;
@@ -296,22 +294,19 @@
     scroll-snap-type: x proximity;
   }
 
-  .nav__hint {
-    display: block;
-  }
-
   .nav::-webkit-scrollbar {
     display: none;
   }
 
   .nav__item {
-    padding: 0.75rem 0.9rem;
+    padding: 0.65rem 0.85rem;
     min-height: auto;
     height: auto;
     gap: 0;
     scroll-snap-align: start;
     place-items: center;
     text-align: center;
+    border-radius: 1rem;
   }
 
   .nav__item:hover,
@@ -325,7 +320,7 @@
   }
 
   .nav__label {
-    font-size: var(--font-size-body-sm);
+    font-size: var(--font-size-body-xs);
     text-align: center;
   }
 
