@@ -27,10 +27,16 @@ public class TournamentController : ControllerBase
         [FromQuery] int? pageNumber,
         [FromQuery] int? pageSize)
     {
+        if (pageNumber.HasValue || pageSize.HasValue)
+        {
+            var (normalizedPageNumber, normalizedPageSize) = PaginationHelper.Normalize(pageNumber, pageSize);
+            var pagedTournaments = await _tournamentService.GetPagedAsync(normalizedPageNumber, normalizedPageSize);
+            PaginationHelper.AddHeaders(Response, pagedTournaments.PageNumber, pagedTournaments.PageSize, pagedTournaments.TotalCount, pagedTournaments.TotalPages);
+            return Ok(_mapper.Map<IEnumerable<TournamentResponseDTO>>(pagedTournaments.Items));
+        }
+
         var tournaments = await _tournamentService.GetAllAsync();
-        var mappedTournaments = _mapper.Map<IEnumerable<TournamentResponseDTO>>(tournaments);
-        var response = PaginationHelper.Apply(Response, mappedTournaments, pageNumber, pageSize);
-        return Ok(response);
+        return Ok(_mapper.Map<IEnumerable<TournamentResponseDTO>>(tournaments));
     }
 
     [HttpGet("{id:int}")]

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SportsLeague.DataAccess.Context;
+using SportsLeague.Domain.Common;
 using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Enums;
 using SportsLeague.Domain.Interfaces.Repositories;
@@ -15,6 +16,30 @@ public class TournamentRepository : GenericRepository<Tournament>, ITournamentRe
     public override async Task<IEnumerable<Tournament>> GetAllAsync()
     {
         return await GetAllWithTeamsAsync();
+    }
+
+    public async Task<PagedResult<Tournament>> GetPagedWithTeamsAsync(int pageNumber, int pageSize)
+    {
+        var query = _dbSet
+            .Include(t => t.TournamentTeams)
+            .AsNoTracking()
+            .OrderBy(t => t.StartDate)
+            .ThenBy(t => t.Id);
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new PagedResult<Tournament>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize)
+        };
     }
 
     public async Task<IEnumerable<Tournament>> GetAllWithTeamsAsync()

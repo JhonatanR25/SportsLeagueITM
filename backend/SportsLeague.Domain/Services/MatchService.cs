@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using SportsLeague.Domain.Common;
 using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Enums;
 using SportsLeague.Domain.Interfaces.Repositories;
@@ -29,6 +30,29 @@ public class MatchService : IMatchService
         _tournamentRepository = tournamentRepository;
         _tournamentTeamRepository = tournamentTeamRepository;
         _logger = logger;
+    }
+
+    public async Task<PagedResult<Match>> GetPagedAsync(int pageNumber, int pageSize)
+    {
+        _logger.LogInformation("Retrieving paged matches. PageNumber={PageNumber}, PageSize={PageSize}.", pageNumber, pageSize);
+        return await _matchRepository.GetPagedWithDetailsAsync(pageNumber, pageSize);
+    }
+
+    public async Task<PagedResult<Match>> GetFilteredPagedAsync(int? tournamentId, MatchStatus? status, DateTime? fromDate, DateTime? toDate, int pageNumber, int pageSize)
+    {
+        if (fromDate.HasValue && toDate.HasValue && fromDate > toDate)
+            throw new ArgumentException("La fecha inicial no puede ser posterior a la fecha final.");
+
+        _logger.LogInformation(
+            "Retrieving paged matches with filters: TournamentId={TournamentId}, Status={Status}, FromDate={FromDate}, ToDate={ToDate}, PageNumber={PageNumber}, PageSize={PageSize}.",
+            tournamentId,
+            status,
+            fromDate,
+            toDate,
+            pageNumber,
+            pageSize);
+
+        return await _matchRepository.GetFilteredPagedAsync(tournamentId, status, fromDate, toDate, pageNumber, pageSize);
     }
 
     public async Task<IEnumerable<Match>> GetAllAsync()

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using SportsLeague.Domain.Common;
 using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Interfaces.Repositories;
 using SportsLeague.Domain.Interfaces.Services;
@@ -19,6 +20,12 @@ public class PlayerService : IPlayerService
         _playerRepository = playerRepository;
         _teamRepository = teamRepository;
         _logger = logger;
+    }
+
+    public async Task<PagedResult<Player>> GetPagedAsync(int pageNumber, int pageSize)
+    {
+        _logger.LogInformation("Retrieving paged players. PageNumber={PageNumber}, PageSize={PageSize}.", pageNumber, pageSize);
+        return await _playerRepository.GetPagedAsync(pageNumber, pageSize);
     }
 
     public async Task<IEnumerable<Player>> GetAllAsync()

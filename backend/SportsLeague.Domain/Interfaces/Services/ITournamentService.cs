@@ -1,10 +1,12 @@
-﻿using SportsLeague.Domain.Entities;
+﻿using SportsLeague.Domain.Common;
+using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Enums;
 
 namespace SportsLeague.Domain.Interfaces.Services;
 
 public interface ITournamentService
 {
+    Task<PagedResult<Tournament>> GetPagedAsync(int pageNumber, int pageSize);
     Task<IEnumerable<Tournament>> GetAllAsync();
     Task<Tournament?> GetByIdAsync(int id);
     Task<Tournament> CreateAsync(Tournament tournament);

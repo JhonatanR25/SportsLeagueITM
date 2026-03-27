@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using SportsLeague.Domain.Common;
 using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Interfaces.Repositories;
 using SportsLeague.Domain.Interfaces.Services;
@@ -14,6 +15,12 @@ public class TeamService : ITeamService
     {
         _teamRepository = teamRepository;
         _logger = logger;
+    }
+
+    public async Task<PagedResult<Team>> GetPagedAsync(int pageNumber, int pageSize)
+    {
+        _logger.LogInformation("Consultando equipos paginados. PageNumber={PageNumber}, PageSize={PageSize}", pageNumber, pageSize);
+        return await _teamRepository.GetPagedAsync(pageNumber, pageSize);
     }
 
     public async Task<IEnumerable<Team>> GetAllAsync()

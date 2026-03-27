@@ -29,10 +29,16 @@ public class RefereeController : ControllerBase
         [FromQuery] int? pageNumber,
         [FromQuery] int? pageSize)
     {
+        if (pageNumber.HasValue || pageSize.HasValue)
+        {
+            var (normalizedPageNumber, normalizedPageSize) = PaginationHelper.Normalize(pageNumber, pageSize);
+            var pagedReferees = await _refereeService.GetPagedAsync(normalizedPageNumber, normalizedPageSize);
+            PaginationHelper.AddHeaders(Response, pagedReferees.PageNumber, pagedReferees.PageSize, pagedReferees.TotalCount, pagedReferees.TotalPages);
+            return Ok(_mapper.Map<IEnumerable<RefereeResponseDTO>>(pagedReferees.Items));
+        }
+
         var referees = await _refereeService.GetAllAsync();
-        var mappedReferees = _mapper.Map<IEnumerable<RefereeResponseDTO>>(referees);
-        var response = PaginationHelper.Apply(Response, mappedReferees, pageNumber, pageSize);
-        return Ok(response);
+        return Ok(_mapper.Map<IEnumerable<RefereeResponseDTO>>(referees));
     }
 
     [HttpGet("{id:int}")]

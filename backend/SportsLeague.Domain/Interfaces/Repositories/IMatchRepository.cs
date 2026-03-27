@@ -1,10 +1,13 @@
-﻿using SportsLeague.Domain.Entities;
+﻿using SportsLeague.Domain.Common;
+using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Enums;
 
 namespace SportsLeague.Domain.Interfaces.Repositories;
 
 public interface IMatchRepository : IGenericRepository<Match>
 {
+    Task<PagedResult<Match>> GetPagedWithDetailsAsync(int pageNumber, int pageSize);
+    Task<PagedResult<Match>> GetFilteredPagedAsync(int? tournamentId, MatchStatus? status, DateTime? fromDate, DateTime? toDate, int pageNumber, int pageSize);
     Task<Match?> GetByIdWithDetailsAsync(int id);
     Task<Match?> GetByIdentityAsync(int tournamentId, int homeTeamId, int awayTeamId, DateTime matchDate);
     Task<IEnumerable<Match>> GetAllWithDetailsAsync();

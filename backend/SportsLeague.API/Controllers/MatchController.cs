@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using SportsLeague.API.DTOs.Request;
 using SportsLeague.API.DTOs.Response;
@@ -32,13 +32,27 @@ public class MatchController : ControllerBase
         [FromQuery] int? pageNumber,
         [FromQuery] int? pageSize)
     {
+        if (pageNumber.HasValue || pageSize.HasValue)
+        {
+            var (normalizedPageNumber, normalizedPageSize) = PaginationHelper.Normalize(pageNumber, pageSize);
+
+            if (tournamentId.HasValue || status.HasValue || fromDate.HasValue || toDate.HasValue)
+            {
+                var pagedMatches = await _matchService.GetFilteredPagedAsync(tournamentId, status, fromDate, toDate, normalizedPageNumber, normalizedPageSize);
+                PaginationHelper.AddHeaders(Response, pagedMatches.PageNumber, pagedMatches.PageSize, pagedMatches.TotalCount, pagedMatches.TotalPages);
+                return Ok(_mapper.Map<IEnumerable<MatchResponseDTO>>(pagedMatches.Items));
+            }
+
+            var allPagedMatches = await _matchService.GetPagedAsync(normalizedPageNumber, normalizedPageSize);
+            PaginationHelper.AddHeaders(Response, allPagedMatches.PageNumber, allPagedMatches.PageSize, allPagedMatches.TotalCount, allPagedMatches.TotalPages);
+            return Ok(_mapper.Map<IEnumerable<MatchResponseDTO>>(allPagedMatches.Items));
+        }
+
         var matches = tournamentId.HasValue || status.HasValue || fromDate.HasValue || toDate.HasValue
             ? await _matchService.GetFilteredAsync(tournamentId, status, fromDate, toDate)
             : await _matchService.GetAllAsync();
 
-        var mappedMatches = _mapper.Map<IEnumerable<MatchResponseDTO>>(matches);
-        var response = PaginationHelper.Apply(Response, mappedMatches, pageNumber, pageSize);
-        return Ok(response);
+        return Ok(_mapper.Map<IEnumerable<MatchResponseDTO>>(matches));
     }
 
     [HttpGet("{id:int}")]

@@ -1,3 +1,4 @@
+﻿using SportsLeague.Domain.Common;
 using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Enums;
 
@@ -5,6 +6,8 @@ namespace SportsLeague.Domain.Interfaces.Services;
 
 public interface IMatchService
 {
+    Task<PagedResult<Match>> GetPagedAsync(int pageNumber, int pageSize);
+    Task<PagedResult<Match>> GetFilteredPagedAsync(int? tournamentId, MatchStatus? status, DateTime? fromDate, DateTime? toDate, int pageNumber, int pageSize);
     Task<IEnumerable<Match>> GetAllAsync();
     Task<IEnumerable<Match>> GetFilteredAsync(int? tournamentId, MatchStatus? status, DateTime? fromDate, DateTime? toDate);
     Task<Match?> GetByIdAsync(int id);

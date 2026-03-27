@@ -27,10 +27,16 @@ public class PlayerController : ControllerBase
         [FromQuery] int? pageNumber,
         [FromQuery] int? pageSize)
     {
+        if (pageNumber.HasValue || pageSize.HasValue)
+        {
+            var (normalizedPageNumber, normalizedPageSize) = PaginationHelper.Normalize(pageNumber, pageSize);
+            var pagedPlayers = await _playerService.GetPagedAsync(normalizedPageNumber, normalizedPageSize);
+            PaginationHelper.AddHeaders(Response, pagedPlayers.PageNumber, pagedPlayers.PageSize, pagedPlayers.TotalCount, pagedPlayers.TotalPages);
+            return Ok(_mapper.Map<IEnumerable<PlayerResponseDTO>>(pagedPlayers.Items));
+        }
+
         var players = await _playerService.GetAllAsync();
-        var mappedPlayers = _mapper.Map<IEnumerable<PlayerResponseDTO>>(players);
-        var response = PaginationHelper.Apply(Response, mappedPlayers, pageNumber, pageSize);
-        return Ok(response);
+        return Ok(_mapper.Map<IEnumerable<PlayerResponseDTO>>(players));
     }
 
     [HttpGet("{id:int}")]

@@ -27,10 +27,16 @@ public class TeamController : ControllerBase
         [FromQuery] int? pageNumber,
         [FromQuery] int? pageSize)
     {
+        if (pageNumber.HasValue || pageSize.HasValue)
+        {
+            var (normalizedPageNumber, normalizedPageSize) = PaginationHelper.Normalize(pageNumber, pageSize);
+            var pagedTeams = await _teamService.GetPagedAsync(normalizedPageNumber, normalizedPageSize);
+            PaginationHelper.AddHeaders(Response, pagedTeams.PageNumber, pagedTeams.PageSize, pagedTeams.TotalCount, pagedTeams.TotalPages);
+            return Ok(_mapper.Map<IEnumerable<TeamResponseDTO>>(pagedTeams.Items));
+        }
+
         var teams = await _teamService.GetAllAsync();
-        var mappedTeams = _mapper.Map<IEnumerable<TeamResponseDTO>>(teams);
-        var response = PaginationHelper.Apply(Response, mappedTeams, pageNumber, pageSize);
-        return Ok(response);
+        return Ok(_mapper.Map<IEnumerable<TeamResponseDTO>>(teams));
     }
 
     [HttpGet("{id:int}")]

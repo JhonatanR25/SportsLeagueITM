@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SportsLeague.DataAccess.Context;
+using SportsLeague.Domain.Common;
 using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Interfaces.Repositories;
 
@@ -19,6 +20,30 @@ public class TeamRepository : GenericRepository<Team>, ITeamRepository
             .OrderBy(t => t.Name)
             .ThenBy(t => t.Id)
             .ToListAsync();
+    }
+
+    public async Task<PagedResult<Team>> GetPagedAsync(int pageNumber, int pageSize)
+    {
+        var query = _dbSet
+            .Include(t => t.Players)
+            .AsNoTracking()
+            .OrderBy(t => t.Name)
+            .ThenBy(t => t.Id);
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new PagedResult<Team>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize)
+        };
     }
 
     public async Task<Team?> GetByNameAsync(string name)

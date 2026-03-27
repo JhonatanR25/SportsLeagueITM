@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using SportsLeague.Domain.Common;
 using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Interfaces.Repositories;
 using SportsLeague.Domain.Interfaces.Services;
@@ -16,6 +17,12 @@ public class RefereeService : IRefereeService
     {
         _refereeRepository = refereeRepository;
         _logger = logger;
+    }
+
+    public async Task<PagedResult<Referee>> GetPagedAsync(int pageNumber, int pageSize)
+    {
+        _logger.LogInformation("Retrieving paged referees. PageNumber={PageNumber}, PageSize={PageSize}", pageNumber, pageSize);
+        return await _refereeRepository.GetPagedAsync(pageNumber, pageSize);
     }
 
     public async Task<IEnumerable<Referee>> GetAllAsync()
@@ -112,6 +119,7 @@ public class RefereeService : IRefereeService
         _logger.LogInformation("Updating referee with ID: {RefereeId}", id);
         await _refereeRepository.UpdateAsync(existing);
     }
+
     public async Task DeleteAsync(int id)
     {
         var exists = await _refereeRepository.ExistsAsync(id);
@@ -128,4 +136,3 @@ public class RefereeService : IRefereeService
         await _refereeRepository.DeleteAsync(id);
     }
 }
-

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using SportsLeague.Domain.Common;
 using SportsLeague.Domain.Entities;
 using SportsLeague.Domain.Enums;
 using SportsLeague.Domain.Interfaces.Repositories;
@@ -23,6 +24,12 @@ public class TournamentService : ITournamentService
         _tournamentTeamRepository = tournamentTeamRepository;
         _teamRepository = teamRepository;
         _logger = logger;
+    }
+
+    public async Task<PagedResult<Tournament>> GetPagedAsync(int pageNumber, int pageSize)
+    {
+        _logger.LogInformation("Retrieving paged tournaments. PageNumber={PageNumber}, PageSize={PageSize}", pageNumber, pageSize);
+        return await _tournamentRepository.GetPagedWithTeamsAsync(pageNumber, pageSize);
     }
 
     public async Task<IEnumerable<Tournament>> GetAllAsync()
