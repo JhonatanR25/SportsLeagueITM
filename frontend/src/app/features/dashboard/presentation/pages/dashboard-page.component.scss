@@ -5,7 +5,7 @@
 
 .panel,
 .state-card {
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--color-border-soft);
   box-shadow: var(--shadow-soft);
 }
 
@@ -28,14 +28,14 @@
 .module-card p,
 .state-card p {
   margin: 0;
-  color: rgba(245, 247, 250, 0.72);
+  color: var(--color-text-soft);
 }
 
 .panel,
 .state-card {
   padding: 1.5rem;
   border-radius: var(--radius-panel);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.03));
+  background: var(--surface-card-soft);
 }
 
 .panel__header {
@@ -58,8 +58,8 @@
   min-width: 9rem;
   padding: 0.75rem 0.9rem;
   border-radius: 0.95rem;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025));
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--surface-card-soft);
+  border: 1px solid var(--color-border-soft);
   text-align: center;
   flex-shrink: 0;
 }
@@ -91,8 +91,8 @@
   padding: 1.3rem;
   height: 100%;
   border-radius: var(--radius-card);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.025));
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface-card-soft);
+  border: 1px solid var(--color-border-soft);
 }
 
 .module-card__header {
@@ -106,13 +106,19 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.4rem;
+  min-height: var(--control-height-icon);
   padding: 0.65rem 0.95rem;
   border-radius: var(--radius-control);
   text-decoration: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  font-weight: 400;
+  background: var(--surface-card-soft);
+  border: 1px solid var(--color-border-soft);
+  box-shadow: var(--shadow-soft);
+  font-weight: var(--font-weight-regular);
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base),
+    border-color var(--transition-base),
+    background var(--transition-base);
 }
 
 .module-card__metrics {
@@ -128,8 +134,8 @@
   gap: 0.35rem;
   padding: 0.85rem 0.9rem;
   border-radius: 0.95rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--surface-card-soft);
+  border: 1px solid var(--color-border-soft);
 }
 
 .module-card__metrics > div:last-child:nth-child(odd) {
@@ -142,27 +148,40 @@
 }
 
 .module-card--gold {
-  background: linear-gradient(180deg, rgba(243, 180, 76, 0.1), rgba(255, 255, 255, 0.03));
+  background: linear-gradient(
+    180deg,
+    var(--color-accent-dashboard-soft),
+    rgba(255, 255, 255, 0.03)
+  );
 }
 
 .module-card--blue {
-  background: linear-gradient(180deg, rgba(39, 89, 214, 0.11), rgba(255, 255, 255, 0.03));
+  background: linear-gradient(180deg, var(--color-accent-teams-soft), rgba(255, 255, 255, 0.03));
 }
 
 .module-card--green {
-  background: linear-gradient(180deg, rgba(60, 179, 113, 0.1), rgba(255, 255, 255, 0.03));
+  background: linear-gradient(180deg, var(--color-accent-players-soft), rgba(255, 255, 255, 0.03));
 }
 
 .module-card--red {
-  background: linear-gradient(180deg, rgba(219, 68, 55, 0.09), rgba(255, 255, 255, 0.03));
+  background: linear-gradient(180deg, var(--color-accent-referees-soft), rgba(255, 255, 255, 0.03));
 }
 
 .module-card--cyan {
-  background: linear-gradient(180deg, rgba(69, 182, 255, 0.1), rgba(255, 255, 255, 0.03));
+  background: linear-gradient(180deg, var(--color-accent-matches-soft), rgba(255, 255, 255, 0.03));
 }
 
 .state-card--error {
-  background: linear-gradient(180deg, rgba(219, 68, 55, 0.12), rgba(255, 255, 255, 0.04));
+  background: linear-gradient(
+    180deg,
+    var(--color-danger-soft),
+    color-mix(in srgb, var(--color-bg-secondary) 92%, transparent)
+  );
+}
+
+.module-card__cta:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-strong);
 }
 
 @media (max-width: 980px) {

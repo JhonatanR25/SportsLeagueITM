@@ -26,7 +26,11 @@
 }
 
 .state-card--error {
-  background: linear-gradient(180deg, rgba(219, 68, 55, 0.12), rgba(255, 255, 255, 0.04));
+  background: linear-gradient(
+    180deg,
+    var(--color-danger-soft),
+    color-mix(in srgb, var(--color-bg-secondary) 92%, transparent)
+  );
 }
 
 @media (max-width: 720px) {

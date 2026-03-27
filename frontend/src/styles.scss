@@ -1,23 +1,49 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap');
 
 :root {
+  /* =========================================================
+     Sports League ITM - Phase 1 Design Tokens
+     Scope: Global CSS variables aligned with current frontend
+     Goal: Consolidate the existing visual system, not redesign it
+     ========================================================= */
   color-scheme: dark;
-  --color-surface: #071124;
-  --color-surface-strong: #091833;
-  --color-surface-soft: #102445;
-  --color-surface-elevated: #13284b;
-  --color-text: #f5f7fa;
-  --color-text-muted: #9fb0c8;
+  --color-bg-primary: #071124;
+  --color-bg-secondary: #091833;
+  --color-bg-tertiary: #102445;
+  --color-bg-surface: #13284b;
+  --color-bg-overlay: rgba(3, 8, 17, 0.72);
+  --color-text-primary: #f5f7fa;
+  --color-text-secondary: #9fb0c8;
   --color-text-soft: rgba(245, 247, 250, 0.78);
-  --color-primary: #f3b44c;
-  --color-secondary: #2759d6;
+  --color-text-inverse: #08101f;
+  --color-border-soft: rgba(255, 255, 255, 0.08);
+  --color-border-default: rgba(255, 255, 255, 0.09);
+  --color-border-accent: rgba(243, 180, 76, 0.45);
+  --color-brand-primary: #f3b44c;
+  --color-brand-primary-hover: #de9f38;
+  --color-brand-primary-active: #c98e2f;
+  --color-brand-secondary: #2759d6;
+  --color-brand-secondary-soft: rgba(39, 89, 214, 0.18);
   --color-success: #3cb371;
+  --color-success-soft: rgba(60, 179, 113, 0.18);
+  --color-warning: #f3b44c;
+  --color-warning-soft: rgba(243, 180, 76, 0.18);
   --color-danger: #db4437;
+  --color-danger-soft: rgba(219, 68, 55, 0.18);
+  --color-info: #45b6ff;
+  --color-info-soft: rgba(69, 182, 255, 0.18);
+  --color-accent-dashboard-soft: rgba(243, 180, 76, 0.1);
+  --color-accent-teams-soft: rgba(39, 89, 214, 0.11);
+  --color-accent-players-soft: rgba(60, 179, 113, 0.1);
+  --color-accent-referees-soft: rgba(219, 68, 55, 0.09);
+  --color-accent-matches-soft: rgba(69, 182, 255, 0.1);
+  --color-accent-tournaments-soft: rgba(243, 180, 76, 0.1);
   --shadow-soft: 0 1.25rem 3rem rgba(2, 8, 20, 0.24);
   --shadow-strong: 0 1.6rem 3.8rem rgba(2, 8, 20, 0.32);
+  --shadow-focus: 0 0 0 2px rgba(243, 180, 76, 0.45);
   --radius-panel: 1.2rem;
   --radius-card: 0.8rem;
-  --radius-pill: 0.55rem;
+  --radius-pill: 999px;
   --radius-control: 0.55rem;
   --radius-panel-mobile: 1.1rem;
   --radius-modal-lg: 1.5rem;
@@ -37,16 +63,19 @@
   --layout-modal-md: 42rem;
   --layout-modal-sm: 40rem;
   --layout-modal-wide: 48rem;
-  --button-height-md: 2.9rem;
-  --button-height-sm: 2.2rem;
   --button-width-md: 11rem;
-  --border-soft: 1px solid rgba(255, 255, 255, 0.08);
-  --surface-card: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03));
-  --surface-card-soft: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.045),
-    rgba(255, 255, 255, 0.028)
-  );
+  --control-height-sm: 2.2rem;
+  --control-height-md: 2.9rem;
+  --control-height-icon: 2.4rem;
+  --control-padding-inline-md: 1.1rem;
+  --control-padding-inline-sm: 0.9rem;
+  --input-padding-block: 0.85rem;
+  --input-padding-inline: 0.95rem;
+  --transition-fast: 120ms ease;
+  --transition-base: 180ms ease;
+  --font-family-heading:
+    'Sora', 'Bahnschrift', 'Segoe UI Variable Display', 'Trebuchet MS', sans-serif;
+  --font-family-base: 'Inter', 'Segoe UI', 'Segoe UI Variable Text', 'Tahoma', sans-serif;
   --font-size-label-xs: 0.72rem;
   --font-size-label-sm: 0.75rem;
   --font-size-label-md: 0.78rem;
@@ -58,8 +87,37 @@
   --font-size-heading-md: clamp(1.4rem, 3vw, 2rem);
   --font-size-metric: clamp(1.5rem, 4vw, 2.25rem);
   --font-size-metric-copy: clamp(1.2rem, 2vw, 1.7rem);
-  --font-display: 'Sora', 'Bahnschrift', 'Segoe UI Variable Display', 'Trebuchet MS', sans-serif;
-  --font-body: 'Inter', 'Segoe UI', 'Segoe UI Variable Text', 'Tahoma', sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-display-strong: 800;
+  --line-height-tight: 1.15;
+  --line-height-base: 1.5;
+  --line-height-relaxed: 1.7;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 720px;
+  --breakpoint-lg: 960px;
+  --breakpoint-xl: 1280px;
+  --color-surface: var(--color-bg-primary);
+  --color-surface-strong: var(--color-bg-secondary);
+  --color-surface-soft: var(--color-bg-tertiary);
+  --color-surface-elevated: var(--color-bg-surface);
+  --color-text: var(--color-text-primary);
+  --color-text-muted: var(--color-text-secondary);
+  --color-primary: var(--color-brand-primary);
+  --color-secondary: var(--color-brand-secondary);
+  --border-soft: 1px solid var(--color-border-soft);
+  --surface-card: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03));
+  --surface-card-soft: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.045),
+    rgba(255, 255, 255, 0.028)
+  );
+  --button-height-md: var(--control-height-md);
+  --button-height-sm: var(--control-height-sm);
+  --font-display: var(--font-family-heading);
+  --font-body: var(--font-family-base);
 }
 
 *,
@@ -79,10 +137,11 @@ body {
   margin: 0;
   min-width: 320px;
   overflow-y: scroll;
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-family: var(--font-body);
-  line-height: 1.5;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body-lg);
+  line-height: var(--line-height-base);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
@@ -110,9 +169,9 @@ h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-display);
+  font-family: var(--font-family-heading);
   letter-spacing: -0.02em;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
 }
 
 p {
@@ -129,42 +188,42 @@ p {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-body);
-  line-height: 1.15;
+  font-family: var(--font-family-base);
+  line-height: var(--line-height-tight);
   letter-spacing: 0;
   text-align: center;
   border-radius: var(--radius-control);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid var(--color-border-default);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.025),
-    0 0.65rem 1.6rem rgba(2, 8, 20, 0.16);
+    var(--shadow-soft);
   transition:
-    transform 180ms ease,
-    box-shadow 180ms ease,
-    border-color 180ms ease,
-    background 180ms ease,
-    color 180ms ease;
+    transform var(--transition-base),
+    box-shadow var(--transition-base),
+    border-color var(--transition-base),
+    background var(--transition-base),
+    color var(--transition-base);
 }
 
 .primary-button,
 .ghost-button {
-  min-height: var(--button-height-md);
-  height: var(--button-height-md);
-  padding: 0 1.1rem;
-  font-weight: 400;
+  min-height: var(--control-height-md);
+  height: var(--control-height-md);
+  padding-inline: var(--control-padding-inline-md);
+  font-weight: var(--font-weight-regular);
   white-space: nowrap;
 }
 
 .table-action {
-  min-height: var(--button-height-sm);
-  height: var(--button-height-sm);
-  padding: 0 0.9rem;
-  font-weight: 400;
+  min-height: var(--control-height-sm);
+  height: var(--control-height-sm);
+  padding-inline: var(--control-padding-inline-sm);
+  font-weight: var(--font-weight-regular);
   white-space: nowrap;
 }
 
 .icon-button {
-  min-height: 2.4rem;
+  min-height: var(--control-height-icon);
   padding: 0.65rem 0.95rem;
 }
 
@@ -173,32 +232,36 @@ p {
 .hero__pill {
   min-height: 2rem;
   padding: 0.1rem 0.75rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .primary-button {
-  background: linear-gradient(180deg, #f3b44c, #de9f38);
-  color: #08101f;
-  border-color: rgba(243, 180, 76, 0.22);
+  background: linear-gradient(180deg, var(--color-brand-primary), var(--color-brand-primary-hover));
+  color: var(--color-text-inverse);
+  border-color: color-mix(in srgb, var(--color-brand-primary) 35%, transparent);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 0.75rem 1.8rem rgba(243, 180, 76, 0.16);
+    0 0.75rem 1.8rem color-mix(in srgb, var(--color-brand-primary) 16%, transparent);
 }
 
 .ghost-button,
 .table-action {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.04));
-  color: var(--color-text);
+  background: var(--surface-card-soft);
+  color: var(--color-text-primary);
 }
 
 .ghost-button--light,
 .table-action--light {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08));
+  background: var(--surface-card);
 }
 
 .ghost-button--danger,
 .table-action--danger {
-  background: linear-gradient(180deg, rgba(219, 68, 55, 0.2), rgba(219, 68, 55, 0.12));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-danger) 22%, transparent),
+    var(--color-danger-soft)
+  );
   color: #ffd8d4;
 }
 
@@ -211,22 +274,43 @@ p {
 }
 
 .icon-button {
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.04));
-  color: var(--color-text);
+  border: 1px solid var(--color-border-default);
+  background: var(--surface-card-soft);
+  color: var(--color-text-primary);
   cursor: pointer;
 }
 
 .status-badge {
   border-radius: var(--radius-control);
   letter-spacing: 0.01em;
-  border-color: rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.04));
+  border-color: var(--color-border-soft);
+  background: var(--surface-card-soft);
+}
+
+.status-badge--scheduled,
+.status-badge--pending {
+  background: var(--color-warning-soft);
+  color: #ffd89a;
+}
+
+.status-badge--inprogress {
+  background: color-mix(in srgb, var(--color-brand-secondary) 22%, transparent);
+  color: #b8cbff;
+}
+
+.status-badge--finished {
+  background: var(--color-success-soft);
+  color: #c5ffd8;
+}
+
+.status-badge--suspended {
+  background: var(--color-danger-soft);
+  color: #ffd8d4;
 }
 
 .team-chip {
   border-radius: var(--radius-control);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.04));
+  background: var(--surface-card-soft);
 }
 
 .search-field {
@@ -255,12 +339,12 @@ p {
 .filter-row select {
   width: 100%;
   min-height: 3rem;
-  padding: 0.85rem 2.6rem 0.85rem 0.95rem;
+  padding: var(--input-padding-block) 2.6rem var(--input-padding-block) var(--input-padding-inline);
   border-radius: var(--radius-control);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.032));
+  border: 1px solid var(--color-border-default);
+  background: var(--surface-card-soft);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 .field select,
@@ -291,7 +375,7 @@ p {
 .field input:focus,
 .field select:focus,
 .filter-row select:focus {
-  outline: 2px solid rgba(243, 180, 76, 0.45);
+  outline: 2px solid var(--color-border-accent);
   outline-offset: 0.1rem;
 }
 
@@ -302,7 +386,7 @@ p {
   place-items: center;
   padding: 1rem;
   overflow-y: auto;
-  background: rgba(3, 8, 17, 0.72);
+  background: var(--color-bg-overlay);
   backdrop-filter: blur(8px);
   z-index: 30;
 }
@@ -313,7 +397,11 @@ p {
   overflow-y: auto;
   padding: var(--space-2xl);
   border-radius: var(--radius-modal-lg);
-  background: linear-gradient(180deg, rgba(12, 29, 58, 0.98), rgba(8, 20, 40, 0.98));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-bg-surface) 96%, black),
+    color-mix(in srgb, var(--color-bg-primary) 96%, black)
+  );
   border: var(--border-soft);
   box-shadow: var(--shadow-strong);
 }
@@ -403,7 +491,7 @@ p {
   padding: 1rem 0.9rem;
   text-align: left;
   vertical-align: middle;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--color-border-soft);
 }
 
 :where(.team-table th, .player-table th, .referee-table th, .tournament-table th, .match-table th) {
@@ -643,7 +731,7 @@ p {
   transform: translateY(-1px);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 0.9rem 2rem rgba(2, 8, 20, 0.22);
+    var(--shadow-strong);
 }
 
 .primary-button:active:not(:disabled),
@@ -663,6 +751,6 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 a:focus-visible {
-  outline: 2px solid rgba(243, 180, 76, 0.45);
+  outline: 2px solid var(--color-border-accent);
   outline-offset: 0.12rem;
 }

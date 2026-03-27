@@ -130,24 +130,12 @@
 .match-table__actions {
   gap: 0.65rem;
 }
-.status-badge--scheduled {
-  background: rgba(243, 180, 76, 0.18);
-  color: #ffd89a;
-}
-.status-badge--inprogress {
-  background: rgba(39, 89, 214, 0.2);
-  color: #b8cbff;
-}
-.status-badge--finished {
-  background: rgba(60, 179, 113, 0.18);
-  color: #c5ffd8;
-}
-.status-badge--suspended {
-  background: rgba(219, 68, 55, 0.16);
-  color: #ffd8d4;
-}
 .state-card--error {
-  background: linear-gradient(180deg, rgba(219, 68, 55, 0.12), rgba(255, 255, 255, 0.04));
+  background: linear-gradient(
+    180deg,
+    var(--color-danger-soft),
+    color-mix(in srgb, var(--color-bg-secondary) 92%, transparent)
+  );
 }
 .overlay {
   position: fixed;
