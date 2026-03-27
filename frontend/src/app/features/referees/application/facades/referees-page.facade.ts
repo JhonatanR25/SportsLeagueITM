@@ -1,18 +1,20 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 
-import { ToastNotification, ToastType } from '../../../../shared/domain/models/toast-notification.model';
+import {
+  ToastNotification,
+  ToastType,
+} from '../../../../shared/domain/models/toast-notification.model';
 import { parseApiErrorMessage } from '../../../../shared/utils/http-error.utils';
 import { pushToastNotification } from '../../../../shared/utils/toast.utils';
 import { Referee } from '../../domain/models/referee.model';
-import { RefereeUpsertPayload } from '../../domain/models/referee-upsert.model';
 import { RefereeApiService } from '../../infrastructure/repositories/referee-api.service';
+import { RefereesFormService } from './referees-form.service';
 
 @Injectable()
 export class RefereesPageFacade {
   private readonly refereeApi = inject(RefereeApiService);
-  private readonly formBuilder = inject(FormBuilder);
+  private readonly formService = inject(RefereesFormService);
 
   readonly referees = signal<Referee[]>([]);
   readonly isLoading = signal(true);
@@ -24,6 +26,7 @@ export class RefereesPageFacade {
   readonly refereePendingDelete = signal<Referee | null>(null);
   readonly notifications = signal<ToastNotification[]>([]);
   readonly searchTerm = signal('');
+  readonly refereeForm = this.formService.refereeForm;
   readonly filteredReferees = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
 
@@ -37,11 +40,6 @@ export class RefereesPageFacade {
       ),
     );
   });
-  readonly uniqueNationalitiesCount = computed(
-    () =>
-      new Set(this.filteredReferees().map((referee) => referee.nationality.trim().toLowerCase()))
-        .size,
-  );
   readonly submitLabel = computed(() =>
     this.refereeBeingEdited() ? 'Guardar cambios' : 'Crear arbitro',
   );
@@ -51,22 +49,7 @@ export class RefereesPageFacade {
   readonly formModeLabel = computed(() =>
     this.refereeBeingEdited() ? 'Edicion de arbitro' : 'Creacion de arbitro',
   );
-  readonly refereePreview = computed(() => {
-    const firstName = this.refereeForm.controls.firstName.value.trim();
-    const lastName = this.refereeForm.controls.lastName.value.trim();
-    const nationality = this.refereeForm.controls.nationality.value.trim();
-
-    return {
-      initials: `${firstName.slice(0, 1)}${lastName.slice(0, 1)}`.trim().toUpperCase() || 'AR',
-      fullName: `${firstName} ${lastName}`.trim() || 'Nombre del arbitro',
-      nationality: nationality || 'Nacionalidad pendiente',
-    };
-  });
-  readonly refereeForm = this.formBuilder.nonNullable.group({
-    firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
-    lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
-    nationality: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
-  });
+  readonly refereePreview = this.formService.refereePreview;
 
   loadReferees(): void {
     this.isLoading.set(true);
@@ -95,25 +78,13 @@ export class RefereesPageFacade {
 
   openCreateModal(): void {
     this.refereeBeingEdited.set(null);
-    this.refereeForm.reset({
-      firstName: '',
-      lastName: '',
-      nationality: '',
-    });
-    this.refereeForm.markAsPristine();
-    this.refereeForm.markAsUntouched();
+    this.formService.resetForCreate();
     this.isFormModalOpen.set(true);
   }
 
   openEditModal(referee: Referee): void {
     this.refereeBeingEdited.set(referee);
-    this.refereeForm.reset({
-      firstName: referee.firstName,
-      lastName: referee.lastName,
-      nationality: referee.nationality,
-    });
-    this.refereeForm.markAsPristine();
-    this.refereeForm.markAsUntouched();
+    this.formService.resetForEdit(referee);
     this.isFormModalOpen.set(true);
   }
 
@@ -142,7 +113,7 @@ export class RefereesPageFacade {
     }
 
     const editingReferee = this.refereeBeingEdited();
-    const payload = this.buildPayload();
+    const payload = this.formService.buildPayload();
     const request$: Observable<unknown> = editingReferee
       ? this.refereeApi.update(editingReferee.id, payload)
       : this.refereeApi.create(payload);
@@ -206,40 +177,15 @@ export class RefereesPageFacade {
   }
 
   fieldHasError(fieldName: keyof typeof this.refereeForm.controls): boolean {
-    const control = this.refereeForm.controls[fieldName];
-    return control.invalid && (control.dirty || control.touched);
+    return this.formService.fieldHasError(fieldName);
   }
 
   getFieldError(fieldName: keyof typeof this.refereeForm.controls): string {
-    const control = this.refereeForm.controls[fieldName];
-
-    if (control.hasError('required')) {
-      return 'Este campo es obligatorio.';
-    }
-
-    if (control.hasError('minlength')) {
-      return 'El valor es demasiado corto.';
-    }
-
-    if (control.hasError('maxlength')) {
-      return 'El valor supera la longitud permitida.';
-    }
-
-    return 'Revisa este campo.';
+    return this.formService.getFieldError(fieldName);
   }
 
   canSubmitForm(): boolean {
     return !this.isSaving();
-  }
-
-  private buildPayload(): RefereeUpsertPayload {
-    const { firstName, lastName, nationality } = this.refereeForm.getRawValue();
-
-    return {
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
-      nationality: nationality.trim(),
-    };
   }
 
   private pushNotification(type: ToastType, title: string, message: string): void {

@@ -1,10 +1,4 @@
 import { Routes } from '@angular/router';
-import { DashboardPageComponent } from './features/dashboard/presentation/pages/dashboard-page.component';
-import { MatchesPageComponent } from './features/matches/presentation/pages/matches-page.component';
-import { PlayersPageComponent } from './features/players/presentation/pages/players-page.component';
-import { RefereesPageComponent } from './features/referees/presentation/pages/referees-page.component';
-import { TeamsPageComponent } from './features/teams/presentation/pages/teams-page.component';
-import { TournamentsPageComponent } from './features/tournaments/presentation/pages/tournaments-page.component';
 import { ShellComponent } from './layout/shell/shell.component';
 
 export const routes: Routes = [
@@ -19,27 +13,45 @@ export const routes: Routes = [
       },
       {
         path: 'dashboard',
-        component: DashboardPageComponent,
+        loadComponent: () =>
+          import('./features/dashboard/presentation/pages/dashboard-page.component').then(
+            (module) => module.DashboardPageComponent,
+          ),
       },
       {
         path: 'teams',
-        component: TeamsPageComponent,
+        loadComponent: () =>
+          import('./features/teams/presentation/pages/teams-page.component').then(
+            (module) => module.TeamsPageComponent,
+          ),
       },
       {
         path: 'players',
-        component: PlayersPageComponent,
+        loadComponent: () =>
+          import('./features/players/presentation/pages/players-page.component').then(
+            (module) => module.PlayersPageComponent,
+          ),
       },
       {
         path: 'referees',
-        component: RefereesPageComponent,
+        loadComponent: () =>
+          import('./features/referees/presentation/pages/referees-page.component').then(
+            (module) => module.RefereesPageComponent,
+          ),
       },
       {
         path: 'matches',
-        component: MatchesPageComponent,
+        loadComponent: () =>
+          import('./features/matches/presentation/pages/matches-page.component').then(
+            (module) => module.MatchesPageComponent,
+          ),
       },
       {
         path: 'tournaments',
-        component: TournamentsPageComponent,
+        loadComponent: () =>
+          import('./features/tournaments/presentation/pages/tournaments-page.component').then(
+            (module) => module.TournamentsPageComponent,
+          ),
       },
     ],
   },

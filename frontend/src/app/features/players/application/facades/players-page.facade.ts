@@ -1,27 +1,24 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 
-import { ToastNotification, ToastType } from '../../../../shared/domain/models/toast-notification.model';
+import {
+  ToastNotification,
+  ToastType,
+} from '../../../../shared/domain/models/toast-notification.model';
 import { parseApiErrorMessage } from '../../../../shared/utils/http-error.utils';
 import { pushToastNotification } from '../../../../shared/utils/toast.utils';
 import { Team } from '../../../teams/domain/models/team.model';
 import { TeamApiService } from '../../../teams/infrastructure/repositories/team-api.service';
 import { Player } from '../../domain/models/player.model';
 import { PlayerPosition } from '../../domain/models/player-position.type';
-import { PlayerUpsertPayload } from '../../domain/models/player-upsert.model';
 import { PlayerApiService } from '../../infrastructure/repositories/player-api.service';
-
-type PositionOption = {
-  value: PlayerPosition;
-  label: string;
-};
+import { PlayersFormService } from './players-form.service';
 
 @Injectable()
 export class PlayersPageFacade {
   private readonly playerApi = inject(PlayerApiService);
   private readonly teamApi = inject(TeamApiService);
-  private readonly formBuilder = inject(FormBuilder);
+  private readonly formService = inject(PlayersFormService);
 
   readonly players = signal<Player[]>([]);
   readonly teams = signal<Team[]>([]);
@@ -35,6 +32,7 @@ export class PlayersPageFacade {
   readonly playerPendingDelete = signal<Player | null>(null);
   readonly notifications = signal<ToastNotification[]>([]);
   readonly searchTerm = signal('');
+  readonly playerForm = this.formService.playerForm;
   readonly filteredPlayers = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
 
@@ -51,9 +49,6 @@ export class PlayersPageFacade {
       ].some((value) => value.toLowerCase().includes(term)),
     );
   });
-  readonly uniqueTeamsCount = computed(
-    () => new Set(this.filteredPlayers().map((player) => player.teamName.trim().toLowerCase())).size,
-  );
   readonly submitLabel = computed(() =>
     this.playerBeingEdited() ? 'Guardar cambios' : 'Crear jugador',
   );
@@ -63,32 +58,8 @@ export class PlayersPageFacade {
   readonly formModeLabel = computed(() =>
     this.playerBeingEdited() ? 'Edicion de jugador' : 'Creacion de jugador',
   );
-  readonly playerPreview = computed(() => {
-    const firstName = this.playerForm.controls.firstName.value.trim();
-    const lastName = this.playerForm.controls.lastName.value.trim();
-    const team = this.teams().find((item) => item.id === this.playerForm.controls.teamId.value);
-
-    return {
-      initials: `${firstName.slice(0, 1)}${lastName.slice(0, 1)}`.trim().toUpperCase() || 'JG',
-      fullName: `${firstName} ${lastName}`.trim() || 'Nombre del jugador',
-      teamName: team?.name ?? 'Sin equipo seleccionado',
-      positionLabel: this.getPositionLabel(this.playerForm.controls.position.value),
-    };
-  });
-  readonly positionOptions: PositionOption[] = [
-    { value: 'Goalkeeper', label: 'Portero' },
-    { value: 'Defender', label: 'Defensa' },
-    { value: 'Midfielder', label: 'Mediocampista' },
-    { value: 'Forward', label: 'Delantero' },
-  ];
-  readonly playerForm = this.formBuilder.nonNullable.group({
-    firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
-    lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
-    birthDate: ['', [Validators.required]],
-    number: [0, [Validators.required, Validators.min(1), Validators.max(999)]],
-    position: ['Goalkeeper' as PlayerPosition, [Validators.required]],
-    teamId: [0, [Validators.required, Validators.min(1)]],
-  });
+  readonly playerPreview = this.formService.createPreview(this.teams);
+  readonly positionOptions = this.formService.positionOptions;
 
   loadInitialData(): void {
     this.loadPlayers();
@@ -106,31 +77,13 @@ export class PlayersPageFacade {
 
   openCreateModal(): void {
     this.playerBeingEdited.set(null);
-    this.playerForm.reset({
-      firstName: '',
-      lastName: '',
-      birthDate: '',
-      number: 0,
-      position: 'Goalkeeper',
-      teamId: 0,
-    });
-    this.playerForm.markAsPristine();
-    this.playerForm.markAsUntouched();
+    this.formService.resetForCreate();
     this.isFormModalOpen.set(true);
   }
 
   openEditModal(player: Player): void {
     this.playerBeingEdited.set(player);
-    this.playerForm.reset({
-      firstName: player.firstName,
-      lastName: player.lastName,
-      birthDate: this.toDateInputValue(player.birthDate),
-      number: player.number,
-      position: player.position,
-      teamId: player.teamId,
-    });
-    this.playerForm.markAsPristine();
-    this.playerForm.markAsUntouched();
+    this.formService.resetForEdit(player);
     this.isFormModalOpen.set(true);
   }
 
@@ -159,7 +112,7 @@ export class PlayersPageFacade {
     }
 
     const editingPlayer = this.playerBeingEdited();
-    const payload = this.buildPayload();
+    const payload = this.formService.buildPayload();
     const request$: Observable<unknown> = editingPlayer
       ? this.playerApi.update(editingPlayer.id, payload)
       : this.playerApi.create(payload);
@@ -223,34 +176,15 @@ export class PlayersPageFacade {
   }
 
   fieldHasError(fieldName: keyof typeof this.playerForm.controls): boolean {
-    const control = this.playerForm.controls[fieldName];
-    return control.invalid && (control.dirty || control.touched);
+    return this.formService.fieldHasError(fieldName);
   }
 
   getFieldError(fieldName: keyof typeof this.playerForm.controls): string {
-    const control = this.playerForm.controls[fieldName];
-
-    if (control.hasError('required')) {
-      return 'Este campo es obligatorio.';
-    }
-
-    if (control.hasError('minlength')) {
-      return 'El valor es demasiado corto.';
-    }
-
-    if (control.hasError('maxlength')) {
-      return 'El valor supera la longitud permitida.';
-    }
-
-    if (control.hasError('min') || control.hasError('max')) {
-      return 'El valor esta fuera del rango permitido.';
-    }
-
-    return 'Revisa este campo.';
+    return this.formService.getFieldError(fieldName);
   }
 
   getPositionLabel(position: PlayerPosition): string {
-    return this.positionOptions.find((option) => option.value === position)?.label ?? position;
+    return this.formService.getPositionLabel(position);
   }
 
   canSubmitForm(): boolean {
@@ -286,24 +220,6 @@ export class PlayersPageFacade {
         this.isTeamsLoading.set(false);
       },
     });
-  }
-
-  private buildPayload(): PlayerUpsertPayload {
-    const { firstName, lastName, birthDate, number, position, teamId } =
-      this.playerForm.getRawValue();
-
-    return {
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
-      birthDate,
-      number,
-      position,
-      teamId,
-    };
-  }
-
-  private toDateInputValue(value: string): string {
-    return value ? value.slice(0, 10) : '';
   }
 
   private pushNotification(type: ToastType, title: string, message: string): void {

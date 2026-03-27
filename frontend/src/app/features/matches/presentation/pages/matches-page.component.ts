@@ -8,6 +8,7 @@ import { ModulePageHeaderComponent } from '../../../../shared/presentation/compo
 import { SectionCardHeaderComponent } from '../../../../shared/presentation/components/section-card-header/section-card-header.component';
 import { StateCardComponent } from '../../../../shared/presentation/components/state-card/state-card.component';
 import { ToastStackComponent } from '../../../../shared/presentation/components/toast-stack/toast-stack.component';
+import { MatchesFormService } from '../../application/facades/matches-form.service';
 import { Match } from '../../domain/models/match.model';
 import { MatchStatus } from '../../domain/models/match-status.type';
 import { MatchesPageFacade } from '../../application/facades/matches-page.facade';
@@ -15,10 +16,20 @@ import { MatchesPageFacade } from '../../application/facades/matches-page.facade
 @Component({
   selector: 'app-matches-page',
   standalone: true,
-  imports: [CommonModule, DatePipe, ReactiveFormsModule, ContextBannerComponent, ContextBannerItemComponent, ModulePageHeaderComponent, SectionCardHeaderComponent, StateCardComponent, ToastStackComponent],
+  imports: [
+    CommonModule,
+    DatePipe,
+    ReactiveFormsModule,
+    ContextBannerComponent,
+    ContextBannerItemComponent,
+    ModulePageHeaderComponent,
+    SectionCardHeaderComponent,
+    StateCardComponent,
+    ToastStackComponent,
+  ],
   templateUrl: './matches-page.component.html',
   styleUrl: './matches-page.component.scss',
-  providers: [MatchesPageFacade],
+  providers: [MatchesFormService, MatchesPageFacade],
 })
 export class MatchesPageComponent {
   private readonly facade = inject(MatchesPageFacade);

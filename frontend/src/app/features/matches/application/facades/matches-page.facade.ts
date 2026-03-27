@@ -1,8 +1,10 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
 import { startWith } from 'rxjs';
 
-import { ToastNotification, ToastType } from '../../../../shared/domain/models/toast-notification.model';
+import {
+  ToastNotification,
+  ToastType,
+} from '../../../../shared/domain/models/toast-notification.model';
 import { parseApiErrorMessage } from '../../../../shared/utils/http-error.utils';
 import { pushToastNotification } from '../../../../shared/utils/toast.utils';
 import { Referee } from '../../../referees/domain/models/referee.model';
@@ -11,10 +13,10 @@ import { Team } from '../../../teams/domain/models/team.model';
 import { TeamApiService } from '../../../teams/infrastructure/repositories/team-api.service';
 import { Tournament } from '../../../tournaments/domain/models/tournament.model';
 import { TournamentApiService } from '../../../tournaments/infrastructure/repositories/tournament-api.service';
-import { MatchCreatePayload } from '../../domain/models/match-create.model';
 import { Match } from '../../domain/models/match.model';
 import { MatchStatus } from '../../domain/models/match-status.type';
 import { MatchApiService } from '../../infrastructure/repositories/match-api.service';
+import { MatchesFormService } from './matches-form.service';
 
 @Injectable()
 export class MatchesPageFacade {
@@ -22,7 +24,7 @@ export class MatchesPageFacade {
   private readonly teamApi = inject(TeamApiService);
   private readonly refereeApi = inject(RefereeApiService);
   private readonly tournamentApi = inject(TournamentApiService);
-  private readonly formBuilder = inject(FormBuilder);
+  private readonly formService = inject(MatchesFormService);
 
   readonly matches = signal<Match[]>([]);
   readonly teams = signal<Team[]>([]);
@@ -45,6 +47,8 @@ export class MatchesPageFacade {
   readonly selectedAwayTeamId = signal(0);
   readonly statusOptions: MatchStatus[] = ['Scheduled', 'InProgress', 'Finished', 'Suspended'];
   readonly tournamentTeams = signal<Team[]>([]);
+  readonly createForm = this.formService.createForm;
+  readonly scoreForm = this.formService.scoreForm;
   readonly filteredMatches = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
 
@@ -85,18 +89,6 @@ export class MatchesPageFacade {
   readonly canCreateMatch = computed(
     () => this.tournamentTeams().length >= 2 && !this.isTournamentTeamsLoading(),
   );
-  readonly createForm = this.formBuilder.nonNullable.group({
-    matchDate: ['', [Validators.required]],
-    tournamentId: [0, [Validators.required, Validators.min(1)]],
-    homeTeamId: [0, [Validators.required, Validators.min(1)]],
-    awayTeamId: [0, [Validators.required, Validators.min(1)]],
-    refereeId: [0, [Validators.required, Validators.min(1)]],
-  });
-  readonly scoreForm = this.formBuilder.nonNullable.group({
-    homeScore: [0, [Validators.required, Validators.min(0)]],
-    awayScore: [0, [Validators.required, Validators.min(0)]],
-    isFinalScore: [false],
-  });
 
   constructor() {
     this.createForm.controls.tournamentId.valueChanges
@@ -144,15 +136,7 @@ export class MatchesPageFacade {
   }
 
   openCreateModal(): void {
-    this.createForm.reset({
-      matchDate: '',
-      tournamentId: 0,
-      homeTeamId: 0,
-      awayTeamId: 0,
-      refereeId: 0,
-    });
-    this.createForm.markAsPristine();
-    this.createForm.markAsUntouched();
+    this.formService.resetCreateForm();
     this.tournamentTeams.set([]);
     this.isTournamentTeamsLoading.set(false);
     this.selectedCreateTournamentId.set(0);
@@ -174,11 +158,7 @@ export class MatchesPageFacade {
 
   openScoreModal(match: Match): void {
     this.selectedMatchForScore.set(match);
-    this.scoreForm.reset({
-      homeScore: match.homeScore,
-      awayScore: match.awayScore,
-      isFinalScore: match.status === 'Finished',
-    });
+    this.formService.resetScoreForm(match);
     this.isScoreModalOpen.set(true);
   }
 
@@ -195,7 +175,7 @@ export class MatchesPageFacade {
       return;
     }
 
-    const payload = this.createForm.getRawValue() as MatchCreatePayload;
+    const payload = this.formService.buildCreatePayload();
 
     if (payload.homeTeamId === payload.awayTeamId) {
       this.pushNotification(
@@ -220,11 +200,7 @@ export class MatchesPageFacade {
       },
       error: (error: unknown) => {
         this.isSaving.set(false);
-        this.pushNotification(
-          'error',
-          'No se pudo crear el partido',
-          parseApiErrorMessage(error),
-        );
+        this.pushNotification('error', 'No se pudo crear el partido', parseApiErrorMessage(error));
       },
     });
   }
@@ -337,41 +313,19 @@ export class MatchesPageFacade {
   }
 
   hasCreateFieldError(fieldName: keyof typeof this.createForm.controls): boolean {
-    const control = this.createForm.controls[fieldName];
-    return control.invalid && (control.touched || control.dirty);
+    return this.formService.hasCreateFieldError(fieldName);
   }
 
   getCreateFieldError(fieldName: keyof typeof this.createForm.controls): string {
-    const control = this.createForm.controls[fieldName];
-
-    if (control.hasError('required')) {
-      return 'Este campo es obligatorio.';
-    }
-
-    if (control.hasError('min')) {
-      return 'Selecciona una opcion valida.';
-    }
-
-    return 'Revisa este campo.';
+    return this.formService.getCreateFieldError(fieldName);
   }
 
   hasScoreFieldError(fieldName: keyof typeof this.scoreForm.controls): boolean {
-    const control = this.scoreForm.controls[fieldName];
-    return control.invalid && (control.touched || control.dirty);
+    return this.formService.hasScoreFieldError(fieldName);
   }
 
   getScoreFieldError(fieldName: keyof typeof this.scoreForm.controls): string {
-    const control = this.scoreForm.controls[fieldName];
-
-    if (control.hasError('required')) {
-      return 'Este campo es obligatorio.';
-    }
-
-    if (control.hasError('min')) {
-      return 'El marcador no puede ser negativo.';
-    }
-
-    return 'Revisa este campo.';
+    return this.formService.getScoreFieldError(fieldName);
   }
 
   private loadMatches(): void {

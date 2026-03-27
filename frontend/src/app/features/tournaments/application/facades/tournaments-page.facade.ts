@@ -1,22 +1,24 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 
-import { ToastNotification, ToastType } from '../../../../shared/domain/models/toast-notification.model';
+import {
+  ToastNotification,
+  ToastType,
+} from '../../../../shared/domain/models/toast-notification.model';
 import { parseApiErrorMessage } from '../../../../shared/utils/http-error.utils';
 import { pushToastNotification } from '../../../../shared/utils/toast.utils';
 import { Team } from '../../../teams/domain/models/team.model';
 import { TeamApiService } from '../../../teams/infrastructure/repositories/team-api.service';
 import { Tournament } from '../../domain/models/tournament.model';
 import { TournamentStatus } from '../../domain/models/tournament-status.type';
-import { TournamentUpsertPayload } from '../../domain/models/tournament-upsert.model';
 import { TournamentApiService } from '../../infrastructure/repositories/tournament-api.service';
+import { TournamentsFormService } from './tournaments-form.service';
 
 @Injectable()
 export class TournamentsPageFacade {
   private readonly tournamentApi = inject(TournamentApiService);
   private readonly teamApi = inject(TeamApiService);
-  private readonly formBuilder = inject(FormBuilder);
+  private readonly formService = inject(TournamentsFormService);
 
   readonly tournaments = signal<Tournament[]>([]);
   readonly teams = signal<Team[]>([]);
@@ -35,6 +37,7 @@ export class TournamentsPageFacade {
   readonly notifications = signal<ToastNotification[]>([]);
   readonly searchTerm = signal('');
   readonly selectedTeamId = signal(0);
+  readonly tournamentForm = this.formService.tournamentForm;
   readonly filteredTournaments = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
 
@@ -88,13 +91,6 @@ export class TournamentsPageFacade {
       !this.isTeamsLoading() &&
       this.remainingTeamsCount() > 0,
   );
-  readonly tournamentForm = this.formBuilder.nonNullable.group({
-    name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(150)]],
-    season: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(20)]],
-    startDate: ['', [Validators.required]],
-    endDate: ['', [Validators.required]],
-  });
-
   loadInitialData(): void {
     this.loadTournaments();
     this.loadTeams();
@@ -111,22 +107,13 @@ export class TournamentsPageFacade {
 
   openCreateModal(): void {
     this.tournamentBeingEdited.set(null);
-    this.tournamentForm.reset({ name: '', season: '', startDate: '', endDate: '' });
-    this.tournamentForm.markAsPristine();
-    this.tournamentForm.markAsUntouched();
+    this.formService.resetForCreate();
     this.isFormModalOpen.set(true);
   }
 
   openEditModal(tournament: Tournament): void {
     this.tournamentBeingEdited.set(tournament);
-    this.tournamentForm.reset({
-      name: tournament.name,
-      season: tournament.season,
-      startDate: this.toDateInputValue(tournament.startDate),
-      endDate: this.toDateInputValue(tournament.endDate),
-    });
-    this.tournamentForm.markAsPristine();
-    this.tournamentForm.markAsUntouched();
+    this.formService.resetForEdit(tournament);
     this.isFormModalOpen.set(true);
   }
 
@@ -175,7 +162,7 @@ export class TournamentsPageFacade {
     }
 
     const editingTournament = this.tournamentBeingEdited();
-    const payload = this.buildPayload();
+    const payload = this.formService.buildPayload();
     const request$: Observable<unknown> = editingTournament
       ? this.tournamentApi.update(editingTournament.id, payload)
       : this.tournamentApi.create(payload);
@@ -281,7 +268,11 @@ export class TournamentsPageFacade {
       },
       error: (error: unknown) => {
         this.isSaving.set(false);
-        this.pushNotification('error', 'No se pudo inscribir el equipo', parseApiErrorMessage(error));
+        this.pushNotification(
+          'error',
+          'No se pudo inscribir el equipo',
+          parseApiErrorMessage(error),
+        );
       },
     });
   }
@@ -291,36 +282,15 @@ export class TournamentsPageFacade {
   }
 
   fieldHasError(fieldName: keyof typeof this.tournamentForm.controls): boolean {
-    const control = this.tournamentForm.controls[fieldName];
-    return control.invalid && (control.dirty || control.touched);
+    return this.formService.fieldHasError(fieldName);
   }
 
   getFieldError(fieldName: keyof typeof this.tournamentForm.controls): string {
-    const control = this.tournamentForm.controls[fieldName];
-
-    if (control.hasError('required')) {
-      return 'Este campo es obligatorio.';
-    }
-
-    if (control.hasError('minlength')) {
-      return 'El valor es demasiado corto.';
-    }
-
-    if (control.hasError('maxlength')) {
-      return 'El valor supera la longitud permitida.';
-    }
-
-    return 'Revisa este campo.';
+    return this.formService.getFieldError(fieldName);
   }
 
   hasDateRangeError(): boolean {
-    const { startDate, endDate } = this.tournamentForm.getRawValue();
-
-    if (!startDate || !endDate) {
-      return false;
-    }
-
-    return new Date(endDate).getTime() <= new Date(startDate).getTime();
+    return this.formService.hasDateRangeError();
   }
 
   canEdit(tournament: Tournament): boolean {
@@ -407,17 +377,6 @@ export class TournamentsPageFacade {
     });
   }
 
-  private buildPayload(): TournamentUpsertPayload {
-    const { name, season, startDate, endDate } = this.tournamentForm.getRawValue();
-
-    return {
-      name: name.trim(),
-      season: season.trim(),
-      startDate,
-      endDate,
-    };
-  }
-
   private getNextStatus(status: TournamentStatus): TournamentStatus | null {
     switch (status) {
       case 'Pending':
@@ -427,10 +386,6 @@ export class TournamentsPageFacade {
       case 'Finished':
         return null;
     }
-  }
-
-  private toDateInputValue(value: string): string {
-    return value ? value.slice(0, 10) : '';
   }
 
   private pushNotification(type: ToastType, title: string, message: string): void {

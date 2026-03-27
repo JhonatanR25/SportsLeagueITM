@@ -11,15 +11,27 @@ import { StateCardComponent } from '../../../../shared/presentation/components/s
 import { ToastStackComponent } from '../../../../shared/presentation/components/toast-stack/toast-stack.component';
 import { Player } from '../../domain/models/player.model';
 import { PlayerPosition } from '../../domain/models/player-position.type';
+import { PlayersFormService } from '../../application/facades/players-form.service';
 import { PlayersPageFacade } from '../../application/facades/players-page.facade';
 
 @Component({
   selector: 'app-players-page',
   standalone: true,
-  imports: [CommonModule, DatePipe, ReactiveFormsModule, ConfirmDialogComponent, ContextBannerComponent, ContextBannerItemComponent, ModulePageHeaderComponent, SectionCardHeaderComponent, StateCardComponent, ToastStackComponent],
+  imports: [
+    CommonModule,
+    DatePipe,
+    ReactiveFormsModule,
+    ConfirmDialogComponent,
+    ContextBannerComponent,
+    ContextBannerItemComponent,
+    ModulePageHeaderComponent,
+    SectionCardHeaderComponent,
+    StateCardComponent,
+    ToastStackComponent,
+  ],
   templateUrl: './players-page.component.html',
   styleUrl: './players-page.component.scss',
-  providers: [PlayersPageFacade],
+  providers: [PlayersFormService, PlayersPageFacade],
 })
 export class PlayersPageComponent {
   private readonly facade = inject(PlayersPageFacade);

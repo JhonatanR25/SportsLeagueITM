@@ -196,9 +196,9 @@ public class MatchService : IMatchService
 
     private static void ValidateTournamentAllowsScheduling(Tournament tournament)
     {
-        if (tournament.Status != TournamentStatus.Pending)
+        if (tournament.Status == TournamentStatus.Finished)
         {
-            throw new InvalidOperationException("Solo se pueden programar partidos en torneos con estado Pending.");
+            throw new InvalidOperationException("No se pueden programar partidos en torneos con estado Finished.");
         }
     }
 }

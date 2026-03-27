@@ -10,15 +10,26 @@ import { SectionCardHeaderComponent } from '../../../../shared/presentation/comp
 import { StateCardComponent } from '../../../../shared/presentation/components/state-card/state-card.component';
 import { ToastStackComponent } from '../../../../shared/presentation/components/toast-stack/toast-stack.component';
 import { Referee } from '../../domain/models/referee.model';
+import { RefereesFormService } from '../../application/facades/referees-form.service';
 import { RefereesPageFacade } from '../../application/facades/referees-page.facade';
 
 @Component({
   selector: 'app-referees-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ConfirmDialogComponent, ContextBannerComponent, ContextBannerItemComponent, ModulePageHeaderComponent, SectionCardHeaderComponent, StateCardComponent, ToastStackComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    ConfirmDialogComponent,
+    ContextBannerComponent,
+    ContextBannerItemComponent,
+    ModulePageHeaderComponent,
+    SectionCardHeaderComponent,
+    StateCardComponent,
+    ToastStackComponent,
+  ],
   templateUrl: './referees-page.component.html',
   styleUrl: './referees-page.component.scss',
-  providers: [RefereesPageFacade],
+  providers: [RefereesFormService, RefereesPageFacade],
 })
 export class RefereesPageComponent {
   private readonly facade = inject(RefereesPageFacade);

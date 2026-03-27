@@ -5,11 +5,20 @@
 >
   <label class="search-field" moduleHeaderControls>
     <span>Buscar</span>
-    <input type="search" [value]="searchTerm()" (input)="updateSearchTerm(searchInput.value)" #searchInput placeholder="Equipos, arbitro o torneo" />
+    <input
+      type="search"
+      [value]="searchTerm()"
+      (input)="updateSearchTerm(searchInput.value)"
+      #searchInput
+      placeholder="Equipos, arbitro o torneo"
+    />
   </label>
 
   <div class="filter-row" moduleHeaderControls>
-    <select [value]="filterTournamentId()" (change)="updateFilterTournament(+$any($event.target).value)">
+    <select
+      [value]="filterTournamentId()"
+      (change)="updateFilterTournament(+$any($event.target).value)"
+    >
       <option [value]="0">Todos los torneos</option>
       @for (tournament of tournaments(); track tournament.id) {
         <option [value]="tournament.id">{{ tournament.name }}</option>
@@ -24,8 +33,12 @@
     </select>
   </div>
 
-  <button type="button" class="ghost-button" moduleHeaderButtons (click)="retry()">Actualizar</button>
-  <button type="button" class="primary-button" moduleHeaderButtons (click)="openCreateModal()">Crear partido</button>
+  <button type="button" class="ghost-button" moduleHeaderButtons (click)="retry()">
+    Actualizar
+  </button>
+  <button type="button" class="primary-button" moduleHeaderButtons (click)="openCreateModal()">
+    Crear partido
+  </button>
 </app-module-page-header>
 
 @if (isLoading()) {
@@ -56,22 +69,44 @@
                 <h3>{{ match.homeTeamName }} vs {{ match.awayTeamName }}</h3>
                 <p>{{ match.tournamentName }}</p>
               </div>
-              <span class="status-badge" [class]="'status-badge--' + match.status.toLowerCase()">{{ getStatusLabel(match.status) }}</span>
+              <span class="status-badge" [class]="'status-badge--' + match.status.toLowerCase()">{{
+                getStatusLabel(match.status)
+              }}</span>
             </div>
 
             <dl class="match-card__details">
-              <div><dt>Fecha</dt><dd>{{ match.matchDate | date: 'dd/MM/yyyy HH:mm' }}</dd></div>
-              <div><dt>Arbitro</dt><dd>{{ match.refereeName }}</dd></div>
-              <div><dt>Marcador</dt><dd>{{ match.homeScore }} - {{ match.awayScore }}</dd></div>
+              <div>
+                <dt>Fecha</dt>
+                <dd>{{ match.matchDate | date: 'dd/MM/yyyy HH:mm' }}</dd>
+              </div>
+              <div>
+                <dt>Arbitro</dt>
+                <dd>{{ match.refereeName }}</dd>
+              </div>
+              <div>
+                <dt>Marcador</dt>
+                <dd>{{ match.homeScore }} - {{ match.awayScore }}</dd>
+              </div>
             </dl>
 
             <div class="match-card__actions card-actions--dense">
               @for (status of getNextStatusOptions(match); track status) {
-                <button type="button" class="ghost-button" (click)="updateMatchStatus(match, status)">
+                <button
+                  type="button"
+                  class="ghost-button"
+                  (click)="updateMatchStatus(match, status)"
+                >
                   {{ getStatusActionLabel(match.status, status) }}
                 </button>
               }
-              <button type="button" class="ghost-button ghost-button--light" [disabled]="!canEditScore(match)" (click)="openScoreModal(match)">Actualizar marcador</button>
+              <button
+                type="button"
+                class="ghost-button ghost-button--light"
+                [disabled]="!canEditScore(match)"
+                (click)="openScoreModal(match)"
+              >
+                Actualizar marcador
+              </button>
             </div>
           </article>
         }
@@ -93,18 +128,39 @@
           <tbody>
             @for (match of filteredMatches(); track trackByMatchId($index, match)) {
               <tr>
-                <td><strong>{{ match.homeTeamName }} vs {{ match.awayTeamName }}</strong></td>
+                <td>
+                  <strong>{{ match.homeTeamName }} vs {{ match.awayTeamName }}</strong>
+                </td>
                 <td>{{ match.tournamentName }}</td>
                 <td>{{ match.matchDate | date: 'dd/MM/yyyy HH:mm' }}</td>
-                <td><span class="status-badge" [class]="'status-badge--' + match.status.toLowerCase()">{{ getStatusLabel(match.status) }}</span></td>
+                <td>
+                  <span
+                    class="status-badge"
+                    [class]="'status-badge--' + match.status.toLowerCase()"
+                    >{{ getStatusLabel(match.status) }}</span
+                  >
+                </td>
                 <td>{{ match.homeScore }} - {{ match.awayScore }}</td>
                 <td>{{ match.refereeName }}</td>
                 <td class="match-table__actions-cell dense-actions-cell">
                   <div class="match-table__actions table-actions--dense">
                     @for (status of getNextStatusOptions(match); track status) {
-                      <button type="button" class="table-action" (click)="updateMatchStatus(match, status)">{{ getStatusActionLabel(match.status, status) }}</button>
+                      <button
+                        type="button"
+                        class="table-action"
+                        (click)="updateMatchStatus(match, status)"
+                      >
+                        {{ getStatusActionLabel(match.status, status) }}
+                      </button>
                     }
-                    <button type="button" class="table-action table-action--light" [disabled]="!canEditScore(match)" (click)="openScoreModal(match)">Marcador</button>
+                    <button
+                      type="button"
+                      class="table-action table-action--light"
+                      [disabled]="!canEditScore(match)"
+                      (click)="openScoreModal(match)"
+                    >
+                      Marcador
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -118,7 +174,12 @@
 
 @if (isCreateModalOpen()) {
   <div class="overlay" (click)="closeCreateModal()">
-    <section class="modal modal--wide" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
+    <section
+      class="modal modal--wide"
+      (click)="$event.stopPropagation()"
+      aria-modal="true"
+      role="dialog"
+    >
       <div class="modal__header">
         <div>
           <p class="modal__eyebrow">Programacion</p>
@@ -130,7 +191,9 @@
         <app-context-banner [fullWidth]="true">
           <app-context-banner-item
             label="Torneo seleccionado"
-            [value]="selectedTournament()?.name ?? 'Selecciona un torneo para habilitar los equipos'"
+            [value]="
+              selectedTournament()?.name ?? 'Selecciona un torneo para habilitar los equipos'
+            "
           />
           <app-context-banner-item label="Equipos disponibles">
             <strong>
@@ -166,7 +229,12 @@
 
         <label class="field">
           <span>Equipo local</span>
-          <select formControlName="homeTeamId" [disabled]="!selectedTournament() || isTournamentTeamsLoading() || tournamentTeams().length === 0">
+          <select
+            formControlName="homeTeamId"
+            [disabled]="
+              !selectedTournament() || isTournamentTeamsLoading() || tournamentTeams().length === 0
+            "
+          >
             <option [value]="0">
               @if (!selectedTournament()) {
                 Selecciona primero un torneo
@@ -187,7 +255,12 @@
 
         <label class="field">
           <span>Equipo visitante</span>
-          <select formControlName="awayTeamId" [disabled]="!selectedTournament() || isTournamentTeamsLoading() || tournamentTeams().length === 0">
+          <select
+            formControlName="awayTeamId"
+            [disabled]="
+              !selectedTournament() || isTournamentTeamsLoading() || tournamentTeams().length === 0
+            "
+          >
             <option [value]="0">
               @if (!selectedTournament()) {
                 Selecciona primero un torneo
@@ -225,13 +298,26 @@
           </p>
         } @else {
           <p class="form-hint field--full">
-            Solo se muestran equipos inscritos en el torneo seleccionado para evitar errores de registro.
+            Solo se muestran equipos inscritos en el torneo seleccionado para evitar errores de
+            registro.
           </p>
         }
 
         <div class="modal__actions">
-          <button type="button" class="ghost-button ghost-button--light" (click)="closeCreateModal()">Cancelar</button>
-          <button type="submit" class="primary-button" [disabled]="isSaving() || isCatalogLoading() || !canCreateMatch()">{{ isSaving() ? 'Guardando...' : 'Crear partido' }}</button>
+          <button
+            type="button"
+            class="ghost-button ghost-button--light"
+            (click)="closeCreateModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="isSaving() || isCatalogLoading() || !canCreateMatch()"
+          >
+            {{ isSaving() ? 'Guardando...' : 'Crear partido' }}
+          </button>
         </div>
       </form>
     </section>
@@ -250,13 +336,13 @@
         </div>
 
         <form class="score-form" [formGroup]="scoreForm" (ngSubmit)="submitScoreForm()">
-        <app-context-banner [fullWidth]="true">
-          <app-context-banner-item
-            label="Estado actual"
-            [value]="getStatusLabel(selectedMatch.status)"
-          />
-          <app-context-banner-item label="Torneo" [value]="selectedMatch.tournamentName" />
-        </app-context-banner>
+          <app-context-banner [fullWidth]="true">
+            <app-context-banner-item
+              label="Estado actual"
+              [value]="getStatusLabel(selectedMatch.status)"
+            />
+            <app-context-banner-item label="Torneo" [value]="selectedMatch.tournamentName" />
+          </app-context-banner>
 
           <label class="field">
             <span>{{ selectedMatch.homeTeamName }}</span>
@@ -281,13 +367,22 @@
             </label>
           } @else {
             <p class="form-hint field--full">
-              Para guardar este resultado como definitivo, primero cambia el partido a estado finalizado.
+              Para guardar este resultado como definitivo, primero cambia el partido a estado
+              finalizado.
             </p>
           }
 
           <div class="modal__actions">
-            <button type="button" class="ghost-button ghost-button--light" (click)="closeScoreModal()">Cancelar</button>
-            <button type="submit" class="primary-button" [disabled]="isSaving()">{{ isSaving() ? 'Guardando...' : 'Guardar marcador' }}</button>
+            <button
+              type="button"
+              class="ghost-button ghost-button--light"
+              (click)="closeScoreModal()"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="primary-button" [disabled]="isSaving()">
+              {{ isSaving() ? 'Guardando...' : 'Guardar marcador' }}
+            </button>
           </div>
         </form>
       </section>

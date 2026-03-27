@@ -82,7 +82,8 @@ public class LeagueDbContext : DbContext
             entity.Property(t => t.UpdatedAt)
                 .IsRequired(false);
 
-            entity.HasIndex(t => t.Name);
+            entity.HasIndex(t => t.Name)
+                .IsUnique();
 
             entity.HasMany(t => t.Players)
                 .WithOne(p => p.Team)
@@ -138,6 +139,10 @@ public class LeagueDbContext : DbContext
                 .IsRequired(false);
 
             entity.HasIndex(p => p.TeamId);
+            entity.HasIndex(p => new { p.TeamId, p.Number })
+                .IsUnique();
+            entity.HasIndex(p => new { p.TeamId, p.FirstName, p.LastName, p.BirthDate })
+                .IsUnique();
 
             entity.HasOne(p => p.Team)
                 .WithMany(t => t.Players)
@@ -171,6 +176,9 @@ public class LeagueDbContext : DbContext
 
             entity.Property(r => r.UpdatedAt)
                 .IsRequired(false);
+
+            entity.HasIndex(r => new { r.FirstName, r.LastName, r.Nationality })
+                .IsUnique();
 
             entity.HasMany(r => r.Matches)
                 .WithOne(m => m.Referee)
@@ -209,6 +217,9 @@ public class LeagueDbContext : DbContext
 
             entity.Property(t => t.UpdatedAt)
                 .IsRequired(false);
+
+            entity.HasIndex(t => new { t.Name, t.Season })
+                .IsUnique();
 
             entity.HasMany(t => t.TournamentTeams)
                 .WithOne(tt => tt.Tournament)
@@ -283,6 +294,8 @@ public class LeagueDbContext : DbContext
             entity.HasIndex(m => m.TournamentId);
             entity.HasIndex(m => m.RefereeId);
             entity.HasIndex(m => m.MatchDate);
+            entity.HasIndex(m => new { m.TournamentId, m.HomeTeamId, m.AwayTeamId, m.MatchDate })
+                .IsUnique();
 
             entity.HasOne(m => m.HomeTeam)
                 .WithMany(t => t.HomeMatches)

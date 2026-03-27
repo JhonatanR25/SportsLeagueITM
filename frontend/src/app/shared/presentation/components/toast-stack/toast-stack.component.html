@@ -5,7 +5,11 @@
         <strong>{{ notification.title }}</strong>
         <p>{{ notification.message }}</p>
       </div>
-      <button type="button" class="icon-button icon-button--toast" (click)="dismissNotification(notification.id)">
+      <button
+        type="button"
+        class="icon-button icon-button--toast"
+        (click)="dismissNotification(notification.id)"
+      >
         Cerrar
       </button>
     </article>

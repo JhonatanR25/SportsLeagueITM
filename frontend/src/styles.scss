@@ -42,7 +42,11 @@
   --button-width-md: 11rem;
   --border-soft: 1px solid rgba(255, 255, 255, 0.08);
   --surface-card: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03));
-  --surface-card-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.028));
+  --surface-card-soft: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.045),
+    rgba(255, 255, 255, 0.028)
+  );
   --font-size-label-xs: 0.72rem;
   --font-size-label-sm: 0.75rem;
   --font-size-label-md: 0.78rem;
@@ -54,18 +58,8 @@
   --font-size-heading-md: clamp(1.4rem, 3vw, 2rem);
   --font-size-metric: clamp(1.5rem, 4vw, 2.25rem);
   --font-size-metric-copy: clamp(1.2rem, 2vw, 1.7rem);
-  --font-display:
-    'Sora',
-    'Bahnschrift',
-    'Segoe UI Variable Display',
-    'Trebuchet MS',
-    sans-serif;
-  --font-body:
-    'Inter',
-    'Segoe UI',
-    'Segoe UI Variable Text',
-    'Tahoma',
-    sans-serif;
+  --font-display: 'Sora', 'Bahnschrift', 'Segoe UI Variable Display', 'Trebuchet MS', sans-serif;
+  --font-body: 'Inter', 'Segoe UI', 'Segoe UI Variable Text', 'Tahoma', sans-serif;
 }
 
 *,
@@ -380,13 +374,7 @@ p {
   overflow-x: auto;
 }
 
-:where(
-  .team-table,
-  .player-table,
-  .referee-table,
-  .tournament-table,
-  .match-table
-) {
+:where(.team-table, .player-table, .referee-table, .tournament-table, .match-table) {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
@@ -396,10 +384,7 @@ p {
   table-layout: auto;
 }
 
-:where(
-  .tournament-table,
-  .match-table
-) {
+:where(.tournament-table, .match-table) {
   table-layout: auto;
 }
 
@@ -421,13 +406,7 @@ p {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-:where(
-  .team-table th,
-  .player-table th,
-  .referee-table th,
-  .tournament-table th,
-  .match-table th
-) {
+:where(.team-table th, .player-table th, .referee-table th, .tournament-table th, .match-table th) {
   color: var(--color-text-muted);
   font-size: var(--font-size-label-md);
   text-transform: uppercase;
@@ -491,24 +470,26 @@ p {
 }
 
 :where(
-  .team-card__actions,
-  .player-card__actions,
-  .referee-card__actions,
-  .tournament-card__actions,
-  .match-card__actions,
-  .team-table__actions,
-  .player-table__actions,
-  .referee-table__actions,
-  .tournament-table__actions,
-  .match-table__actions
-) > .ghost-button,
+    .team-card__actions,
+    .player-card__actions,
+    .referee-card__actions,
+    .tournament-card__actions,
+    .match-card__actions,
+    .team-table__actions,
+    .player-table__actions,
+    .referee-table__actions,
+    .tournament-table__actions,
+    .match-table__actions
+  )
+  > .ghost-button,
 :where(
-  .team-table__actions,
-  .player-table__actions,
-  .referee-table__actions,
-  .tournament-table__actions,
-  .match-table__actions
-) > .table-action {
+    .team-table__actions,
+    .player-table__actions,
+    .referee-table__actions,
+    .tournament-table__actions,
+    .match-table__actions
+  )
+  > .table-action {
   width: var(--button-width-md);
   min-inline-size: var(--button-width-md);
 }
@@ -619,24 +600,26 @@ p {
   }
 
   :where(
-    .team-card__actions,
-    .player-card__actions,
-    .referee-card__actions,
-    .tournament-card__actions,
-    .match-card__actions,
-    .team-table__actions,
-    .player-table__actions,
-    .referee-table__actions,
-    .tournament-table__actions,
-    .match-table__actions
-  ) > .ghost-button,
+      .team-card__actions,
+      .player-card__actions,
+      .referee-card__actions,
+      .tournament-card__actions,
+      .match-card__actions,
+      .team-table__actions,
+      .player-table__actions,
+      .referee-table__actions,
+      .tournament-table__actions,
+      .match-table__actions
+    )
+    > .ghost-button,
   :where(
-    .team-table__actions,
-    .player-table__actions,
-    .referee-table__actions,
-    .tournament-table__actions,
-    .match-table__actions
-  ) > .table-action {
+      .team-table__actions,
+      .player-table__actions,
+      .referee-table__actions,
+      .tournament-table__actions,
+      .match-table__actions
+    )
+    > .table-action {
     width: 100%;
     min-inline-size: 0;
   }

@@ -13,8 +13,12 @@
     />
   </label>
 
-  <button type="button" class="ghost-button" moduleHeaderButtons (click)="retry()">Actualizar</button>
-  <button type="button" class="primary-button" moduleHeaderButtons (click)="openCreateModal()">Crear equipo</button>
+  <button type="button" class="ghost-button" moduleHeaderButtons (click)="retry()">
+    Actualizar
+  </button>
+  <button type="button" class="primary-button" moduleHeaderButtons (click)="openCreateModal()">
+    Crear equipo
+  </button>
 </app-module-page-header>
 
 @if (isLoading()) {
@@ -62,7 +66,11 @@
             </dl>
 
             <div class="team-card__actions card-actions--compact">
-              <button type="button" class="ghost-button ghost-button--light" (click)="openEditModal(team)">
+              <button
+                type="button"
+                class="ghost-button ghost-button--light"
+                (click)="openEditModal(team)"
+              >
                 Editar
               </button>
               <button
@@ -147,7 +155,10 @@
         <section class="logo-preview field--full">
           <div class="logo-preview__crest">
             @if (logoPreview().logoUrl) {
-              <img [src]="logoPreview().logoUrl" [alt]="'Vista previa de ' + (teamForm.controls.name.value || 'equipo')" />
+              <img
+                [src]="logoPreview().logoUrl"
+                [alt]="'Vista previa de ' + (teamForm.controls.name.value || 'equipo')"
+              />
             } @else {
               <span>{{ logoPreview().initials }}</span>
             }
@@ -207,7 +218,8 @@
         </label>
 
         <p class="form-hint field--full">
-          Usa nombre, ciudad y estadio faciles de reconocer. Eso mejora la lectura del listado y evita duplicados visuales.
+          Usa nombre, ciudad y estadio faciles de reconocer. Eso mejora la lectura del listado y
+          evita duplicados visuales.
         </p>
 
         <div class="modal__actions">
@@ -226,7 +238,11 @@
 <app-confirm-dialog
   [open]="isDeleteModalOpen()"
   title="Eliminar equipo"
-  [message]="'Vas a eliminar el equipo &quot;' + (teamPendingDelete()?.name ?? '') + '&quot;. Esta accion no se puede deshacer.'"
+  [message]="
+    'Vas a eliminar el equipo &quot;' +
+    (teamPendingDelete()?.name ?? '') +
+    '&quot;. Esta accion no se puede deshacer.'
+  "
   confirmLabel="Eliminar equipo"
   [isSaving]="isSaving()"
   (cancel)="closeDeleteModal()"

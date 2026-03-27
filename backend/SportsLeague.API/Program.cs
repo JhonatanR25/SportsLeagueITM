@@ -38,9 +38,37 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddProblemDetails();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        var allowedOrigins = builder.Configuration
+            .GetSection("Cors:AllowedOrigins")
+            .Get<string[]>();
+
+        if (allowedOrigins is { Length: > 0 })
+        {
+            policy.WithOrigins(allowedOrigins)
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        }
+        else
+        {
+            policy.WithOrigins(
+                    "http://localhost:4200",
+                    "http://127.0.0.1:4200")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        }
+    });
+});
+
+var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException(
+        "No se encontró la cadena de conexión 'DefaultConnection'. Configúrala en appsettings.Development.json o mediante variables de entorno.");
 
 builder.Services.AddDbContext<LeagueDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(defaultConnection));
 
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
@@ -66,6 +94,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("FrontendPolicy");
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthorization();

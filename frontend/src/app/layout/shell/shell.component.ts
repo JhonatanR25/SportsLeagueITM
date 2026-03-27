@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { appSettings } from '../../core/config/app-settings';
 
 type NavigationItem = {
   label: string;
@@ -49,5 +50,5 @@ export class ShellComponent {
     },
   ];
 
-  protected readonly currentSeason = '2026';
+  protected readonly currentSeason = appSettings.currentSeason;
 }

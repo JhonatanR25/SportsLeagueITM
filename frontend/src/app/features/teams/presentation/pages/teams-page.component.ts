@@ -11,14 +11,26 @@ import { StateCardComponent } from '../../../../shared/presentation/components/s
 import { ToastStackComponent } from '../../../../shared/presentation/components/toast-stack/toast-stack.component';
 import { Team } from '../../domain/models/team.model';
 import { TeamsPageFacade } from '../../application/facades/teams-page.facade';
+import { TeamsFormService } from '../../application/facades/teams-form.service';
 
 @Component({
   selector: 'app-teams-page',
   standalone: true,
-  imports: [CommonModule, DatePipe, ReactiveFormsModule, ConfirmDialogComponent, ContextBannerComponent, ContextBannerItemComponent, ModulePageHeaderComponent, SectionCardHeaderComponent, StateCardComponent, ToastStackComponent],
+  imports: [
+    CommonModule,
+    DatePipe,
+    ReactiveFormsModule,
+    ConfirmDialogComponent,
+    ContextBannerComponent,
+    ContextBannerItemComponent,
+    ModulePageHeaderComponent,
+    SectionCardHeaderComponent,
+    StateCardComponent,
+    ToastStackComponent,
+  ],
   templateUrl: './teams-page.component.html',
   styleUrl: './teams-page.component.scss',
-  providers: [TeamsPageFacade],
+  providers: [TeamsFormService, TeamsPageFacade],
 })
 export class TeamsPageComponent {
   private readonly facade = inject(TeamsPageFacade);

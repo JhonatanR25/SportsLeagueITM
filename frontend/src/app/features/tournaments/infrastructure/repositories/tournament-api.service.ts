@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { map, Observable, of, tap } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 import { Team } from '../../../teams/domain/models/team.model';
@@ -22,39 +22,65 @@ type TournamentApiResponse = Omit<Tournament, 'status'> & {
 export class TournamentApiService {
   private readonly http = inject(HttpClient);
   private readonly endpoint = `${environment.apiBaseUrl}/Tournament`;
+  private cache: Tournament[] | null = null;
+  private readonly teamsCache = new Map<number, Team[]>();
 
   getAll(): Observable<Tournament[]> {
-    return this.http
-      .get<TournamentApiResponse[]>(this.endpoint)
-      .pipe(map((items) => items.map((item) => this.mapTournament(item))));
+    if (this.cache) {
+      return of(this.cache);
+    }
+
+    return this.http.get<TournamentApiResponse[]>(this.endpoint).pipe(
+      map((items) => items.map((item) => this.mapTournament(item))),
+      tap((tournaments) => (this.cache = tournaments)),
+    );
   }
 
   create(payload: TournamentUpsertPayload): Observable<Tournament> {
-    return this.http
-      .post<TournamentApiResponse>(this.endpoint, payload)
-      .pipe(map((item) => this.mapTournament(item)));
+    return this.http.post<TournamentApiResponse>(this.endpoint, payload).pipe(
+      map((item) => this.mapTournament(item)),
+      tap(() => this.invalidateCache()),
+    );
   }
 
   update(tournamentId: number, payload: TournamentUpsertPayload): Observable<void> {
-    return this.http.put<void>(`${this.endpoint}/${tournamentId}`, payload);
+    return this.http
+      .put<void>(`${this.endpoint}/${tournamentId}`, payload)
+      .pipe(tap(() => this.invalidateCache()));
   }
 
   delete(tournamentId: number): Observable<void> {
-    return this.http.delete<void>(`${this.endpoint}/${tournamentId}`);
+    return this.http
+      .delete<void>(`${this.endpoint}/${tournamentId}`)
+      .pipe(tap(() => this.invalidateCache()));
   }
 
   updateStatus(tournamentId: number, status: TournamentStatus): Observable<void> {
-    return this.http.patch<void>(`${this.endpoint}/${tournamentId}/status`, {
-      status: toTournamentStatusCode(status),
-    });
+    return this.http
+      .patch<void>(`${this.endpoint}/${tournamentId}/status`, {
+        status: toTournamentStatusCode(status),
+      })
+      .pipe(tap(() => this.invalidateCache()));
   }
 
   registerTeam(tournamentId: number, teamId: number): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.endpoint}/${tournamentId}/teams`, { teamId });
+    return this.http
+      .post<{ message: string }>(`${this.endpoint}/${tournamentId}/teams`, {
+        teamId,
+      })
+      .pipe(tap(() => this.invalidateTeamsCache(tournamentId)));
   }
 
   getTeams(tournamentId: number): Observable<Team[]> {
-    return this.http.get<Team[]>(`${this.endpoint}/${tournamentId}/teams`);
+    const cachedTeams = this.teamsCache.get(tournamentId);
+
+    if (cachedTeams) {
+      return of(cachedTeams);
+    }
+
+    return this.http
+      .get<Team[]>(`${this.endpoint}/${tournamentId}/teams`)
+      .pipe(tap((teams) => this.teamsCache.set(tournamentId, teams)));
   }
 
   private mapTournament(item: TournamentApiResponse): Tournament {
@@ -62,5 +88,15 @@ export class TournamentApiService {
       ...item,
       status: toTournamentStatus(item.status),
     };
+  }
+
+  private invalidateCache(): void {
+    this.cache = null;
+    this.teamsCache.clear();
+  }
+
+  private invalidateTeamsCache(tournamentId: number): void {
+    this.cache = null;
+    this.teamsCache.delete(tournamentId);
   }
 }

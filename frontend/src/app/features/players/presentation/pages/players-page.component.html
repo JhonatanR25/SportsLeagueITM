@@ -14,8 +14,12 @@
     />
   </label>
 
-  <button type="button" class="ghost-button" moduleHeaderButtons (click)="retry()">Actualizar</button>
-  <button type="button" class="primary-button" moduleHeaderButtons (click)="openCreateModal()">Crear jugador</button>
+  <button type="button" class="ghost-button" moduleHeaderButtons (click)="retry()">
+    Actualizar
+  </button>
+  <button type="button" class="primary-button" moduleHeaderButtons (click)="openCreateModal()">
+    Crear jugador
+  </button>
 </app-module-page-header>
 
 @if (isLoading()) {
@@ -42,7 +46,9 @@
         @for (player of filteredPlayers(); track trackByPlayerId($index, player)) {
           <article class="player-card">
             <div class="player-card__header">
-              <div class="player-card__avatar">{{ player.firstName.slice(0, 1) }}{{ player.lastName.slice(0, 1) }}</div>
+              <div class="player-card__avatar">
+                {{ player.firstName.slice(0, 1) }}{{ player.lastName.slice(0, 1) }}
+              </div>
 
               <div>
                 <h3>{{ player.firstName }} {{ player.lastName }}</h3>
@@ -66,7 +72,11 @@
             </dl>
 
             <div class="player-card__actions card-actions--compact">
-              <button type="button" class="ghost-button ghost-button--light" (click)="openEditModal(player)">
+              <button
+                type="button"
+                class="ghost-button ghost-button--light"
+                (click)="openEditModal(player)"
+              >
                 Editar
               </button>
               <button
@@ -146,10 +156,7 @@
       <form class="player-form" [formGroup]="playerForm" (ngSubmit)="submitPlayerForm()">
         <app-context-banner [fullWidth]="true">
           <app-context-banner-item label="Modo" [value]="formModeLabel()" />
-          <app-context-banner-item
-            label="Objetivo"
-            value="Registrar una ficha clara del jugador"
-          />
+          <app-context-banner-item label="Objetivo" value="Registrar una ficha clara del jugador" />
         </app-context-banner>
 
         <section class="player-preview field--full">
@@ -226,18 +233,15 @@
         </label>
 
         <p class="form-hint field--full">
-          Completa nombre, posicion, dorsal y equipo con datos faciles de reconocer para que la plantilla sea mas legible.
+          Completa nombre, posicion, dorsal y equipo con datos faciles de reconocer para que la
+          plantilla sea mas legible.
         </p>
 
         <div class="modal__actions">
           <button type="button" class="ghost-button ghost-button--light" (click)="closeFormModal()">
             Cancelar
           </button>
-          <button
-            type="submit"
-            class="primary-button"
-            [disabled]="!canSubmitForm()"
-          >
+          <button type="submit" class="primary-button" [disabled]="!canSubmitForm()">
             {{ isSaving() ? 'Guardando...' : submitLabel() }}
           </button>
         </div>
@@ -250,7 +254,9 @@
   <app-confirm-dialog
     [open]="isDeleteModalOpen()"
     title="Eliminar jugador"
-    message="Vas a eliminar al jugador &quot;{{ selectedPlayer.firstName }} {{ selectedPlayer.lastName }}&quot;. Esta accion no se puede deshacer."
+    message="Vas a eliminar al jugador &quot;{{ selectedPlayer.firstName }} {{
+      selectedPlayer.lastName
+    }}&quot;. Esta accion no se puede deshacer."
     confirmLabel="{{ isSaving() ? 'Eliminando...' : 'Eliminar jugador' }}"
     [isSaving]="isSaving()"
     (cancel)="closeDeleteModal()"

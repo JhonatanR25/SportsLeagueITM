@@ -14,8 +14,12 @@
     />
   </label>
 
-  <button type="button" class="ghost-button" moduleHeaderButtons (click)="retry()">Actualizar</button>
-  <button type="button" class="primary-button" moduleHeaderButtons (click)="openCreateModal()">Crear torneo</button>
+  <button type="button" class="ghost-button" moduleHeaderButtons (click)="retry()">
+    Actualizar
+  </button>
+  <button type="button" class="primary-button" moduleHeaderButtons (click)="openCreateModal()">
+    Crear torneo
+  </button>
 </app-module-page-header>
 
 @if (isLoading()) {
@@ -46,7 +50,10 @@
                 <h3>{{ tournament.name }}</h3>
                 <p>{{ tournament.season }}</p>
               </div>
-              <span class="status-badge" [class]="'status-badge--' + tournament.status.toLowerCase()">
+              <span
+                class="status-badge"
+                [class]="'status-badge--' + tournament.status.toLowerCase()"
+              >
                 {{ getStatusLabel(tournament.status) }}
               </span>
             </div>
@@ -67,12 +74,38 @@
             </dl>
 
             <div class="tournament-card__actions card-actions--dense">
-              <button type="button" class="ghost-button ghost-button--light" [disabled]="!canEdit(tournament)" (click)="openEditModal(tournament)">Editar</button>
-              <button type="button" class="ghost-button" [disabled]="!canRegisterTeams(tournament)" (click)="openRegisterTeamsModal(tournament)">Gestionar equipos</button>
-              <button type="button" class="ghost-button" [disabled]="!canAdvanceStatus(tournament)" (click)="advanceStatus(tournament)">
+              <button
+                type="button"
+                class="ghost-button ghost-button--light"
+                [disabled]="!canEdit(tournament)"
+                (click)="openEditModal(tournament)"
+              >
+                Editar
+              </button>
+              <button
+                type="button"
+                class="ghost-button"
+                [disabled]="!canRegisterTeams(tournament)"
+                (click)="openRegisterTeamsModal(tournament)"
+              >
+                Gestionar equipos
+              </button>
+              <button
+                type="button"
+                class="ghost-button"
+                [disabled]="!canAdvanceStatus(tournament)"
+                (click)="advanceStatus(tournament)"
+              >
                 {{ getStatusActionLabel(tournament.status) }}
               </button>
-              <button type="button" class="ghost-button ghost-button--danger" [disabled]="!canDelete(tournament)" (click)="openDeleteModal(tournament)">Eliminar</button>
+              <button
+                type="button"
+                class="ghost-button ghost-button--danger"
+                [disabled]="!canDelete(tournament)"
+                (click)="openDeleteModal(tournament)"
+              >
+                Eliminar
+              </button>
             </div>
           </article>
         }
@@ -92,12 +125,20 @@
             </tr>
           </thead>
           <tbody>
-            @for (tournament of filteredTournaments(); track trackByTournamentId($index, tournament)) {
+            @for (
+              tournament of filteredTournaments();
+              track trackByTournamentId($index, tournament)
+            ) {
               <tr>
-                <td><strong>{{ tournament.name }}</strong></td>
+                <td>
+                  <strong>{{ tournament.name }}</strong>
+                </td>
                 <td>{{ tournament.season }}</td>
                 <td>
-                  <span class="status-badge" [class]="'status-badge--' + tournament.status.toLowerCase()">
+                  <span
+                    class="status-badge"
+                    [class]="'status-badge--' + tournament.status.toLowerCase()"
+                  >
                     {{ getStatusLabel(tournament.status) }}
                   </span>
                 </td>
@@ -106,12 +147,38 @@
                 <td>{{ tournament.teamsCount }}</td>
                 <td class="tournament-table__actions-cell dense-actions-cell">
                   <div class="tournament-table__actions table-actions--dense">
-                    <button type="button" class="table-action" [disabled]="!canEdit(tournament)" (click)="openEditModal(tournament)">Editar</button>
-                    <button type="button" class="table-action" [disabled]="!canRegisterTeams(tournament)" (click)="openRegisterTeamsModal(tournament)">Equipos</button>
-                    <button type="button" class="table-action" [disabled]="!canAdvanceStatus(tournament)" (click)="advanceStatus(tournament)">
+                    <button
+                      type="button"
+                      class="table-action"
+                      [disabled]="!canEdit(tournament)"
+                      (click)="openEditModal(tournament)"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      class="table-action"
+                      [disabled]="!canRegisterTeams(tournament)"
+                      (click)="openRegisterTeamsModal(tournament)"
+                    >
+                      Equipos
+                    </button>
+                    <button
+                      type="button"
+                      class="table-action"
+                      [disabled]="!canAdvanceStatus(tournament)"
+                      (click)="advanceStatus(tournament)"
+                    >
                       {{ getStatusActionLabel(tournament.status) }}
                     </button>
-                    <button type="button" class="table-action table-action--danger" [disabled]="!canDelete(tournament)" (click)="openDeleteModal(tournament)">Eliminar</button>
+                    <button
+                      type="button"
+                      class="table-action table-action--danger"
+                      [disabled]="!canDelete(tournament)"
+                      (click)="openDeleteModal(tournament)"
+                    >
+                      Eliminar
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -133,7 +200,11 @@
         </div>
       </div>
 
-      <form class="tournament-form" [formGroup]="tournamentForm" (ngSubmit)="submitTournamentForm()">
+      <form
+        class="tournament-form"
+        [formGroup]="tournamentForm"
+        (ngSubmit)="submitTournamentForm()"
+      >
         <app-context-banner [fullWidth]="true">
           <app-context-banner-item
             label="Modo"
@@ -148,22 +219,30 @@
         <label class="field">
           <span>Nombre</span>
           <input type="text" formControlName="name" placeholder="Ej: Copa ITM" />
-          @if (fieldHasError('name')) { <small>{{ getFieldError('name') }}</small> }
+          @if (fieldHasError('name')) {
+            <small>{{ getFieldError('name') }}</small>
+          }
         </label>
         <label class="field">
           <span>Temporada</span>
           <input type="text" formControlName="season" placeholder="Ej: 2026-A" />
-          @if (fieldHasError('season')) { <small>{{ getFieldError('season') }}</small> }
+          @if (fieldHasError('season')) {
+            <small>{{ getFieldError('season') }}</small>
+          }
         </label>
         <label class="field">
           <span>Fecha de inicio</span>
           <input type="date" formControlName="startDate" />
-          @if (fieldHasError('startDate')) { <small>{{ getFieldError('startDate') }}</small> }
+          @if (fieldHasError('startDate')) {
+            <small>{{ getFieldError('startDate') }}</small>
+          }
         </label>
         <label class="field">
           <span>Fecha de fin</span>
           <input type="date" formControlName="endDate" />
-          @if (fieldHasError('endDate')) { <small>{{ getFieldError('endDate') }}</small> }
+          @if (fieldHasError('endDate')) {
+            <small>{{ getFieldError('endDate') }}</small>
+          }
         </label>
 
         @if (hasDateRangeError()) {
@@ -177,7 +256,9 @@
         }
 
         <div class="modal__actions">
-          <button type="button" class="ghost-button ghost-button--light" (click)="closeFormModal()">Cancelar</button>
+          <button type="button" class="ghost-button ghost-button--light" (click)="closeFormModal()">
+            Cancelar
+          </button>
           <button type="submit" class="primary-button" [disabled]="!canSubmitTournamentForm()">
             {{ isSaving() ? 'Guardando...' : submitLabel() }}
           </button>
@@ -191,7 +272,9 @@
   <app-confirm-dialog
     [open]="isDeleteModalOpen()"
     title="Eliminar torneo"
-    message="Vas a eliminar el torneo &quot;{{ selectedTournament.name }}&quot;. Solo puede eliminarse si esta pendiente."
+    message="Vas a eliminar el torneo &quot;{{
+      selectedTournament.name
+    }}&quot;. Solo puede eliminarse si esta pendiente."
     confirmLabel="{{ isSaving() ? 'Eliminando...' : 'Eliminar torneo' }}"
     [isSaving]="isSaving()"
     (cancel)="closeDeleteModal()"
@@ -202,14 +285,21 @@
 @if (isRegisterTeamsModalOpen()) {
   @if (tournamentForRegistration(); as selectedTournament) {
     <div class="overlay" (click)="closeRegisterTeamsModal()">
-      <section class="modal modal--wide" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
+      <section
+        class="modal modal--wide"
+        (click)="$event.stopPropagation()"
+        aria-modal="true"
+        role="dialog"
+      >
         <div class="modal__header">
           <div>
             <p class="modal__eyebrow">Inscripcion de equipos</p>
             <h2>{{ selectedTournament.name }}</h2>
             <p class="modal__description">{{ selectedTournamentStatusCopy() }}</p>
           </div>
-          <button type="button" class="icon-button" (click)="closeRegisterTeamsModal()">Cerrar</button>
+          <button type="button" class="icon-button" (click)="closeRegisterTeamsModal()">
+            Cerrar
+          </button>
         </div>
 
         <app-context-banner>
@@ -235,7 +325,11 @@
         <div class="register-panel">
           <label class="field field--full">
             <span>Equipo</span>
-            <select [value]="selectedTeamId()" (change)="updateSelectedTeamId(+$any($event.target).value)" [disabled]="isTeamsLoading() || isSaving()">
+            <select
+              [value]="selectedTeamId()"
+              (change)="updateSelectedTeamId(+$any($event.target).value)"
+              [disabled]="isTeamsLoading() || isSaving()"
+            >
               <option [value]="0">
                 @if (isTournamentTeamsLoading()) {
                   Cargando equipos...
@@ -251,7 +345,12 @@
             </select>
           </label>
 
-          <button type="button" class="primary-button" [disabled]="!canRegisterSelectedTeam()" (click)="registerSelectedTeam()">
+          <button
+            type="button"
+            class="primary-button"
+            [disabled]="!canRegisterSelectedTeam()"
+            (click)="registerSelectedTeam()"
+          >
             {{ isSaving() ? 'Inscribiendo...' : 'Inscribir equipo' }}
           </button>
         </div>

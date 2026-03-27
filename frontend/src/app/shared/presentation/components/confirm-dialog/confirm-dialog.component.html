@@ -1,6 +1,11 @@
 @if (open) {
   <div class="overlay overlay--compact" (click)="onCancel()">
-    <section class="modal modal--compact" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
+    <section
+      class="modal modal--compact"
+      (click)="$event.stopPropagation()"
+      aria-modal="true"
+      role="dialog"
+    >
       <div class="modal__header">
         <div>
           <p class="modal__eyebrow">{{ eyebrow }}</p>
@@ -14,7 +19,12 @@
         <button type="button" class="ghost-button ghost-button--light" (click)="onCancel()">
           {{ cancelLabel }}
         </button>
-        <button type="button" class="ghost-button ghost-button--danger" [disabled]="isSaving" (click)="onConfirm()">
+        <button
+          type="button"
+          class="ghost-button ghost-button--danger"
+          [disabled]="isSaving"
+          (click)="onConfirm()"
+        >
           {{ isSaving ? 'Procesando...' : confirmLabel }}
         </button>
       </div>

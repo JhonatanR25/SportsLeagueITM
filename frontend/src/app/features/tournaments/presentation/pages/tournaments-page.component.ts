@@ -11,15 +11,27 @@ import { StateCardComponent } from '../../../../shared/presentation/components/s
 import { ToastStackComponent } from '../../../../shared/presentation/components/toast-stack/toast-stack.component';
 import { Tournament } from '../../domain/models/tournament.model';
 import { TournamentStatus } from '../../domain/models/tournament-status.type';
+import { TournamentsFormService } from '../../application/facades/tournaments-form.service';
 import { TournamentsPageFacade } from '../../application/facades/tournaments-page.facade';
 
 @Component({
   selector: 'app-tournaments-page',
   standalone: true,
-  imports: [CommonModule, DatePipe, ReactiveFormsModule, ConfirmDialogComponent, ContextBannerComponent, ContextBannerItemComponent, ModulePageHeaderComponent, SectionCardHeaderComponent, StateCardComponent, ToastStackComponent],
+  imports: [
+    CommonModule,
+    DatePipe,
+    ReactiveFormsModule,
+    ConfirmDialogComponent,
+    ContextBannerComponent,
+    ContextBannerItemComponent,
+    ModulePageHeaderComponent,
+    SectionCardHeaderComponent,
+    StateCardComponent,
+    ToastStackComponent,
+  ],
   templateUrl: './tournaments-page.component.html',
   styleUrl: './tournaments-page.component.scss',
-  providers: [TournamentsPageFacade],
+  providers: [TournamentsFormService, TournamentsPageFacade],
 })
 export class TournamentsPageComponent {
   private readonly facade = inject(TournamentsPageFacade);

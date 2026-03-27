@@ -15,8 +15,12 @@
     />
   </label>
 
-  <button type="button" class="ghost-button" moduleHeaderButtons (click)="retry()">Actualizar</button>
-  <button type="button" class="primary-button" moduleHeaderButtons (click)="openCreateModal()">Crear arbitro</button>
+  <button type="button" class="ghost-button" moduleHeaderButtons (click)="retry()">
+    Actualizar
+  </button>
+  <button type="button" class="primary-button" moduleHeaderButtons (click)="openCreateModal()">
+    Crear arbitro
+  </button>
 </app-module-page-header>
 
 @if (isLoading()) {
@@ -54,7 +58,11 @@
             </div>
 
             <div class="referee-card__actions card-actions--compact">
-              <button type="button" class="ghost-button ghost-button--light" (click)="openEditModal(referee)">
+              <button
+                type="button"
+                class="ghost-button ghost-button--light"
+                (click)="openEditModal(referee)"
+              >
                 Editar
               </button>
               <button
@@ -169,7 +177,8 @@
         </label>
 
         <p class="form-hint field--full">
-          Usa nombres y nacionalidad tal como quieras verlos luego en listados, asignaciones y reportes.
+          Usa nombres y nacionalidad tal como quieras verlos luego en listados, asignaciones y
+          reportes.
         </p>
 
         <div class="modal__actions">
@@ -189,7 +198,9 @@
   <app-confirm-dialog
     [open]="isDeleteModalOpen()"
     title="Eliminar arbitro"
-    message="Vas a eliminar al arbitro &quot;{{ selectedReferee.firstName }} {{ selectedReferee.lastName }}&quot;. Esta accion no se puede deshacer."
+    message="Vas a eliminar al arbitro &quot;{{ selectedReferee.firstName }} {{
+      selectedReferee.lastName
+    }}&quot;. Esta accion no se puede deshacer."
     confirmLabel="{{ isSaving() ? 'Eliminando...' : 'Eliminar arbitro' }}"
     [isSaving]="isSaving()"
     (cancel)="closeDeleteModal()"
