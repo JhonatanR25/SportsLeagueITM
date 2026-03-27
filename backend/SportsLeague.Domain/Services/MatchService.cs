@@ -97,6 +97,7 @@ public class MatchService : IMatchService
         await ValidateTeamsRegisteredAsync(match.TournamentId, match.HomeTeamId, match.AwayTeamId);
         ValidateTournamentAllowsScheduling(tournament);
         ValidateMatchDateWithinTournament(match.MatchDate, tournament);
+        await ValidateRefereeAvailabilityAsync(match.RefereeId, match.MatchDate);
         await ValidateMatchNotDuplicatedAsync(match);
 
         match.Status = MatchStatus.Scheduled;
@@ -193,6 +194,16 @@ public class MatchService : IMatchService
         if (homeRegistration == null || awayRegistration == null)
         {
             throw new InvalidOperationException("Ambos equipos deben estar inscritos en el torneo para crear un partido.");
+        }
+    }
+
+    private async Task ValidateRefereeAvailabilityAsync(int refereeId, DateTime matchDate)
+    {
+        var refereeOccupied = await _matchRepository.RefereeHasMatchAtDateAsync(refereeId, matchDate);
+
+        if (refereeOccupied)
+        {
+            throw new InvalidOperationException("El arbitro ya tiene un partido asignado para esa fecha y hora.");
         }
     }
 

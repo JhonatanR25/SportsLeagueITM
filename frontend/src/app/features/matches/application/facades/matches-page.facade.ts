@@ -89,6 +89,15 @@ export class MatchesPageFacade {
   readonly canCreateMatch = computed(
     () => this.tournamentTeams().length >= 2 && !this.isTournamentTeamsLoading(),
   );
+  readonly availableReferees = computed(() => {
+    const assignedRefereeIds = new Set(
+      this.matches()
+        .map((match) => match.refereeId)
+        .filter((refereeId) => refereeId > 0),
+    );
+
+    return this.referees().filter((referee) => !assignedRefereeIds.has(referee.id));
+  });
 
   constructor() {
     this.createForm.controls.tournamentId.valueChanges

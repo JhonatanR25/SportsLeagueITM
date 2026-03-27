@@ -152,8 +152,8 @@
           />
         </app-context-banner>
 
-        <section class="logo-preview field--full">
-          <div class="logo-preview__crest">
+        <section class="logo-preview entity-preview field--full">
+          <div class="logo-preview__crest entity-preview__avatar">
             @if (logoPreview().logoUrl) {
               <img
                 [src]="logoPreview().logoUrl"
@@ -164,8 +164,8 @@
             }
           </div>
 
-          <div class="logo-preview__content">
-            <span class="context-banner__label">Vista previa</span>
+          <div class="logo-preview__content entity-preview__content">
+            <span class="meta-label">Vista previa</span>
             <strong>{{ teamForm.controls.name.value || 'Nombre del equipo' }}</strong>
             <p>
               @if (logoPreview().logoUrl) {

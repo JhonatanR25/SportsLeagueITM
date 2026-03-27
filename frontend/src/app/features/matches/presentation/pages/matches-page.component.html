@@ -282,8 +282,14 @@
         <label class="field field--full">
           <span>Arbitro</span>
           <select formControlName="refereeId">
-            <option [value]="0">Selecciona un arbitro</option>
-            @for (referee of referees(); track referee.id) {
+            <option [value]="0">
+              @if (availableReferees().length === 0) {
+                No hay arbitros disponibles
+              } @else {
+                Selecciona un arbitro
+              }
+            </option>
+            @for (referee of availableReferees(); track referee.id) {
               <option [value]="referee.id">{{ referee.firstName }} {{ referee.lastName }}</option>
             }
           </select>

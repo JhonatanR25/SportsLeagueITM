@@ -1,7 +1,9 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule } from '@angular/forms';
 
+import { AutoRefreshService } from '../../../../shared/application/auto-refresh.service';
 import { ContextBannerComponent } from '../../../../shared/presentation/components/context-banner/context-banner.component';
 import { ContextBannerItemComponent } from '../../../../shared/presentation/components/context-banner-item/context-banner-item.component';
 import { ModulePageHeaderComponent } from '../../../../shared/presentation/components/module-page-header/module-page-header.component';
@@ -33,10 +35,13 @@ import { MatchesPageFacade } from '../../application/facades/matches-page.facade
 })
 export class MatchesPageComponent {
   private readonly facade = inject(MatchesPageFacade);
+  private readonly autoRefresh = inject(AutoRefreshService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly matches = this.facade.matches;
   protected readonly teams = this.facade.teams;
   protected readonly referees = this.facade.referees;
+  protected readonly availableReferees = this.facade.availableReferees;
   protected readonly tournaments = this.facade.tournaments;
   protected readonly isLoading = this.facade.isLoading;
   protected readonly isCatalogLoading = this.facade.isCatalogLoading;
@@ -65,6 +70,10 @@ export class MatchesPageComponent {
 
   constructor() {
     this.facade.loadInitialData();
+    this.autoRefresh
+      .watch()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.facade.retry());
   }
 
   protected trackByMatchId(_: number, match: Match): number {

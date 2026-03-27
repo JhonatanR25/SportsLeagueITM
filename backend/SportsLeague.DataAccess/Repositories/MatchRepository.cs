@@ -70,6 +70,13 @@ public class MatchRepository : GenericRepository<Match>, IMatchRepository
                 m.MatchDate == matchDate);
     }
 
+    public async Task<bool> RefereeHasMatchAtDateAsync(int refereeId, DateTime matchDate)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .AnyAsync(m => m.RefereeId == refereeId && m.MatchDate == matchDate);
+    }
+
     public async Task<Match?> GetByIdWithDetailsAsync(int id)
     {
         return await _dbSet
@@ -174,3 +181,4 @@ public class MatchRepository : GenericRepository<Match>, IMatchRepository
         return query.OrderBy(m => m.MatchDate).ThenBy(m => m.Id);
     }
 }
+

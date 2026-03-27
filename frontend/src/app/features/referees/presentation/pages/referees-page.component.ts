@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule } from '@angular/forms';
 
+import { AutoRefreshService } from '../../../../shared/application/auto-refresh.service';
 import { ConfirmDialogComponent } from '../../../../shared/presentation/components/confirm-dialog/confirm-dialog.component';
 import { ContextBannerComponent } from '../../../../shared/presentation/components/context-banner/context-banner.component';
 import { ContextBannerItemComponent } from '../../../../shared/presentation/components/context-banner-item/context-banner-item.component';
@@ -33,6 +35,8 @@ import { RefereesPageFacade } from '../../application/facades/referees-page.faca
 })
 export class RefereesPageComponent {
   private readonly facade = inject(RefereesPageFacade);
+  private readonly autoRefresh = inject(AutoRefreshService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly refereeForm = this.facade.refereeForm;
   protected readonly referees = this.facade.referees;
@@ -53,6 +57,10 @@ export class RefereesPageComponent {
 
   constructor() {
     this.facade.loadReferees();
+    this.autoRefresh
+      .watch()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.facade.retry());
   }
 
   protected trackByRefereeId(_: number, referee: Referee): number {

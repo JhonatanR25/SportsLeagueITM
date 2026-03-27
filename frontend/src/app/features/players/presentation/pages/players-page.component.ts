@@ -1,7 +1,9 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule } from '@angular/forms';
 
+import { AutoRefreshService } from '../../../../shared/application/auto-refresh.service';
 import { ConfirmDialogComponent } from '../../../../shared/presentation/components/confirm-dialog/confirm-dialog.component';
 import { ContextBannerComponent } from '../../../../shared/presentation/components/context-banner/context-banner.component';
 import { ContextBannerItemComponent } from '../../../../shared/presentation/components/context-banner-item/context-banner-item.component';
@@ -35,6 +37,8 @@ import { PlayersPageFacade } from '../../application/facades/players-page.facade
 })
 export class PlayersPageComponent {
   private readonly facade = inject(PlayersPageFacade);
+  private readonly autoRefresh = inject(AutoRefreshService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly playerForm = this.facade.playerForm;
   protected readonly players = this.facade.players;
@@ -58,6 +62,10 @@ export class PlayersPageComponent {
 
   constructor() {
     this.facade.loadInitialData();
+    this.autoRefresh
+      .watch()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.facade.retry());
   }
 
   protected trackByPlayerId(_: number, player: Player): number {

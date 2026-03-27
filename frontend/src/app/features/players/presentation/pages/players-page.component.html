@@ -159,11 +159,13 @@
           <app-context-banner-item label="Objetivo" value="Registrar una ficha clara del jugador" />
         </app-context-banner>
 
-        <section class="player-preview field--full">
-          <div class="player-preview__avatar">{{ playerPreview().initials }}</div>
+        <section class="player-preview entity-preview field--full">
+          <div class="player-preview__avatar entity-preview__avatar">
+            {{ playerPreview().initials }}
+          </div>
 
-          <div class="player-preview__content">
-            <span class="context-banner__label">Vista previa</span>
+          <div class="player-preview__content entity-preview__content">
+            <span class="meta-label">Vista previa</span>
             <strong>{{ playerPreview().fullName }}</strong>
             <p>{{ playerPreview().teamName }} · {{ playerPreview().positionLabel }}</p>
           </div>

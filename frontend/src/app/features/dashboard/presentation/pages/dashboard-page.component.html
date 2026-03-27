@@ -1,8 +1,5 @@
 @if (isLoading()) {
-  <app-state-card
-    label="Actualizando panel"
-    title="Consultando la informacion general de la competencia..."
-  />
+  <app-state-card label="Cargando dashboard" title="Consultando la API del backend..." />
 } @else if (errorMessage()) {
   <app-state-card
     label="Resumen no disponible"

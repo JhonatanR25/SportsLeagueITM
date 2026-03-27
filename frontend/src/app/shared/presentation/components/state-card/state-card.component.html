@@ -3,7 +3,9 @@
     <p class="state-card__label">{{ label }}</p>
   }
 
-  <h2>{{ title }}</h2>
+  @if (title) {
+    <h2>{{ title }}</h2>
+  }
 
   @if (actionLabel) {
     <button type="button" class="ghost-button ghost-button--light" (click)="onAction()">

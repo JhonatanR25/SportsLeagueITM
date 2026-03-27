@@ -1,7 +1,9 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule } from '@angular/forms';
 
+import { AutoRefreshService } from '../../../../shared/application/auto-refresh.service';
 import { ConfirmDialogComponent } from '../../../../shared/presentation/components/confirm-dialog/confirm-dialog.component';
 import { ContextBannerComponent } from '../../../../shared/presentation/components/context-banner/context-banner.component';
 import { ContextBannerItemComponent } from '../../../../shared/presentation/components/context-banner-item/context-banner-item.component';
@@ -34,6 +36,8 @@ import { TeamsFormService } from '../../application/facades/teams-form.service';
 })
 export class TeamsPageComponent {
   private readonly facade = inject(TeamsPageFacade);
+  private readonly autoRefresh = inject(AutoRefreshService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly teamForm = this.facade.teamForm;
   protected readonly teams = this.facade.teams;
@@ -54,6 +58,10 @@ export class TeamsPageComponent {
 
   constructor() {
     this.facade.loadTeams();
+    this.autoRefresh
+      .watch()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.facade.retry());
   }
 
   protected trackByTeamId(_: number, team: Team): number {
