@@ -297,8 +297,13 @@
             <h2>{{ selectedTournament.name }}</h2>
             <p class="modal__description">{{ selectedTournamentStatusCopy() }}</p>
           </div>
-          <button type="button" class="icon-button" (click)="closeRegisterTeamsModal()">
-            Cerrar
+          <button
+            type="button"
+            class="icon-button icon-button--icon-only icon-button--close"
+            (click)="closeRegisterTeamsModal()"
+            aria-label="Cerrar modal"
+          >
+            <span class="sr-only">Cerrar</span>
           </button>
         </div>
 

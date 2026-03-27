@@ -1,16 +1,13 @@
 :host {
   display: grid;
-  gap: 1.5rem;
+  gap: var(--space-2xl);
 }
 
-.panel,
-.state-card {
+.panel {
   border: 1px solid var(--color-border-soft);
   box-shadow: var(--shadow-soft);
 }
 
-.hero__eyebrow,
-.panel__eyebrow,
 .module-card__metrics span {
   margin: 0;
   color: var(--color-text-muted);
@@ -25,14 +22,12 @@
   margin: 0;
 }
 
-.module-card p,
-.state-card p {
+.module-card p {
   margin: 0;
   color: var(--color-text-soft);
 }
 
-.panel,
-.state-card {
+.panel {
   padding: 1.5rem;
   border-radius: var(--radius-panel);
   background: var(--surface-card-soft);
@@ -46,8 +41,7 @@
   margin-bottom: 1.4rem;
 }
 
-.panel__header h2,
-.state-card h2 {
+.panel__header h2 {
   margin-top: 0.4rem;
   font-size: var(--font-size-heading-md);
 }
@@ -171,14 +165,6 @@
   background: linear-gradient(180deg, var(--color-accent-matches-soft), rgba(255, 255, 255, 0.03));
 }
 
-.state-card--error {
-  background: linear-gradient(
-    180deg,
-    var(--color-danger-soft),
-    color-mix(in srgb, var(--color-bg-secondary) 92%, transparent)
-  );
-}
-
 .module-card__cta:hover {
   transform: translateY(-1px);
   box-shadow: var(--shadow-strong);
@@ -192,16 +178,14 @@
 
 @media (max-width: 640px) {
   :host {
-    gap: 1rem;
+    gap: var(--space-lg);
   }
 
-  .panel,
-  .state-card {
+  .panel {
     border-radius: 1.1rem;
   }
 
-  .panel,
-  .state-card {
+  .panel {
     padding: 1.1rem;
   }
 

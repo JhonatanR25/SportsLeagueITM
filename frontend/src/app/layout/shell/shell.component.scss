@@ -10,8 +10,12 @@
   gap: var(--space-lg);
   padding: var(--space-lg);
   background:
-    radial-gradient(circle at top left, rgba(243, 180, 76, 0.24), transparent 24rem),
-    radial-gradient(circle at bottom right, rgba(39, 89, 214, 0.18), transparent 20rem),
+    radial-gradient(circle at top left, var(--color-shell-intro-glow), transparent 24rem),
+    radial-gradient(
+      circle at bottom right,
+      var(--color-shell-intro-secondary-glow),
+      transparent 20rem
+    ),
     var(--color-surface);
 }
 
@@ -21,12 +25,16 @@
   align-content: start;
   padding: var(--space-2xl) var(--space-xl);
   background:
-    linear-gradient(180deg, rgba(9, 24, 51, 0.96), rgba(6, 16, 36, 0.98)),
+    linear-gradient(
+      180deg,
+      var(--color-shell-sidebar-bg-top),
+      var(--color-shell-sidebar-bg-bottom)
+    ),
     var(--color-surface-strong);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1.6rem;
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-shell-sidebar);
   box-shadow:
-    0 1.5rem 3.5rem rgba(3, 9, 20, 0.34),
+    var(--shadow-shell-sidebar),
     inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
@@ -62,7 +70,7 @@
 .brand__copy {
   margin: 0;
   max-width: 26ch;
-  color: rgba(245, 247, 250, 0.68);
+  color: color-mix(in srgb, var(--color-text-primary) 68%, transparent);
   font-size: var(--font-size-body-sm);
 }
 
@@ -81,11 +89,11 @@
   padding: 0.85rem 0.95rem;
   min-height: 5.75rem;
   height: 5.75rem;
-  border-radius: 1.15rem;
+  border-radius: var(--radius-shell-item);
   text-decoration: none;
   color: inherit;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: var(--color-shell-nav-bg);
+  border: 1px solid var(--color-shell-panel-border);
   transition:
     transform 180ms ease,
     border-color 180ms ease,
@@ -96,17 +104,21 @@
 .nav__item:hover,
 .nav__item:focus-visible {
   transform: translateY(-0.125rem);
-  border-color: rgba(243, 180, 76, 0.45);
-  background: rgba(255, 255, 255, 0.06);
-  box-shadow: 0 1rem 2.2rem rgba(5, 12, 24, 0.22);
+  border-color: var(--color-border-accent);
+  background: var(--color-shell-nav-bg-hover);
+  box-shadow: var(--shadow-shell-nav-hover);
 }
 
 .nav__item--active {
   background:
-    linear-gradient(135deg, rgba(243, 180, 76, 0.18), rgba(39, 89, 214, 0.2)),
-    rgba(255, 255, 255, 0.04);
-  border-color: rgba(243, 180, 76, 0.45);
-  box-shadow: 0 1rem 2.5rem rgba(5, 12, 24, 0.32);
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-brand-primary) 18%, transparent),
+      color-mix(in srgb, var(--color-brand-secondary) 20%, transparent)
+    ),
+    var(--color-shell-nav-active-bg);
+  border-color: var(--color-border-accent);
+  box-shadow: var(--shadow-shell-nav-active);
 }
 
 .nav__label {
@@ -127,9 +139,9 @@
 
 .sidebar-card {
   padding: 1.1rem;
-  border-radius: 1.15rem;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03));
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-shell-item);
+  background: var(--color-shell-card-bg);
+  border: 1px solid color-mix(in srgb, var(--color-text-primary) 7%, transparent);
 }
 
 .sidebar-card__title {
@@ -161,10 +173,10 @@
   grid-template-rows: auto auto;
   align-content: start;
   min-width: 0;
-  border-radius: 1.8rem;
+  border-radius: var(--radius-shell-content);
   overflow: hidden;
-  background: rgba(7, 17, 37, 0.42);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: var(--color-shell-panel-bg);
+  border: 1px solid var(--color-shell-panel-border);
 }
 
 .topbar {
@@ -180,8 +192,8 @@
   gap: 0.65rem;
   padding: 0.8rem 1rem;
   border-radius: var(--radius-control);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.04));
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--color-shell-status-bg);
+  border: 1px solid color-mix(in srgb, var(--color-text-primary) 7%, transparent);
   color: var(--color-text-muted);
   white-space: nowrap;
 }
@@ -191,7 +203,7 @@
   height: 0.65rem;
   border-radius: 50%;
   background: var(--color-success);
-  box-shadow: 0 0 0.8rem rgba(60, 179, 113, 0.5);
+  box-shadow: var(--shadow-shell-status);
 }
 
 .page {
@@ -306,7 +318,7 @@
     scroll-snap-align: start;
     place-items: center;
     text-align: center;
-    border-radius: 1rem;
+    border-radius: var(--radius-card-md);
   }
 
   .nav__item:hover,

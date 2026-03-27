@@ -19,36 +19,11 @@ app-module-page-header.page-header--narrow {
   display: none;
 }
 
-.referee-card {
-  display: grid;
-  gap: var(--space-lg);
-  padding: var(--space-lg);
-  border-radius: var(--radius-card-lg);
-  background: rgba(255, 255, 255, 0.04);
-}
-
 .referee-card__header,
 .referee-table__identity {
   display: flex;
   align-items: center;
   gap: 0.9rem;
-}
-
-.referee-card__avatar {
-  width: 3.25rem;
-  height: 3.25rem;
-  border-radius: 1rem;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(135deg, rgba(243, 180, 76, 0.2), rgba(39, 89, 214, 0.2));
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  font-weight: 800;
-}
-
-.referee-card__avatar--small {
-  width: 2.6rem;
-  height: 2.6rem;
-  border-radius: 0.85rem;
 }
 
 .referee-card__header p,

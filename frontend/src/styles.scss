@@ -38,6 +38,32 @@
   --color-accent-referees-soft: rgba(219, 68, 55, 0.09);
   --color-accent-matches-soft: rgba(69, 182, 255, 0.1);
   --color-accent-tournaments-soft: rgba(243, 180, 76, 0.1);
+  --color-shell-sidebar-bg-top: rgba(9, 24, 51, 0.96);
+  --color-shell-sidebar-bg-bottom: rgba(6, 16, 36, 0.98);
+  --color-shell-panel-bg: rgba(7, 17, 37, 0.42);
+  --color-shell-panel-border: rgba(255, 255, 255, 0.04);
+  --color-shell-nav-bg: rgba(255, 255, 255, 0.03);
+  --color-shell-nav-bg-hover: rgba(255, 255, 255, 0.06);
+  --color-shell-nav-active-bg: rgba(255, 255, 255, 0.04);
+  --color-shell-card-bg: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.03)
+  );
+  --color-shell-status-bg: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.07),
+    rgba(255, 255, 255, 0.04)
+  );
+  --color-shell-intro-glow: rgba(243, 180, 76, 0.24);
+  --color-shell-intro-secondary-glow: rgba(39, 89, 214, 0.18);
+  --shadow-shell-sidebar: 0 1.5rem 3.5rem rgba(3, 9, 20, 0.34);
+  --shadow-shell-nav-hover: 0 1rem 2.2rem rgba(5, 12, 24, 0.22);
+  --shadow-shell-nav-active: 0 1rem 2.5rem rgba(5, 12, 24, 0.32);
+  --shadow-shell-status: 0 0 0.8rem rgba(60, 179, 113, 0.5);
+  --radius-shell-sidebar: 1.6rem;
+  --radius-shell-content: 1.8rem;
+  --radius-shell-item: 1.15rem;
   --shadow-soft: 0 1.25rem 3rem rgba(2, 8, 20, 0.24);
   --shadow-strong: 0 1.6rem 3.8rem rgba(2, 8, 20, 0.32);
   --shadow-focus: 0 0 0 2px rgba(243, 180, 76, 0.45);
@@ -227,6 +253,25 @@ p {
   padding: 0.65rem 0.95rem;
 }
 
+.icon-button--icon-only {
+  inline-size: var(--control-height-icon);
+  min-inline-size: var(--control-height-icon);
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+.icon-button--close::before {
+  content: '';
+  width: 1rem;
+  height: 1rem;
+  display: block;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6L6 18'/%3E%3Cpath d='M6 6l12 12'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6L6 18'/%3E%3Cpath d='M6 6l12 12'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+
 .status-badge,
 .team-chip,
 .hero__pill {
@@ -356,6 +401,13 @@ p {
   background: var(--surface-card-soft);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
   color: var(--color-text-primary);
+}
+
+.search-field input {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239fb0c8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.95rem center;
+  background-size: 1rem;
 }
 
 .field input::placeholder,
@@ -548,6 +600,61 @@ p {
 .entity-preview__content p {
   margin-top: 0.35rem;
   color: var(--color-text-soft);
+}
+
+:where(.team-card, .player-card, .referee-card) {
+  display: grid;
+  gap: var(--space-lg);
+  padding: var(--space-lg);
+  border-radius: var(--radius-card-lg);
+  background: var(--surface-card-soft);
+}
+
+:where(.team-card__header, .player-card__header, .referee-card__header) {
+  display: flex;
+  align-items: center;
+}
+
+:where(.player-card__avatar, .referee-card__avatar, .team-card__crest) {
+  display: grid;
+  place-items: center;
+  border-radius: 1rem;
+  border: 1px solid var(--color-border-soft);
+  font-weight: var(--font-weight-display-strong);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-brand-primary) 20%, transparent),
+    color-mix(in srgb, var(--color-brand-secondary) 20%, transparent)
+  );
+}
+
+:where(.player-card__avatar, .referee-card__avatar) {
+  width: 3.25rem;
+  height: 3.25rem;
+}
+
+:where(.player-card__avatar--small, .referee-card__avatar--small) {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 0.85rem;
+}
+
+:where(.team-card__crest) {
+  width: 3.35rem;
+  height: 3.35rem;
+  overflow: hidden;
+}
+
+:where(.team-card__crest--small) {
+  width: 2.9rem;
+  height: 2.9rem;
+  border-radius: 0.85rem;
+}
+
+:where(.team-card__crest img) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .muted-copy,
@@ -926,4 +1033,16 @@ textarea:focus-visible,
 a:focus-visible {
   outline: 2px solid var(--color-border-accent);
   outline-offset: 0.12rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

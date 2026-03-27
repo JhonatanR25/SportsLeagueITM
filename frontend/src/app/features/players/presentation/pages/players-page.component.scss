@@ -7,36 +7,11 @@
   display: none;
 }
 
-.player-card {
-  display: grid;
-  gap: var(--space-lg);
-  padding: var(--space-lg);
-  border-radius: var(--radius-card-lg);
-  background: rgba(255, 255, 255, 0.04);
-}
-
 .player-card__header,
 .player-table__identity {
   display: flex;
   align-items: center;
   gap: 0.9rem;
-}
-
-.player-card__avatar {
-  width: 3.25rem;
-  height: 3.25rem;
-  border-radius: 1rem;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(135deg, rgba(243, 180, 76, 0.2), rgba(39, 89, 214, 0.2));
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  font-weight: 800;
-}
-
-.player-card__avatar--small {
-  width: 2.6rem;
-  height: 2.6rem;
-  border-radius: 0.85rem;
 }
 
 .player-card__header p,

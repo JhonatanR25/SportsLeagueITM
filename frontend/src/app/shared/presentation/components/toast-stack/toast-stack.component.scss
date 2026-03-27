@@ -58,7 +58,7 @@
     width: auto;
   }
 
-  .icon-button {
+  .icon-button:not(.icon-button--icon-only) {
     width: 100%;
   }
 }

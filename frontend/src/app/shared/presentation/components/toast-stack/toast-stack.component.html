@@ -7,10 +7,11 @@
       </div>
       <button
         type="button"
-        class="icon-button icon-button--toast"
+        class="icon-button icon-button--toast icon-button--icon-only icon-button--close"
         (click)="dismissNotification(notification.id)"
+        aria-label="Cerrar notificacion"
       >
-        Cerrar
+        <span class="sr-only">Cerrar</span>
       </button>
     </article>
   }

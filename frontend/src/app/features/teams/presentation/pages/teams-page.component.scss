@@ -21,43 +21,11 @@
   display: none;
 }
 
-.team-card {
-  display: grid;
-  gap: var(--space-lg);
-  padding: var(--space-lg);
-  border-radius: var(--radius-card-lg);
-  background: rgba(255, 255, 255, 0.04);
-}
-
 .team-card__header,
 .team-table__identity {
   display: flex;
   align-items: center;
   gap: 0.85rem;
-}
-
-.team-card__crest {
-  width: 3.35rem;
-  height: 3.35rem;
-  border-radius: 1rem;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  background: linear-gradient(135deg, rgba(243, 180, 76, 0.2), rgba(39, 89, 214, 0.2));
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  font-weight: 800;
-}
-
-.team-card__crest--small {
-  width: 2.9rem;
-  height: 2.9rem;
-  border-radius: 0.85rem;
-}
-
-.team-card__crest img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 .team-card__header p,
