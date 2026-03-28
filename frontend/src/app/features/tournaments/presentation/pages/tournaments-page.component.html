@@ -192,10 +192,14 @@
 
 @if (isFormModalOpen()) {
   <div class="overlay" (click)="closeFormModal()">
-    <section class="modal" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
+    <section
+      class="modal modal--form"
+      (click)="$event.stopPropagation()"
+      aria-modal="true"
+      role="dialog"
+    >
       <div class="modal__header">
         <div>
-          <p class="modal__eyebrow">Configuracion de torneo</p>
           <h2>{{ modalTitle() }}</h2>
         </div>
       </div>
@@ -205,17 +209,6 @@
         [formGroup]="tournamentForm"
         (ngSubmit)="submitTournamentForm()"
       >
-        <app-context-banner [fullWidth]="true">
-          <app-context-banner-item
-            label="Modo"
-            [value]="tournamentBeingEdited() ? 'Edicion de torneo' : 'Creacion de torneo'"
-          />
-          <app-context-banner-item
-            label="Regla clave"
-            value="La fecha final debe ser posterior a la inicial"
-          />
-        </app-context-banner>
-
         <label class="field">
           <span>Nombre</span>
           <input type="text" formControlName="name" placeholder="Ej: Copa ITM" />
@@ -293,7 +286,6 @@
       >
         <div class="modal__header">
           <div>
-            <p class="modal__eyebrow">Inscripcion de equipos</p>
             <h2>{{ selectedTournament.name }}</h2>
             <p class="modal__description">{{ selectedTournamentStatusCopy() }}</p>
           </div>

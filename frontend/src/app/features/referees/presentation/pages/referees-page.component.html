@@ -125,23 +125,19 @@
 
 @if (isFormModalOpen()) {
   <div class="overlay" (click)="closeFormModal()">
-    <section class="modal" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
+    <section
+      class="modal modal--form"
+      (click)="$event.stopPropagation()"
+      aria-modal="true"
+      role="dialog"
+    >
       <div class="modal__header">
         <div>
-          <p class="modal__eyebrow">Ficha arbitral</p>
           <h2>{{ modalTitle() }}</h2>
         </div>
       </div>
 
       <form class="referee-form" [formGroup]="refereeForm" (ngSubmit)="submitRefereeForm()">
-        <app-context-banner [fullWidth]="true">
-          <app-context-banner-item label="Modo" [value]="formModeLabel()" />
-          <app-context-banner-item
-            label="Objetivo"
-            value="Registrar una identidad arbitral clara y consistente"
-          />
-        </app-context-banner>
-
         <section class="referee-preview entity-preview field--full">
           <div class="referee-preview__avatar entity-preview__avatar">
             {{ refereePreview().initials }}

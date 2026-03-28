@@ -145,20 +145,19 @@
 
 @if (isFormModalOpen()) {
   <div class="overlay" (click)="closeFormModal()">
-    <section class="modal" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
+    <section
+      class="modal modal--form"
+      (click)="$event.stopPropagation()"
+      aria-modal="true"
+      role="dialog"
+    >
       <div class="modal__header">
         <div>
-          <p class="modal__eyebrow">Ficha de jugador</p>
           <h2>{{ modalTitle() }}</h2>
         </div>
       </div>
 
       <form class="player-form" [formGroup]="playerForm" (ngSubmit)="submitPlayerForm()">
-        <app-context-banner [fullWidth]="true">
-          <app-context-banner-item label="Modo" [value]="formModeLabel()" />
-          <app-context-banner-item label="Objetivo" value="Registrar una ficha clara del jugador" />
-        </app-context-banner>
-
         <section class="player-preview entity-preview field--full">
           <div class="player-preview__avatar entity-preview__avatar">
             {{ playerPreview().initials }}

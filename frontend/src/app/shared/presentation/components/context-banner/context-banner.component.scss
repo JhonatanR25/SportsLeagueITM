@@ -4,6 +4,7 @@
 
 .context-banner {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
   gap: 0.9rem;
   padding: 1rem;
   border: var(--border-soft);
@@ -16,6 +17,12 @@
 }
 
 @media (max-width: 720px) {
+  .context-banner {
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
   .context-banner {
     grid-template-columns: 1fr;
   }

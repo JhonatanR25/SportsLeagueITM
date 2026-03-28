@@ -135,23 +135,19 @@
 
 @if (isFormModalOpen()) {
   <div class="overlay" (click)="closeFormModal()">
-    <section class="modal" (click)="$event.stopPropagation()" aria-modal="true" role="dialog">
+    <section
+      class="modal modal--form"
+      (click)="$event.stopPropagation()"
+      aria-modal="true"
+      role="dialog"
+    >
       <div class="modal__header">
         <div>
-          <p class="modal__eyebrow">Ficha de equipo</p>
           <h2>{{ modalTitle() }}</h2>
         </div>
       </div>
 
       <form class="team-form" [formGroup]="teamForm" (ngSubmit)="submitTeamForm()">
-        <app-context-banner [fullWidth]="true">
-          <app-context-banner-item label="Modo" [value]="formModeLabel()" />
-          <app-context-banner-item
-            label="Objetivo"
-            value="Registrar datos claros y faciles de identificar"
-          />
-        </app-context-banner>
-
         <section class="logo-preview entity-preview field--full">
           <div class="logo-preview__crest entity-preview__avatar">
             @if (logoPreview().logoUrl) {

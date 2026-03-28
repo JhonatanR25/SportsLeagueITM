@@ -86,9 +86,10 @@
   --layout-sidebar-width: 18.75rem;
   --layout-header-actions-md: 24rem;
   --layout-header-actions-lg: 25rem;
-  --layout-modal-md: 42rem;
+  --layout-modal-md: 46rem;
+  --layout-modal-form: 54rem;
   --layout-modal-sm: 40rem;
-  --layout-modal-wide: 48rem;
+  --layout-modal-wide: 60rem;
   --button-width-md: 11rem;
   --control-height-sm: 2.2rem;
   --control-height-md: 2.9rem;
@@ -415,6 +416,29 @@ p {
   color: rgba(159, 176, 200, 0.68);
 }
 
+.field input[type='date'],
+.field input[type='datetime-local'] {
+  padding-inline-end: 3rem;
+  color-scheme: dark;
+}
+
+.field input[type='date']::-webkit-calendar-picker-indicator,
+.field input[type='datetime-local']::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.82;
+  filter: brightness(1.1) saturate(0.85);
+}
+
+.field input[type='date']::-webkit-datetime-edit,
+.field input[type='datetime-local']::-webkit-datetime-edit {
+  color: var(--color-text-primary);
+}
+
+.field input[type='date']::-webkit-date-and-time-value,
+.field input[type='datetime-local']::-webkit-date-and-time-value {
+  text-align: left;
+}
+
 .field input:disabled,
 .field select:disabled,
 .filter-row select:disabled {
@@ -479,6 +503,10 @@ p {
 
 .modal--wide {
   width: min(100%, var(--layout-modal-wide));
+}
+
+.modal--form {
+  width: min(100%, var(--layout-modal-form));
 }
 
 .modal__header {
@@ -933,14 +961,6 @@ p {
     border-radius: var(--radius-panel-mobile);
   }
 
-  :where(.team-form, .player-form, .referee-form, .tournament-form, .match-form, .score-form) {
-    grid-template-columns: 1fr;
-  }
-
-  .entity-preview {
-    grid-template-columns: 1fr;
-  }
-
   :where(
     .team-card__actions,
     .player-card__actions,
@@ -1001,6 +1021,16 @@ p {
   .modal__actions .primary-button,
   .icon-button {
     width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  :where(.team-form, .player-form, .referee-form, .tournament-form, .match-form, .score-form) {
+    grid-template-columns: 1fr;
+  }
+
+  .entity-preview {
+    grid-template-columns: 1fr;
   }
 }
 

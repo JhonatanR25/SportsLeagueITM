@@ -5,8 +5,6 @@ import { ReactiveFormsModule } from '@angular/forms';
 
 import { AutoRefreshService } from '../../../../shared/application/auto-refresh.service';
 import { ConfirmDialogComponent } from '../../../../shared/presentation/components/confirm-dialog/confirm-dialog.component';
-import { ContextBannerComponent } from '../../../../shared/presentation/components/context-banner/context-banner.component';
-import { ContextBannerItemComponent } from '../../../../shared/presentation/components/context-banner-item/context-banner-item.component';
 import { ModulePageHeaderComponent } from '../../../../shared/presentation/components/module-page-header/module-page-header.component';
 import { SectionCardHeaderComponent } from '../../../../shared/presentation/components/section-card-header/section-card-header.component';
 import { StateCardComponent } from '../../../../shared/presentation/components/state-card/state-card.component';
@@ -24,8 +22,6 @@ import { PlayersPageFacade } from '../../application/facades/players-page.facade
     DatePipe,
     ReactiveFormsModule,
     ConfirmDialogComponent,
-    ContextBannerComponent,
-    ContextBannerItemComponent,
     ModulePageHeaderComponent,
     SectionCardHeaderComponent,
     StateCardComponent,
