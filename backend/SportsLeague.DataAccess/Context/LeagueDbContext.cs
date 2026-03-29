@@ -14,6 +14,8 @@ public class LeagueDbContext : DbContext
     public DbSet<Referee> Referees => Set<Referee>();
     public DbSet<Tournament> Tournaments => Set<Tournament>();
     public DbSet<TournamentTeam> TournamentTeams => Set<TournamentTeam>();
+    public DbSet<Sponsor> Sponsors => Set<Sponsor>();
+    public DbSet<TournamentSponsor> TournamentSponsors => Set<TournamentSponsor>();
     public DbSet<Match> Matches => Set<Match>();
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -47,6 +49,8 @@ public class LeagueDbContext : DbContext
         ConfigureReferee(modelBuilder);
         ConfigureTournament(modelBuilder);
         ConfigureTournamentTeam(modelBuilder);
+        ConfigureSponsor(modelBuilder);
+        ConfigureTournamentSponsor(modelBuilder);
         ConfigureMatch(modelBuilder);
     }
 
@@ -226,6 +230,11 @@ public class LeagueDbContext : DbContext
                 .HasForeignKey(tt => tt.TournamentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            entity.HasMany(t => t.TournamentSponsors)
+                .WithOne(ts => ts.Tournament)
+                .HasForeignKey(ts => ts.TournamentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             entity.HasMany(t => t.Matches)
                 .WithOne(m => m.Tournament)
                 .HasForeignKey(m => m.TournamentId)
@@ -261,6 +270,78 @@ public class LeagueDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasIndex(tt => new { tt.TournamentId, tt.TeamId })
+                .IsUnique();
+        });
+    }
+
+    private static void ConfigureSponsor(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Sponsor>(entity =>
+        {
+            entity.ToTable("Sponsors");
+
+            entity.HasKey(s => s.Id);
+
+            entity.Property(s => s.Name)
+                .IsRequired()
+                .HasMaxLength(150);
+
+            entity.Property(s => s.ContactEmail)
+                .IsRequired()
+                .HasMaxLength(150);
+
+            entity.Property(s => s.Phone)
+                .HasMaxLength(30);
+
+            entity.Property(s => s.WebsiteUrl)
+                .HasMaxLength(500);
+
+            entity.Property(s => s.Category)
+                .IsRequired();
+
+            entity.Property(s => s.CreatedAt)
+                .IsRequired();
+
+            entity.Property(s => s.UpdatedAt)
+                .IsRequired(false);
+
+            entity.HasIndex(s => s.Name)
+                .IsUnique();
+        });
+    }
+
+    private static void ConfigureTournamentSponsor(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TournamentSponsor>(entity =>
+        {
+            entity.ToTable("TournamentSponsors");
+
+            entity.HasKey(ts => ts.Id);
+
+            entity.Property(ts => ts.ContractAmount)
+                .HasColumnType("decimal(18,2)")
+                .IsRequired();
+
+            entity.Property(ts => ts.JoinedAt)
+                .IsRequired();
+
+            entity.Property(ts => ts.CreatedAt)
+                .IsRequired();
+
+            entity.Property(ts => ts.UpdatedAt)
+                .IsRequired(false);
+
+            entity.HasOne(ts => ts.Tournament)
+                .WithMany(t => t.TournamentSponsors)
+                .HasForeignKey(ts => ts.TournamentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(ts => ts.Sponsor)
+                .WithMany(s => s.TournamentSponsors)
+                .HasForeignKey(ts => ts.SponsorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(ts => new { ts.TournamentId, ts.SponsorId })
                 .IsUnique();
         });
     }

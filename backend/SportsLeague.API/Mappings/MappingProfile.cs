@@ -38,6 +38,20 @@ public class MappingProfile : Profile
                 dest => dest.TeamsCount,
                 opt => opt.MapFrom(src => src.TournamentTeams != null ? src.TournamentTeams.Count : 0));
 
+        // Sponsor mappings
+        CreateMap<SponsorRequestDTO, Sponsor>()
+            .ForMember(dest => dest.TournamentSponsors, opt => opt.Ignore());
+
+        CreateMap<Sponsor, SponsorResponseDTO>();
+
+        CreateMap<TournamentSponsor, TournamentSponsorResponseDTO>()
+            .ForMember(
+                dest => dest.TournamentName,
+                opt => opt.MapFrom(src => src.Tournament != null ? src.Tournament.Name : string.Empty))
+            .ForMember(
+                dest => dest.SponsorName,
+                opt => opt.MapFrom(src => src.Sponsor != null ? src.Sponsor.Name : string.Empty));
+
         // Match mappings
         CreateMap<MatchRequestDTO, Match>()
             .ForMember(dest => dest.Status, opt => opt.Ignore())
