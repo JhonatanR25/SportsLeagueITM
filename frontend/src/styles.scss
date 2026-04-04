@@ -746,12 +746,13 @@ p {
   .player-table-wrapper,
   .referee-table-wrapper,
   .tournament-table-wrapper,
-  .match-table-wrapper
+  .match-table-wrapper,
+  .sponsor-table-wrapper
 ) {
   overflow-x: auto;
 }
 
-:where(.team-table, .player-table, .referee-table, .tournament-table, .match-table) {
+:where(.team-table, .player-table, .referee-table, .tournament-table, .match-table, .sponsor-table) {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
@@ -775,7 +776,9 @@ p {
   .tournament-table th,
   .tournament-table td,
   .match-table th,
-  .match-table td
+  .match-table td,
+  .sponsor-table th,
+  .sponsor-table td
 ) {
   padding: 1rem 0.9rem;
   text-align: left;
@@ -783,7 +786,14 @@ p {
   border-bottom: 1px solid var(--color-border-soft);
 }
 
-:where(.team-table th, .player-table th, .referee-table th, .tournament-table th, .match-table th) {
+:where(
+    .team-table th,
+    .player-table th,
+    .referee-table th,
+    .tournament-table th,
+    .match-table th,
+    .sponsor-table th
+  ) {
   color: var(--color-text-muted);
   font-size: var(--font-size-label-md);
   text-transform: uppercase;
@@ -800,7 +810,9 @@ p {
   .tournament-table__actions-column,
   .tournament-table__actions-cell,
   .match-table__actions-column,
-  .match-table__actions-cell
+  .match-table__actions-cell,
+  .sponsor-table__actions-column,
+  .sponsor-table__actions-cell
 ) {
   text-align: center;
 }

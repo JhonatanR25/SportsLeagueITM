@@ -1,0 +1,394 @@
+<app-module-page-header
+  eyebrow="Sponsors"
+  title="Gestion de sponsors"
+  description="Administra patrocinadores, categorias comerciales y vinculos con torneos desde una sola vista."
+>
+  <label class="search-field" moduleHeaderControls>
+    <span>Buscar</span>
+    <input
+      type="search"
+      [value]="searchTerm()"
+      (input)="updateSearchTerm(searchInput.value)"
+      #searchInput
+      placeholder="Nombre, correo, categoria o sitio web"
+    />
+  </label>
+
+  <button type="button" class="ghost-button" moduleHeaderButtons (click)="retry()">
+    Actualizar
+  </button>
+  <button type="button" class="primary-button" moduleHeaderButtons (click)="openCreateModal()">
+    Crear sponsor
+  </button>
+</app-module-page-header>
+
+@if (isLoading()) {
+  <app-state-card label="Cargando sponsors" title="Consultando la API del backend..." />
+} @else if (errorMessage()) {
+  <app-state-card
+    label="No disponible"
+    [title]="errorMessage()"
+    tone="error"
+    actionLabel="Reintentar"
+    (action)="retry()"
+  />
+} @else {
+  <section class="table-card">
+    <app-section-card-header title="Sponsors registrados" />
+
+    @if (filteredSponsors().length === 0) {
+      <app-state-card
+        label="Busqueda sin coincidencias"
+        title="No encontramos sponsors con los filtros actuales."
+      />
+    } @else {
+      <div class="sponsor-grid">
+        @for (sponsor of filteredSponsors(); track trackBySponsorId($index, sponsor)) {
+          <article class="sponsor-card">
+            <div class="sponsor-card__header">
+              <div class="sponsor-card__avatar">{{ sponsor.name.slice(0, 2) }}</div>
+              <div>
+                <h3>{{ sponsor.name }}</h3>
+                <p>{{ sponsor.contactEmail }}</p>
+              </div>
+            </div>
+
+            <dl class="sponsor-card__details">
+              <div>
+                <dt>Categoria</dt>
+                <dd>
+                  <span class="category-badge" [class]="'category-badge--' + sponsor.category.toLowerCase()">
+                    {{ getCategoryLabel(sponsor.category) }}
+                  </span>
+                </dd>
+              </div>
+              <div>
+                <dt>Telefono</dt>
+                <dd>{{ sponsor.phone || 'No registrado' }}</dd>
+              </div>
+              <div class="field--full">
+                <dt>Sitio web</dt>
+                <dd>{{ sponsor.websiteUrl || 'No registrado' }}</dd>
+              </div>
+            </dl>
+
+            <div class="sponsor-card__actions card-actions--dense">
+              <button
+                type="button"
+                class="ghost-button ghost-button--light"
+                (click)="openEditModal(sponsor)"
+              >
+                Editar
+              </button>
+              <button type="button" class="ghost-button" (click)="openManageTournamentsModal(sponsor)">
+                Torneos
+              </button>
+              <button
+                type="button"
+                class="ghost-button ghost-button--danger"
+                (click)="openDeleteModal(sponsor)"
+              >
+                Eliminar
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+
+      <div class="sponsor-table-wrapper">
+        <table class="sponsor-table">
+          <thead>
+            <tr>
+              <th>Sponsor</th>
+              <th>Categoria</th>
+              <th>Contacto</th>
+              <th>Sitio web</th>
+              <th class="sponsor-table__actions-column">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (sponsor of filteredSponsors(); track trackBySponsorId($index, sponsor)) {
+              <tr>
+                <td>
+                  <div class="sponsor-table__identity">
+                    <div class="sponsor-card__avatar sponsor-card__avatar--small">
+                      {{ sponsor.name.slice(0, 2) }}
+                    </div>
+                    <div>
+                      <strong>{{ sponsor.name }}</strong>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="category-badge" [class]="'category-badge--' + sponsor.category.toLowerCase()">
+                    {{ getCategoryLabel(sponsor.category) }}
+                  </span>
+                </td>
+                <td>
+                  <strong>{{ sponsor.contactEmail }}</strong>
+                  <small>{{ sponsor.phone || 'Sin telefono' }}</small>
+                </td>
+                <td class="sponsor-table__website">
+                  {{ sponsor.websiteUrl || 'No registrado' }}
+                </td>
+                <td class="sponsor-table__actions-cell">
+                  <div class="sponsor-table__actions sponsor-table__actions--inline">
+                    <button type="button" class="table-action" (click)="openEditModal(sponsor)">
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      class="table-action"
+                      (click)="openManageTournamentsModal(sponsor)"
+                    >
+                      Torneos
+                    </button>
+                    <button
+                      type="button"
+                      class="table-action table-action--danger"
+                      (click)="openDeleteModal(sponsor)"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+}
+
+@if (isFormModalOpen()) {
+  <div class="overlay" (click)="closeFormModal()">
+    <section
+      class="modal modal--form"
+      (click)="$event.stopPropagation()"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div class="modal__header">
+        <div>
+          <h2>{{ modalTitle() }}</h2>
+        </div>
+      </div>
+
+      <form class="sponsor-form" [formGroup]="sponsorForm" (ngSubmit)="submitSponsorForm()">
+        <section class="sponsor-preview entity-preview field--full">
+          <div class="sponsor-preview__avatar entity-preview__avatar">
+            {{ sponsorPreview().initials }}
+          </div>
+
+          <div class="sponsor-preview__content entity-preview__content">
+            <span class="meta-label">{{ formModeLabel() }}</span>
+            <strong>{{ sponsorPreview().name }}</strong>
+            <p>{{ sponsorPreview().contactEmail }}</p>
+            <small>{{ sponsorPreview().websiteUrl }}</small>
+          </div>
+
+          <span
+            class="category-badge"
+            [class]="'category-badge--' + sponsorPreview().category.toLowerCase()"
+          >
+            {{ getCategoryLabel(sponsorPreview().category) }}
+          </span>
+        </section>
+
+        <label class="field">
+          <span>Nombre</span>
+          <input type="text" formControlName="name" placeholder="Ej: Nike" />
+          @if (fieldHasError('name')) {
+            <small>{{ getFieldError('name') }}</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Correo de contacto</span>
+          <input type="email" formControlName="contactEmail" placeholder="Ej: alianzas@marca.com" />
+          @if (fieldHasError('contactEmail')) {
+            <small>{{ getFieldError('contactEmail') }}</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Telefono</span>
+          <input type="text" formControlName="phone" placeholder="Ej: +57 300 000 0000" />
+          @if (fieldHasError('phone')) {
+            <small>{{ getFieldError('phone') }}</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Sitio web</span>
+          <input type="url" formControlName="websiteUrl" placeholder="Ej: https://marca.com" />
+          @if (fieldHasError('websiteUrl')) {
+            <small>{{ getFieldError('websiteUrl') }}</small>
+          }
+        </label>
+
+        <label class="field field--full">
+          <span>Categoria</span>
+          <select formControlName="category">
+            <option value="Main">Principal</option>
+            <option value="Gold">Gold</option>
+            <option value="Silver">Silver</option>
+            <option value="Bronze">Bronze</option>
+          </select>
+          @if (fieldHasError('category')) {
+            <small>{{ getFieldError('category') }}</small>
+          }
+        </label>
+
+        <p class="form-hint field--full">
+          Usa datos comerciales claros para que el equipo pueda identificar categoria, contacto y
+          presencia digital sin salir del panel.
+        </p>
+
+        <div class="modal__actions">
+          <button type="button" class="ghost-button ghost-button--light" (click)="closeFormModal()">
+            Cancelar
+          </button>
+          <button type="submit" class="primary-button" [disabled]="!canSubmitForm()">
+            {{ isSaving() ? 'Guardando...' : submitLabel() }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+}
+
+@if (sponsorPendingDelete(); as selectedSponsor) {
+  <app-confirm-dialog
+    [open]="isDeleteModalOpen()"
+    title="Eliminar sponsor"
+    message="Vas a eliminar el sponsor &quot;{{ selectedSponsor.name }}&quot;. Si esta vinculado a torneos, el backend bloqueara la operacion."
+    confirmLabel="{{ isSaving() ? 'Eliminando...' : 'Eliminar sponsor' }}"
+    [isSaving]="isSaving()"
+    (cancel)="closeDeleteModal()"
+    (confirm)="confirmDelete()"
+  />
+}
+
+@if (isManageTournamentsModalOpen()) {
+  @if (sponsorForTournamentManagement(); as selectedSponsor) {
+    <div class="overlay" (click)="closeManageTournamentsModal()">
+      <section
+        class="modal modal--wide"
+        (click)="$event.stopPropagation()"
+        aria-modal="true"
+        role="dialog"
+      >
+        <div class="modal__header">
+          <div>
+            <h2>{{ selectedSponsor.name }}</h2>
+            <p class="modal__description">
+              Gestiona los torneos asociados y el monto de cada contrato comercial.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="icon-button icon-button--icon-only icon-button--close"
+            (click)="closeManageTournamentsModal()"
+            aria-label="Cerrar modal"
+          >
+            <span class="sr-only">Cerrar</span>
+          </button>
+        </div>
+
+        <app-context-banner>
+          <app-context-banner-item label="Categoria">
+            <strong>{{ getCategoryLabel(selectedSponsor.category) }}</strong>
+          </app-context-banner-item>
+          <app-context-banner-item label="Torneos vinculados" [value]="selectedSponsorCount()" />
+          <app-context-banner-item label="Monto total">
+            <strong>{{ totalContractAmount() | currency: 'COP':'symbol':'1.0-0' }}</strong>
+          </app-context-banner-item>
+        </app-context-banner>
+
+        <form
+          class="link-panel"
+          [formGroup]="linkTournamentForm"
+          (ngSubmit)="linkSelectedTournament()"
+        >
+          <label class="field field--grow">
+            <span>Torneo</span>
+            <select formControlName="tournamentId" [disabled]="isTournamentsLoading() || isSaving()">
+              <option [value]="0">
+                @if (isSponsorTournamentsLoading()) {
+                  Cargando torneos...
+                } @else if (availableTournaments().length === 0) {
+                  No hay torneos disponibles
+                } @else {
+                  Selecciona un torneo
+                }
+              </option>
+              @for (tournament of availableTournaments(); track tournament.id) {
+                <option [value]="tournament.id">{{ tournament.name }} · {{ tournament.season }}</option>
+              }
+            </select>
+            @if (linkFieldHasError('tournamentId')) {
+              <small>{{ getLinkFieldError('tournamentId') }}</small>
+            }
+          </label>
+
+          <label class="field">
+            <span>Monto del contrato</span>
+            <input type="number" min="0.01" step="0.01" formControlName="contractAmount" />
+            @if (linkFieldHasError('contractAmount')) {
+              <small>{{ getLinkFieldError('contractAmount') }}</small>
+            }
+          </label>
+
+          <button type="submit" class="primary-button" [disabled]="!canLinkTournament()">
+            {{ isSaving() ? 'Vinculando...' : 'Vincular torneo' }}
+          </button>
+        </form>
+
+        @if (!isSponsorTournamentsLoading() && availableTournaments().length === 0) {
+          <p class="form-hint field--full">
+            Todos los torneos disponibles ya se encuentran vinculados a este sponsor.
+          </p>
+        }
+
+        <div class="registered-tournaments">
+          <p class="table-card__eyebrow">Torneos vinculados</p>
+          @if (isSponsorTournamentsLoading()) {
+            <p class="muted-copy">Cargando torneos vinculados...</p>
+          } @else if (selectedSponsorTournaments().length === 0) {
+            <p class="muted-copy">Aun no hay torneos asociados a este sponsor.</p>
+          } @else {
+            <div class="linked-tournaments">
+              @for (
+                item of selectedSponsorTournaments();
+                track trackByTournamentSponsorId($index, item)
+              ) {
+                <article class="linked-tournament-card">
+                  <div>
+                    <strong>{{ item.tournamentName }}</strong>
+                    <p>{{ item.joinedAt | date: 'dd/MM/yyyy' }}</p>
+                  </div>
+
+                  <div class="linked-tournament-card__meta">
+                    <span>{{ item.contractAmount | currency: 'COP':'symbol':'1.0-0' }}</span>
+                    <button
+                      type="button"
+                      class="ghost-button ghost-button--danger"
+                      [disabled]="isSaving()"
+                      (click)="unlinkTournament(item)"
+                    >
+                      Desvincular
+                    </button>
+                  </div>
+                </article>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+  }
+}
+
+<app-toast-stack [notifications]="notifications()" (dismiss)="dismissNotification($event)" />

@@ -9,6 +9,8 @@ import { Player } from '../../../players/domain/models/player.model';
 import { PlayerApiService } from '../../../players/infrastructure/repositories/player-api.service';
 import { Referee } from '../../../referees/domain/models/referee.model';
 import { RefereeApiService } from '../../../referees/infrastructure/repositories/referee-api.service';
+import { Sponsor } from '../../../sponsors/domain/models/sponsor.model';
+import { SponsorApiService } from '../../../sponsors/infrastructure/repositories/sponsor-api.service';
 import { Team } from '../../../teams/domain/models/team.model';
 import { TeamApiService } from '../../../teams/infrastructure/repositories/team-api.service';
 import { Tournament } from '../../../tournaments/domain/models/tournament.model';
@@ -32,6 +34,7 @@ export class DashboardPageFacade {
   private readonly refereeApi = inject(RefereeApiService);
   private readonly tournamentApi = inject(TournamentApiService);
   private readonly matchApi = inject(MatchApiService);
+  private readonly sponsorApi = inject(SponsorApiService);
 
   readonly currentSeason = appSettings.currentSeason;
   readonly teams = signal<Team[]>([]);
@@ -39,6 +42,7 @@ export class DashboardPageFacade {
   readonly referees = signal<Referee[]>([]);
   readonly tournaments = signal<Tournament[]>([]);
   readonly matches = signal<Match[]>([]);
+  readonly sponsors = signal<Sponsor[]>([]);
   readonly isLoading = signal(true);
   readonly errorMessage = signal('');
   readonly modules = computed<ModuleCard[]>(() => {
@@ -47,6 +51,7 @@ export class DashboardPageFacade {
     const referees = this.referees();
     const tournaments = this.tournaments();
     const matches = this.matches();
+    const sponsors = this.sponsors();
 
     const uniqueCities = new Set(teams.map((team) => team.city.trim().toLowerCase())).size;
     const nationalityCounts = Object.entries(
@@ -129,6 +134,27 @@ export class DashboardPageFacade {
         cta: 'Ver torneos',
       },
       {
+        title: 'Sponsors',
+        route: '/sponsors',
+        accent: 'gold',
+        stats: [
+          { label: 'Sponsors', value: String(sponsors.length) },
+          {
+            label: 'Principales',
+            value: String(sponsors.filter((sponsor) => sponsor.category === 'Main').length),
+          },
+          {
+            label: 'Gold',
+            value: String(sponsors.filter((sponsor) => sponsor.category === 'Gold').length),
+          },
+          {
+            label: 'Con sitio web',
+            value: String(sponsors.filter((sponsor) => !!sponsor.websiteUrl?.trim()).length),
+          },
+        ],
+        cta: 'Ver sponsors',
+      },
+      {
         title: 'Partidos',
         route: '/matches',
         accent: 'cyan',
@@ -165,13 +191,15 @@ export class DashboardPageFacade {
       referees: this.refereeApi.getAll(),
       tournaments: this.tournamentApi.getAll(),
       matches: this.matchApi.getAll(),
+      sponsors: this.sponsorApi.getAll(),
     }).subscribe({
-      next: ({ teams, players, referees, tournaments, matches }) => {
+      next: ({ teams, players, referees, tournaments, matches, sponsors }) => {
         this.teams.set(teams);
         this.players.set(players);
         this.referees.set(referees);
         this.tournaments.set(tournaments);
         this.matches.set(matches);
+        this.sponsors.set(sponsors);
         this.isLoading.set(false);
       },
       error: (error: unknown) => {
