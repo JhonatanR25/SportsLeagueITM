@@ -11,7 +11,14 @@
 } @else {
   <section class="panel">
     <div class="panel__header">
-      <h2>Resumen operativo</h2>
+      <div class="panel__intro">
+        <p class="panel__eyebrow">Control Room</p>
+        <h2>Resumen operativo</h2>
+        <p class="panel__description">
+          Supervisa la capacidad competitiva, el volumen operativo y los activos clave del torneo
+          desde un tablero ejecutivo.
+        </p>
+      </div>
 
       <div class="panel__season">
         <span>Temporada actual</span>
@@ -23,7 +30,10 @@
       @for (module of modules(); track module.title) {
         <article class="module-card" [class]="'module-card module-card--' + module.accent">
           <div class="module-card__header">
-            <h3>{{ module.title }}</h3>
+            <div class="module-card__heading">
+              <p class="module-card__kicker">Modulo</p>
+              <h3>{{ module.title }}</h3>
+            </div>
             <a class="module-card__cta" [routerLink]="module.route">{{ module.cta }}</a>
           </div>
 

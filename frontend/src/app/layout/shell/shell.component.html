@@ -2,10 +2,22 @@
   <aside class="sidebar">
     <div class="sidebar__intro">
       <div class="brand">
+        <p class="brand__eyebrow">Competition Control Room</p>
         <h1>Sports League ITM</h1>
         <p class="brand__copy">
-          Plataforma web para administrar equipos, jugadores, arbitros, partidos y torneos.
+          Plataforma central para operar competencia, talento, calendario, patrocinios y torneos
+          con criterio de control total.
         </p>
+      </div>
+
+      <div class="sidebar-card">
+        <p class="sidebar-card__title">Season Control</p>
+        <div class="sidebar-card__stats">
+          <div>
+            <strong>{{ currentSeason }}</strong>
+            <span>Temporada activa</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -17,15 +29,22 @@
           routerLinkActive="nav__item--active"
           [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
         >
-          <span class="nav__label">{{ item.label }}</span>
-          <span class="nav__description">{{ item.description }}</span>
+          <span class="nav__content">
+            <span class="nav__label">{{ item.label }}</span>
+            <span class="nav__description">{{ item.description }}</span>
+          </span>
         </a>
       }
     </nav>
   </aside>
 
   <div class="content">
-    <header class="topbar"></header>
+    <header class="topbar">
+      <div class="topbar__status">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span>Modo operativo activo</span>
+      </div>
+    </header>
 
     <main class="page">
       <router-outlet />

@@ -11,34 +11,49 @@
   border: var(--border-soft);
   border-radius: var(--radius-panel);
   background:
-    radial-gradient(circle at top right, rgba(39, 89, 214, 0.18), transparent 14rem),
-    linear-gradient(135deg, rgba(10, 25, 51, 0.92), rgba(14, 35, 69, 0.92));
+    radial-gradient(circle at top right, rgba(39, 89, 214, 0.16), transparent 14rem),
+    linear-gradient(135deg, rgba(9, 22, 45, 0.96), rgba(11, 27, 52, 0.96));
   box-shadow: var(--shadow-soft);
+  position: relative;
+  overflow: hidden;
+}
+
+.page-header::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0.3rem;
+  background: linear-gradient(180deg, rgba(232, 184, 88, 0.9), rgba(39, 89, 214, 0.3));
 }
 
 .page-header__copy {
   display: grid;
-  gap: var(--space-md);
+  gap: var(--space-lg);
   min-width: 0;
 }
 
 .page-header__eyebrow {
   margin: 0;
-  color: var(--color-text-muted);
+  color: rgba(232, 184, 88, 0.86);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.16em;
   font-size: var(--font-size-label-sm);
   font-weight: 700;
 }
 
 .page-header h1 {
   margin: 0;
+  font-size: clamp(2rem, 3vw, 3rem);
+  line-height: 0.95;
+  max-width: 12ch;
 }
 
 .page-header__description {
-  max-width: 60ch;
+  max-width: 52ch;
   margin: 0;
-  color: var(--color-text-soft);
+  color: color-mix(in srgb, var(--color-text-primary) 72%, transparent);
+  font-size: var(--font-size-body-md);
+  line-height: 1.65;
 }
 
 .page-header__actions {
@@ -48,6 +63,10 @@
   gap: var(--space-md);
   width: 100%;
   min-width: 0;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.026), rgba(255, 255, 255, 0.012));
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 :host ::ng-deep [moduleHeaderControls] {
@@ -60,6 +79,11 @@
 
 :host ::ng-deep .search-field span {
   margin: 0;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: var(--font-size-label-sm);
+  font-weight: 700;
 }
 
 @media (max-width: 960px) {
