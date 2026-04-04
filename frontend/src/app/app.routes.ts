@@ -53,6 +53,13 @@ export const routes: Routes = [
             (module) => module.TournamentsPageComponent,
           ),
       },
+      {
+        path: 'sponsors',
+        loadComponent: () =>
+          import('./features/sponsors/presentation/pages/sponsors-page.component').then(
+            (module) => module.SponsorsPageComponent,
+          ),
+      },
     ],
   },
   {

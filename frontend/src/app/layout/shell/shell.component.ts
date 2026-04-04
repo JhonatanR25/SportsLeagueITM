@@ -48,6 +48,11 @@ export class ShellComponent {
       route: '/tournaments',
       description: 'Temporadas, estados e inscripciones',
     },
+    {
+      label: 'Sponsors',
+      route: '/sponsors',
+      description: 'Patrocinadores, categorias y contratos',
+    },
   ];
 
   protected readonly currentSeason = appSettings.currentSeason;
