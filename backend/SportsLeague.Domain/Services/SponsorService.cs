@@ -121,6 +121,12 @@ public class SponsorService : ISponsorService
         if (sponsor == null)
             throw new KeyNotFoundException($"No se encontró el sponsor con ID {id}.");
 
+        var linkedTournaments = await _tournamentSponsorRepository.GetBySponsorAsync(id);
+        if (linkedTournaments.Any())
+        {
+            throw new InvalidOperationException("No se puede eliminar el sponsor porque está vinculado a uno o más torneos.");
+        }
+
         _logger.LogInformation("Deleting sponsor with ID: {SponsorId}", id);
         await _sponsorRepository.DeleteAsync(id);
     }
@@ -159,7 +165,10 @@ public class SponsorService : ISponsorService
             sponsorId,
             tournamentId);
 
-        return await _tournamentSponsorRepository.CreateAsync(tournamentSponsor);
+        await _tournamentSponsorRepository.CreateAsync(tournamentSponsor);
+
+        return await _tournamentSponsorRepository.GetByTournamentAndSponsorAsync(tournamentId, sponsorId)
+            ?? tournamentSponsor;
     }
 
     public async Task<IEnumerable<TournamentSponsor>> GetTournamentsBySponsorAsync(int sponsorId)
