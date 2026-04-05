@@ -57,15 +57,13 @@
 }
 
 .brand__eyebrow,
-.topbar__eyebrow,
 .sidebar-card__title,
 .sidebar-card__stats span,
 .nav__description {
   color: var(--color-text-muted);
 }
 
-.brand__eyebrow,
-.topbar__eyebrow {
+.brand__eyebrow {
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -202,7 +200,6 @@
 
 .content {
   display: grid;
-  grid-template-rows: auto auto;
   align-content: start;
   min-width: 0;
   border-radius: var(--radius-shell-content);
@@ -210,36 +207,6 @@
   background: var(--color-shell-panel-bg);
   border: 1px solid var(--color-shell-panel-border);
   backdrop-filter: blur(16px);
-}
-
-.topbar {
-  display: flex;
-  justify-content: flex-end;
-  padding: 1rem var(--space-2xl) 0;
-  background: transparent;
-}
-
-.topbar__status {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.65rem;
-  padding: 0.65rem 0.95rem;
-  border-radius: 999px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  color: var(--color-text-muted);
-  white-space: nowrap;
-  font-size: var(--font-size-body-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.status-dot {
-  width: 0.65rem;
-  height: 0.65rem;
-  border-radius: 50%;
-  background: var(--color-success);
-  box-shadow: var(--shadow-shell-status);
 }
 
 .page {
@@ -258,8 +225,7 @@
   }
 
   .sidebar__intro {
-    grid-template-columns: minmax(0, 1.4fr) minmax(16rem, 0.8fr);
-    align-items: start;
+    grid-template-columns: 1fr;
   }
 
   .brand__copy {
@@ -282,7 +248,6 @@
 
 @media (max-width: 640px) {
   .sidebar,
-  .topbar,
   .page {
     padding: var(--space-lg);
   }
@@ -290,10 +255,6 @@
   .shell {
     gap: var(--space-md);
     padding: var(--space-md);
-  }
-
-  .topbar {
-    padding: 0.75rem var(--space-lg) 0;
   }
 
   .sidebar__intro {

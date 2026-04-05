@@ -1,4 +1,5 @@
 <app-module-page-header
+  eyebrow="Equipos"
   title="Clubes y sedes"
   description="Administra la informacion principal de cada equipo, su ciudad, estadio y presencia visual en la competencia."
 >
@@ -28,7 +29,7 @@
   />
 } @else if (errorMessage()) {
   <app-state-card
-    label="Modulo no disponible"
+    label="Area no disponible"
     [title]="errorMessage()"
     tone="error"
     actionLabel="Reintentar"
@@ -36,7 +37,7 @@
   />
 } @else {
   <section class="table-card">
-    <app-section-card-header title="Listado general" />
+    <app-section-card-header title="Listado general de equipos" />
 
     @if (filteredTeams().length === 0) {
       <app-state-card

@@ -20,11 +20,19 @@ type ModuleCard = {
   title: string;
   route: string;
   accent: 'gold' | 'blue' | 'green' | 'red' | 'cyan';
+  tone: 'hero' | 'priority' | 'support';
+  summary: string;
   stats: Array<{
     label: string;
     value: string;
   }>;
   cta: string;
+};
+
+type ExecutiveStat = {
+  label: string;
+  value: string;
+  copy: string;
 };
 
 @Injectable()
@@ -75,6 +83,8 @@ export class DashboardPageFacade {
         title: 'Equipos',
         route: '/teams',
         accent: 'blue',
+        tone: 'support',
+        summary: 'Cobertura territorial, clubes activos y estructura base de la competencia.',
         stats: [
           { label: 'Equipos', value: String(teams.length) },
           { label: 'Ciudades', value: String(uniqueCities) },
@@ -85,6 +95,8 @@ export class DashboardPageFacade {
         title: 'Jugadores',
         route: '/players',
         accent: 'green',
+        tone: 'support',
+        summary: 'Volumen de plantillas y distribucion por posicion deportiva.',
         stats: [
           { label: 'Arqueros', value: String(playerPositionCounts.goalkeepers) },
           { label: 'Defensas', value: String(playerPositionCounts.defenders) },
@@ -97,6 +109,8 @@ export class DashboardPageFacade {
         title: 'Arbitros',
         route: '/referees',
         accent: 'red',
+        tone: 'support',
+        summary: 'Disponibilidad arbitral y cobertura por nacionalidad.',
         stats: [
           { label: 'Disponibles', value: String(referees.length) },
           ...nationalityCounts.map(([nationality, count]) => ({
@@ -110,6 +124,8 @@ export class DashboardPageFacade {
         title: 'Torneos',
         route: '/tournaments',
         accent: 'gold',
+        tone: 'hero',
+        summary: 'Nucleo estrategico de la operacion competitiva y control de temporada.',
         stats: [
           { label: 'Torneos', value: String(tournaments.length) },
           {
@@ -134,11 +150,13 @@ export class DashboardPageFacade {
         cta: 'Ver torneos',
       },
       {
-        title: 'Sponsors',
+        title: 'Sponsor',
         route: '/sponsors',
         accent: 'gold',
+        tone: 'priority',
+        summary: 'Relacion comercial activa, categorias de valor y presencia digital.',
         stats: [
-          { label: 'Sponsors', value: String(sponsors.length) },
+          { label: 'Activos', value: String(sponsors.length) },
           {
             label: 'Principales',
             value: String(sponsors.filter((sponsor) => sponsor.category === 'Main').length),
@@ -152,12 +170,14 @@ export class DashboardPageFacade {
             value: String(sponsors.filter((sponsor) => !!sponsor.websiteUrl?.trim()).length),
           },
         ],
-        cta: 'Ver sponsors',
+        cta: 'Ver sponsor',
       },
       {
         title: 'Partidos',
         route: '/matches',
         accent: 'cyan',
+        tone: 'priority',
+        summary: 'Ritmo operativo del calendario y estado actual de la jornada.',
         stats: [
           {
             label: 'Programados',
@@ -180,6 +200,41 @@ export class DashboardPageFacade {
       },
     ];
   });
+  readonly executiveStats = computed<ExecutiveStat[]>(() => {
+    const tournaments = this.tournaments();
+    const matches = this.matches();
+    const sponsors = this.sponsors();
+
+    return [
+      {
+        label: 'Frentes activos',
+        value: String(
+          tournaments.filter((tournament) => tournament.status === 'InProgress').length +
+            matches.filter((match) => match.status === 'InProgress').length,
+        ),
+        copy: 'Torneos y partidos en ejecucion simultanea.',
+      },
+      {
+        label: 'Calendario resuelto',
+        value: String(matches.filter((match) => match.status === 'Finished').length),
+        copy: 'Partidos cerrados con marcador final registrado.',
+      },
+      {
+        label: 'Valor comercial',
+        value: String(sponsors.filter((sponsor) => sponsor.category === 'Main').length),
+        copy: 'Sponsors principales sosteniendo la temporada.',
+      },
+    ];
+  });
+  readonly primaryModule = computed<ModuleCard | null>(
+    () => this.modules().find((module) => module.tone === 'hero') ?? null,
+  );
+  readonly featuredModules = computed<ModuleCard[]>(
+    () => this.modules().filter((module) => module.tone === 'priority'),
+  );
+  readonly operationalModules = computed<ModuleCard[]>(
+    () => this.modules().filter((module) => module.tone === 'support'),
+  );
 
   loadDashboard(): void {
     this.isLoading.set(true);

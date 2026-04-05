@@ -161,33 +161,41 @@
 .category-badge {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 999px;
+  justify-content: flex-start;
+  min-height: 2.15rem;
   padding: 0.35rem 0.8rem;
+  border-radius: 0.72rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
   font-size: var(--font-size-label-sm);
   font-weight: 700;
-  letter-spacing: 0.04em;
-  background: rgba(255, 255, 255, 0.08);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015));
 }
 
 .category-badge--main {
-  background: rgba(255, 211, 97, 0.18);
-  color: #ffe29c;
+  background: linear-gradient(180deg, rgba(232, 184, 88, 0.16), rgba(232, 184, 88, 0.08));
+  border-color: rgba(232, 184, 88, 0.14);
+  color: #f0cd87;
 }
 
 .category-badge--gold {
-  background: rgba(240, 191, 76, 0.18);
-  color: #ffd36f;
+  background: linear-gradient(180deg, rgba(214, 168, 72, 0.15), rgba(214, 168, 72, 0.07));
+  border-color: rgba(214, 168, 72, 0.12);
+  color: #e8c26b;
 }
 
 .category-badge--silver {
-  background: rgba(194, 205, 219, 0.18);
+  background: linear-gradient(180deg, rgba(194, 205, 219, 0.11), rgba(194, 205, 219, 0.05));
+  border-color: rgba(194, 205, 219, 0.12);
   color: #d6e0ec;
 }
 
 .category-badge--bronze {
-  background: rgba(191, 125, 76, 0.18);
-  color: #e3b08c;
+  background: linear-gradient(180deg, rgba(191, 125, 76, 0.14), rgba(191, 125, 76, 0.06));
+  border-color: rgba(191, 125, 76, 0.12);
+  color: #ddb08d;
 }
 
 .sponsor-form {

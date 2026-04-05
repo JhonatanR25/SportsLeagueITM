@@ -9,7 +9,6 @@
 }
 
 .panel__eyebrow,
-.module-card__kicker,
 .module-card__metrics span {
   margin: 0;
   color: var(--color-text-muted);
@@ -144,10 +143,6 @@
 .module-card__heading {
   display: grid;
   gap: 0.35rem;
-}
-
-.module-card__kicker {
-  color: rgba(232, 184, 88, 0.82);
 }
 
 .module-card h3 {

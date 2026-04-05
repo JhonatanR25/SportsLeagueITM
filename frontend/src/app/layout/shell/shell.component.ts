@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { appSettings } from '../../core/config/app-settings';
 
 type NavigationItem = {
   label: string;
@@ -21,12 +20,12 @@ export class ShellComponent {
     {
       label: 'Panel',
       route: '/dashboard',
-      description: 'Panorama general de la competencia',
+      description: 'Vision general de la operacion',
     },
     {
       label: 'Equipos',
       route: '/teams',
-      description: 'Clubes, ciudades y estadios',
+      description: 'Clubes, sedes e identidad competitiva',
     },
     {
       label: 'Jugadores',
@@ -41,7 +40,7 @@ export class ShellComponent {
     {
       label: 'Partidos',
       route: '/matches',
-      description: 'Programacion, estados y marcadores',
+      description: 'Calendario, estados y marcadores',
     },
     {
       label: 'Torneos',
@@ -49,11 +48,9 @@ export class ShellComponent {
       description: 'Temporadas, estados e inscripciones',
     },
     {
-      label: 'Sponsors',
+      label: 'Sponsor',
       route: '/sponsors',
-      description: 'Patrocinadores, categorias y contratos',
+      description: 'Sponsors, categorias y acuerdos',
     },
   ];
-
-  protected readonly currentSeason = appSettings.currentSeason;
 }
