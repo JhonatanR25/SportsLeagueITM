@@ -65,7 +65,7 @@ builder.Services.AddCors(options =>
 
 var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException(
-        "No se encontro la cadena de conexión 'DefaultConnection'. Configúrala en appsettings.Development.json o mediante variables de entorno.");
+        "No se encontro la cadena de conexion 'DefaultConnection'. Configurala en appsettings.Development.json o mediante variables de entorno.");
 
 builder.Services.AddDbContext<LeagueDbContext>(options =>
     options.UseSqlServer(defaultConnection));

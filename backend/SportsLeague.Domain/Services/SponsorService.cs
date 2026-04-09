@@ -188,7 +188,7 @@ public class SponsorService : ISponsorService
 
         var existingLink = await _tournamentSponsorRepository.GetByTournamentAndSponsorAsync(tournamentId, sponsorId);
         if (existingLink == null)
-            throw new KeyNotFoundException($"No se encontro la vinculación del sponsor {sponsorId} con el torneo {tournamentId}.");
+            throw new KeyNotFoundException($"No se encontro la vinculacion del sponsor {sponsorId} con el torneo {tournamentId}.");
 
         _logger.LogInformation(
             "Unlinking sponsor {SponsorId} from tournament {TournamentId}",
